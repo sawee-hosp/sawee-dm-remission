@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ลงทะเบียน "สวีคุมหวาน"</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: #F0F4F8; color: #333; }
+        .container { max-width: 400px; margin: 0 auto; background-color: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        h1 { color: #06C755; text-align: center; margin-bottom: 20px; }
+        .form-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="text"], input[type="tel"] { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        .consent-group { display: flex; align-items: center; margin-top: 20px; }
+        input[type="checkbox"] { margin-right: 10px; }
+        button { width: 100%; padding: 15px; background-color: #06C755; color: white; border: none; border-radius: 5px; font-size: 16px; font-weight: bold; cursor: pointer; }
+        button:disabled { background-color: #aaa; }
+        #status { text-align: center; margin-top: 15px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>ลงทะเบียน</h1>
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="hn">รหัสโรงพยาบาล (HN)</label>
+                <input type="tel" id="hn" name="hn" required placeholder="กรอกรหัสโรงพยาบาล">
+            </div>
+            <div class="form-group">
+                <label for="name_use">ชื่อที่ให้เรียก</label>
+                <input type="text" id="name_use" name="name_use" required placeholder="เช่น น้องส้ม, พี่สมชาย">
+            </div>
+            <div class="form-group consent-group">
+                <input type="checkbox" id="pdpa" name="pdpa" required>
+                <label for="pdpa">ฉันยินยอมให้เก็บและประมวลผลข้อมูลสุขภาพ</label>
+            </div>
+            <button type="submit" id="submitBtn">ลงทะเบียน</button>
+        </form>
+        <p id="status"></p>
+    </div>
+
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        // *** 중요 ***: 여기에 Google Apps Script Web App URL을 입력하세요.
+        const GAS_WEB_APP_URL = "YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL";
+
+        async function main() {
+            await liff.init({ liffId: "YOUR_LIFF_ID" });
+            if (!liff.isLoggedIn()) {
+                liff.login();
+                return;
+            }
+
+            const form = document.getElementById('registrationForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const statusDiv = document.getElementById('status');
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                statusDiv.innerText = "กำลังลงทะเบียน...";
+
+                try {
+                    const profile = await liff.getProfile();
+                    const formData = new FormData(form);
+                    
+                    const dataToSend = {
+                        userId: profile.userId,
+                        displayName: profile.displayName,
+                        pictureUrl: profile.pictureUrl,
+                        hn: formData.get('hn'),
+                        name_use: formData.get('name_use'),
+                        consent: formData.get('pdpa') === 'on' ? true : false
+                    };
+
+                    const response = await fetch(GAS_WEB_APP_URL, {
+                        method: 'POST',
+                        body: JSON.stringify(dataToSend),
+                        headers: {
+                            'Content-Type': 'text/plain;charset=utf-8', // GAS doPost는 text/plain을 사용합니다.
+                        },
+                    });
+
+                    const result = await response.json();
+
+                    if (result.status === 'success') {
+                        statusDiv.innerText = "ลงทะเบียนสำเร็จ!";
+                        alert("ลงทะเบียนสำเร็จแล้วค่ะ!");
+                        liff.closeWindow();
+                    } else {
+                        throw new Error(result.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
+                    }
+                } catch (error) {
+                    statusDiv.innerText = `เกิดข้อผิดพลาด: ${error.message}`;
+                    alert(`เกิดข้อผิดพลาด: ${error.message}`);
+                    submitBtn.disabled = false;
+                }
+            });
+        }
+
+        main();
+    </script>
+</body>
+</html>
