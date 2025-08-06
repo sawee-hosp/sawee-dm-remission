@@ -39,36 +39,22 @@
         <p id="status"></p>
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
     <script>
-        // ใช้ GAS URL ที่คุณให้มา
         const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec";
-        
-        // คุณต้องไปที่ LINE Dev Console > LIFF แล้วนำ LIFF ID มาใส่ตรงนี้
-        const LIFF_ID = "2007840605-zKl7p3Aa"; 
+        const LIFF_ID = "2007840605-zKl7p3Aa";
 
         async function main() {
-            try {
-                await liff.init({ liffId: LIFF_ID });
-            } catch (error) {
-                console.error('LIFF Initialization failed', error);
-                alert('LIFF ไม่สามารถเริ่มต้นได้');
-                return;
-            }
-
+            await liff.init({ liffId: LIFF_ID });
             if (!liff.isLoggedIn()) {
                 liff.login();
                 return;
             }
 
-            const form = document.getElementById('registrationForm');
-            const submitBtn = document.getElementById('submitBtn');
-            const statusDiv = document.getElementById('status');
-
-            form.addEventListener('submit', async (e) => {
+            $('#registrationForm').on('submit', async function(e) {
                 e.preventDefault();
-                submitBtn.disabled = true;
-                statusDiv.innerText = "กำลังลงทะเบียน...";
+                $('#submitBtn').prop('disabled', true).text('กำลังลงทะเบียน...');
 
                 try {
                     const profile = await liff.getProfile();
@@ -77,39 +63,42 @@
                         userId: profile.userId,
                         displayName: profile.displayName,
                         pictureUrl: profile.pictureUrl,
-                        hn: document.getElementById('hn').value,
-                        name_use: document.getElementById('name_use').value,
-                        consent: document.getElementById('pdpa').checked
+                        hn: $('#hn').val(),
+                        name_use: $('#name_use').val(),
+                        consent: $('#pdpa').is(':checked')
                     };
 
-                    const response = await fetch(GAS_WEB_APP_URL, {
+                    // Using jQuery's AJAX which handles cross-domain requests well
+                    $.ajax({
+                        url: GAS_WEB_APP_URL,
                         method: 'POST',
-                        body: JSON.stringify(dataToSend),
-                        headers: { 'Content-Type': 'application/json' }, // ส่งเป็น JSON
-                        mode: 'cors' // ระบุว่าเป็นการเรียกข้ามโดเมน
+                        contentType: 'application/json',
+                        data: JSON.stringify(dataToSend),
+                        dataType: 'json',
+                        success: function(response) {
+                            if (response.status === 'success') {
+                                alert("ลงทะเบียนสำเร็จแล้วค่ะ!");
+                                liff.closeWindow();
+                            } else {
+                                throw new Error(response.message || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์');
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                             // This error handler is more detailed
+                            console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
+                            alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง');
+                            $('#submitBtn').prop('disabled', false).text('ลงทะเบียน');
+                        }
                     });
 
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! status: ${response.status}`);
-                    }
-
-                    const result = await response.json();
-
-                    if (result.status === 'success') {
-                        alert("ลงทะเบียนสำเร็จแล้วค่ะ!");
-                        liff.closeWindow();
-                    } else {
-                        throw new Error(result.message || 'เกิดข้อผิดพลาดในการลงทะเบียน');
-                    }
                 } catch (error) {
                     console.error('Submission failed', error);
-                    statusDiv.innerText = `เกิดข้อผิดพลาด: ${error.message}`;
+                    $('#status').text(`เกิดข้อผิดพลาด: ${error.message}`);
                     alert(`เกิดข้อผิดพลาด: ${error.message}`);
-                    submitBtn.disabled = false;
+                    $('#submitBtn').prop('disabled', false).text('ลงทะเบียน');
                 }
             });
         }
-
         main();
     </script>
 </body>
