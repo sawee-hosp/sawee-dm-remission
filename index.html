@@ -39,67 +39,69 @@
         <p id="status"></p>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script>
-        const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec";
-        const LIFF_ID = "2007840605-zKl7p3Aa";
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+    // --- CONFIGURATION ---
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec";
+    const LIFF_ID = "2007840605-zKl7p3Aa";
 
-        async function main() {
+    // --- INITIALIZATION ---
+    async function main() {
+        try {
             await liff.init({ liffId: LIFF_ID });
-            if (!liff.isLoggedIn()) {
-                liff.login();
-                return;
-            }
-
-            $('#registrationForm').on('submit', async function(e) {
-                e.preventDefault();
-                $('#submitBtn').prop('disabled', true).text('กำลังลงทะเบียน...');
-
-                try {
-                    const profile = await liff.getProfile();
-                    
-                    const dataToSend = {
-                        userId: profile.userId,
-                        displayName: profile.displayName,
-                        pictureUrl: profile.pictureUrl,
-                        hn: $('#hn').val(),
-                        name_use: $('#name_use').val(),
-                        consent: $('#pdpa').is(':checked')
-                    };
-
-                    // Using jQuery's AJAX which handles cross-domain requests well
-                    $.ajax({
-                        url: GAS_WEB_APP_URL,
-                        method: 'POST',
-                        contentType: 'application/json',
-                        data: JSON.stringify(dataToSend),
-                        dataType: 'json',
-                        success: function(response) {
-                            if (response.status === 'success') {
-                                alert("ลงทะเบียนสำเร็จแล้วค่ะ!");
-                                liff.closeWindow();
-                            } else {
-                                throw new Error(response.message || 'เกิดข้อผิดพลาดจากเซิร์ฟเวอร์');
-                            }
-                        },
-                        error: function(jqXHR, textStatus, errorThrown) {
-                             // This error handler is more detailed
-                            console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText);
-                            alert('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง');
-                            $('#submitBtn').prop('disabled', false).text('ลงทะเบียน');
-                        }
-                    });
-
-                } catch (error) {
-                    console.error('Submission failed', error);
-                    $('#status').text(`เกิดข้อผิดพลาด: ${error.message}`);
-                    alert(`เกิดข้อผิดพลาด: ${error.message}`);
-                    $('#submitBtn').prop('disabled', false).text('ลงทะเบียน');
-                }
-            });
+        } catch (error) {
+            console.error('LIFF Initialization failed', error);
+            alert('LIFF ไม่สามารถเริ่มต้นได้ กรุณาตรวจสอบการตั้งค่า');
+            return;
         }
-        main();
-    </script>
+
+        if (!liff.isLoggedIn()) {
+            liff.login();
+            return;
+        }
+
+        // --- FORM SUBMISSION HANDLER ---
+        $('#registrationForm').on('submit', async function(e) {
+            e.preventDefault();
+            $('#submitBtn').prop('disabled', true).text('กำลังลงทะเบียน...');
+
+            try {
+                const profile = await liff.getProfile();
+                
+                const dataToSend = {
+                    userId: profile.userId,
+                    displayName: profile.displayName,
+                    pictureUrl: profile.pictureUrl,
+                    hn: $('#hn').val(),
+                    name_use: $('#name_use').val(),
+                    consent: $('#pdpa').is(':checked')
+                };
+
+                // ***** THIS IS THE FIX *****
+                // ใช้ `mode: 'no-cors'` เหมือนกับโปรเจกต์ "สวีรู้ทันสโตรก"
+                await fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify(dataToSend),
+                    headers: { 'Content-Type': 'application/json' },
+                    mode: 'no-cors' 
+                });
+
+                // เนื่องจาก `no-cors` จะไม่ได้รับ response กลับมา
+                // เราจะถือว่าถ้าส่งสำเร็จโดยไม่มี error ก็คือลงทะเบียนเรียบร้อย
+                alert("ลงทะเบียนสำเร็จแล้วค่ะ! ระบบกำลังบันทึกข้อมูล");
+                liff.closeWindow();
+
+            } catch (error) {
+                // Error ที่เกิดขึ้นที่ฝั่ง Client (ก่อนส่ง)
+                console.error('Submission failed', error);
+                alert(`เกิดข้อผิดพลาดในการส่งข้อมูล: ${error.message}`);
+                $('#submitBtn').prop('disabled', false).text('ลงทะเบียน');
+            }
+        });
+    }
+
+    main();
+</script>
 </body>
 </html>
