@@ -69,14 +69,15 @@
             try {
                 const profile = await liff.getProfile();
                 
-                const dataToSend = {
-                    userId: profile.userId,
-                    displayName: profile.displayName,
-                    pictureUrl: profile.pictureUrl,
-                    hn: $('#hn').val(),
-                    name_use: $('#name_use').val(),
-                    consent: $('#pdpa').is(':checked')
-                };
+const dataToSend = {
+    action: 'registerUser', // <--- เพิ่มบรรทัดนี้เข้าไป
+    userId: profile.userId,
+    displayName: profile.displayName,
+    pictureUrl: profile.pictureUrl,
+    hn: document.getElementById('hn').value,
+    name_use: document.getElementById('name_use').value,
+    consent: document.getElementById('pdpa').checked
+};
 
                 // ***** THIS IS THE FIX *****
                 // ใช้ `mode: 'no-cors'` เหมือนกับโปรเจกต์ "สวีรู้ทันสโตรก"
