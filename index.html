@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>สวีคุมหวาน — ลงทะเบียน/แดชบอร์ด</title>
+  <link rel="icon" href="data:;base64,=" />
   <style>
     :root {
       --brand:#06C755; --brand2:#10b981;
@@ -75,7 +76,7 @@
           </div>
           <div>
             <label for="name_use">ชื่อที่อยากให้เรียก</label>
-            <input type="text" id="name_use" name="name_use" required placeholder="เช่น น้องส้ม / คุณสมชาย" />
+            <input type="text" id="name_use" name="name_use" required placeholder="เช่น น้องส้ม / พี่แดง / ลุงสมชาย" />
           </div>
         </div>
 
@@ -165,12 +166,39 @@
     function show(el){ el.classList.remove('hidden'); }
     function hide(el){ el.classList.add('hidden'); }
 
+    // -------- JSONP helper (กัน CORS) --------
+    function jsonp(url, params={}) {
+      return new Promise((resolve, reject) => {
+        const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
+        const qs = new URLSearchParams({ ...params, callback: cbName }).toString();
+        const script = document.createElement('script');
+        script.src = url + (url.includes('?') ? '&' : '?') + qs;
+        let done = false;
+
+        window[cbName] = (data) => {
+          if (done) return;
+          done = true;
+          delete window[cbName];
+          script.remove();
+          resolve(data);
+        };
+        script.onerror = () => {
+          if (done) return;
+          done = true;
+          delete window[cbName];
+          script.remove();
+          reject(new Error('JSONP load failed'));
+        };
+        document.body.appendChild(script);
+      });
+    }
+
     async function initLiff(){
       try{
         await liff.init({ liffId: LIFF_ID });
         if(!liff.isLoggedIn()){ liff.login(); return null; }
         const prof = await liff.getProfile();
-        return prof;
+        return { prof, ctx: liff.getContext?.(), token: liff.getDecodedIDToken?.() };
       }catch(e){
         console.error('[LIFF] init failed:', e);
         $('#sub').textContent = 'ไม่สามารถเริ่ม LIFF ได้';
@@ -179,12 +207,10 @@
       }
     }
 
-    async function fetchDashboard(userId){
-      const url = `${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
-      const res = await fetch(url, { method:'GET', mode:'cors', cache:'no-store' });
-      // GAS เราตั้ง CORS * ไว้แล้ว
-      const json = await res.json().catch(()=> ({}));
-      return json || {};
+    // ใช้ JSONP เรียก GAS → ไม่ติด CORS
+    async function fetchDashboardJSONP(userId){
+      const res = await jsonp(GAS_WEB_APP_URL, { action:'getDashboard', userId, t: Date.now() });
+      return res || {};
     }
 
     function bindProfileCard(profile, userId){
@@ -249,7 +275,6 @@
         return;
       }
 
-      // จัดลำดับตาม METRIC_ORDER และแสดงไม่เกิน 4 กราฟ
       const ordered = METRIC_ORDER.filter(k=>keys.includes(k)).concat(keys.filter(k=>!METRIC_ORDER.includes(k)));
       const toShow = ordered.slice(0,4);
 
@@ -325,8 +350,7 @@
           body: JSON.stringify(payload), mode:'no-cors'
         });
         alert('ลงทะเบียนสำเร็จแล้วค่ะ! ระบบกำลังบันทึกข้อมูล');
-        try{ liff.closeWindow(); }catch(_){ /* ถ้านอก LINE */ }
-        // เผื่อยังไม่ปิดหน้าต่าง: รีโหลดเพื่อดึงแดชบอร์ด
+        try{ liff.closeWindow(); }catch(_){}
         setTimeout(()=> location.reload(), 800);
       }catch(e){
         console.error('register failed', e);
@@ -337,23 +361,25 @@
 
     async function main(){
       // 1) LIFF
-      const prof = await initLiff();
-      if(!prof) return;
+      const init = await initLiff();
+      if(!init) return;
+      const { prof, ctx, token } = init;
+      const userId = (ctx && ctx.userId) || (token && token.sub) || prof.userId;
+
       $('#avatar').src = prof.pictureUrl || 'https://placehold.co/120x120/ffffff/999?text=LINE';
       $('#uname').textContent = prof.displayName || 'เพื่อนใหม่ของพี่หวี';
       $('#sub').textContent   = 'กำลังโหลดข้อมูลจากคลินิก…';
 
-      // 2) ดึงแดชบอร์ดจาก GAS (เช็กลงทะเบียน)
+      // 2) ดึงแดชบอร์ดจาก GAS (JSONP)
       let dash = {};
       try{
-        dash = await fetchDashboard(prof.userId);
+        dash = await fetchDashboardJSONP(userId);
       }catch(e){
-        console.error('fetchDashboard error', e);
+        console.error('fetchDashboard JSONP error', e);
+        $('#sub').textContent = 'โหลดข้อมูลไม่สำเร็จ';
       }
 
-      // รองรับทั้ง 2 โครงสร้างคีย์
-      const ok = !!dash.ok;
-      const profile = (dash.profile || (dash.data && dash.data.profile)) || null;
+      const profile = dash.profile || (dash.data && dash.data.profile) || null;
       const goals   = dash.goals || (dash.data && dash.data.goals) || [];
       const logsByType = dash.events || dash.logsByType || {};
       const adviceLatest = dash.ai_latest || dash.adviceLatest || {};
@@ -364,7 +390,6 @@
         // 3) ยังไม่ลงทะเบียน ➜ โชว์ฟอร์ม
         hide($('#dash'));
         show($('#regCard'));
-        // เติมชื่อเล่นอัตโนมัติ
         if (prof.displayName && !$('#name_use').value) $('#name_use').value = prof.displayName;
         $('#registrationForm').addEventListener('submit', (e)=>{
           e.preventDefault();
@@ -376,7 +401,7 @@
 
       // 4) ลงทะเบียนแล้ว ➜ แสดงแดชบอร์ด
       hide($('#regCard')); show($('#dash'));
-      bindProfileCard(profile, prof.userId);
+      bindProfileCard(profile, userId);
       renderGoals(goals);
       renderCharts(logsByType);
       renderAdvice(adviceLatest);
