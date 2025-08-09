@@ -3,222 +3,386 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ลงทะเบียน "สวีคุมหวาน"</title>
+  <title>สวีคุมหวาน — ลงทะเบียน/แดชบอร์ด</title>
   <style>
     :root {
-      --brand:#06C755;
-      --text:#1d2733;
-      --muted:#58677a;
-      --bg:#F3F6F9;
-      --card:#ffffff;
-      --border:#E6ECF2;
+      --brand:#06C755; --brand2:#10b981;
+      --text:#1d2733; --muted:#58677a;
+      --bg:#F3F6F9; --card:#ffffff; --border:#E6ECF2;
     }
     *{box-sizing:border-box}
-    body{
-      margin:0; padding:24px;
-      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
-      background:var(--bg); color:var(--text);
-    }
-    .container{
-      max-width:560px; margin:0 auto;
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius:16px;
-      box-shadow:0 10px 30px rgba(0,0,0,.06);
-      padding:28px;
-    }
-    h1{
-      margin:0 0 6px; text-align:center;
-      font-size:28px; font-weight:800; color:var(--brand);
-      letter-spacing:.2px;
-    }
-    .sub{
-      text-align:center; color:var(--muted);
-      margin-bottom:22px; font-size:15px;
-    }
-    .form-group{ margin-bottom:18px; }
-    label{
-      display:block; margin-bottom:8px;
-      font-weight:700; font-size:15px;
-    }
+    body{ margin:0; padding:20px; background:var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:var(--text); }
+    .container{ max-width:980px; margin:0 auto; }
+    header{ display:flex; align-items:center; gap:14px; margin:0 0 18px; }
+    .avatar{ width:60px; height:60px; border-radius:50%; object-fit:cover; border:2px solid #e5eef5; }
+    h1{ margin:0; font-size:24px; font-weight:800; color:var(--brand); }
+    .sub{ color:var(--muted); margin-top:4px; font-size:14px; }
+
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:16px; padding:18px; margin:14px 0;
+      box-shadow:0 8px 24px rgba(0,0,0,.06); }
+    .card h2{ margin:0 0 10px; font-size:18px; }
+    .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+    .grid3{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+    .row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .pill{ padding:6px 10px; border-radius:999px; background:#f6fbff; border:1px solid #e7f0f7; font-size:12px; color:#2b3950; }
+
+    label{ display:block; margin-bottom:8px; font-weight:700; font-size:16px; }
     input[type="text"], input[type="tel"], input[type="number"]{
       width:100%; padding:14px 16px; font-size:16px;
       border:1px solid var(--border); border-radius:12px;
-      outline:none; transition:.15s;
-      background:#FBFDFF;
+      background:#FBFDFF; outline:none; transition:.15s;
     }
-    input[type="text"]:focus, input[type="tel"]:focus, input[type="number"]:focus{
-      border-color:#b9d8c6; box-shadow:0 0 0 4px rgba(6,199,85,.12);
-    }
-    .gender-row{ display:flex; gap:14px; flex-wrap:wrap; }
-    .gender-item{
-      display:flex; align-items:center; gap:10px;
-      padding:10px 12px; border:1px solid var(--border);
-      border-radius:12px; background:#FBFDFF; cursor:pointer;
-      font-size:16px;
-    }
-    .consent{
-      display:flex; align-items:flex-start; gap:10px;
-      background:#FBFDFF; border:1px solid var(--border);
-      padding:12px; border-radius:12px; margin-top:6px;
-      font-size:15px;
-    }
+    input:focus{ border-color:#b9d8c6; box-shadow:0 0 0 4px rgba(6,199,85,.12); }
+    .gender-row{ display:flex; gap:12px; flex-wrap:wrap; }
+    .gender-item{ display:flex; align-items:center; gap:8px; padding:10px 12px; border:1px solid var(--border);
+      border-radius:12px; background:#FBFDFF; cursor:pointer; font-size:16px; }
+    .consent{ display:flex; align-items:flex-start; gap:10px; background:#FBFDFF; border:1px solid var(--border);
+      padding:12px; border-radius:12px; margin-top:6px; font-size:15px; }
     .consent a{ color:#0a7cff; text-decoration:none; }
     .consent a:hover{ text-decoration:underline; }
-    button{
-      width:100%; padding:16px; margin-top:6px;
-      background:var(--brand); color:#fff; border:0; border-radius:12px;
-      font-size:18px; font-weight:800; cursor:pointer;
-      box-shadow:0 6px 14px rgba(6,199,85,.25);
-      transition:.15s;
-    }
+    button{ width:100%; padding:16px; margin-top:6px; background:linear-gradient(90deg,var(--brand),var(--brand2));
+      color:#fff; border:0; border-radius:12px; font-size:18px; font-weight:800; cursor:pointer;
+      box-shadow:0 6px 14px rgba(6,199,85,.25); transition:.15s; }
     button:disabled{ opacity:.6; cursor:not-allowed; box-shadow:none; }
     #status{ text-align:center; margin-top:14px; font-weight:700; color:var(--muted); }
     .hidden{ display:none; }
+    canvas{ background:#fbfdff; border:1px solid var(--border); border-radius:12px; padding:8px; }
+    .goal{ padding:12px; border:1px dashed #dfe8ee; border-radius:12px; background:#fbfdff; }
+    .goal .title{ font-weight:700; margin-bottom:6px; }
+    .muted{ color:var(--muted); font-size:13px; }
+    .tag{ font-size:12px; color:#1b3550; background:#eef8ff; padding:4px 8px; border-radius:999px; border:1px solid #d4ecff; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>ลงทะเบียน</h1>
-    <div class="sub">กรุณากรอกข้อมูลเบื้องต้นเพื่อใช้งาน “สวีคุมหวาน”</div>
-
-    <form id="registrationForm">
-      <div class="form-group">
-        <label for="hn">รหัสโรงพยาบาล (HN)</label>
-        <input type="tel" id="hn" name="hn" required placeholder="เช่น 55000123" inputmode="numeric" />
+    <header>
+      <img id="avatar" class="avatar" src="">
+      <div>
+        <h1 id="uname">กำลังโหลด…</h1>
+        <div id="sub" class="sub">เชื่อมต่อ LIFF …</div>
       </div>
+    </header>
 
-      <div class="form-group">
-        <label for="name_use">ชื่อที่อยากให้เรียก</label>
-        <input type="text" id="name_use" name="name_use" required placeholder="เช่น น้องส้ม / คุณสมชาย" />
-      </div>
-
-      <div class="form-group">
-        <label>เพศ</label>
-        <div class="gender-row" role="radiogroup" aria-label="gender">
-          <label class="gender-item">
-            <input type="radio" name="gender" value="Male" /> ชาย
-          </label>
-          <label class="gender-item">
-            <input type="radio" name="gender" value="Female" /> หญิง
-          </label>
-          <label class="gender-item">
-            <input type="radio" name="gender" value="Other" /> อื่น ๆ
-          </label>
+    <!-- ฟอร์มลงทะเบียน -->
+    <div id="regCard" class="card hidden">
+      <h2>ลงทะเบียนผู้ป่วย</h2>
+      <form id="registrationForm">
+        <div class="grid2">
+          <div>
+            <label for="hn">รหัสโรงพยาบาล (HN)</label>
+            <input type="tel" id="hn" name="hn" required placeholder="เช่น 55000123" inputmode="numeric" />
+          </div>
+          <div>
+            <label for="name_use">ชื่อที่อยากให้เรียก</label>
+            <input type="text" id="name_use" name="name_use" required placeholder="เช่น น้องส้ม / คุณสมชาย" />
+          </div>
         </div>
-      </div>
 
-      <div class="form-group">
-        <label for="age">อายุ</label>
-        <input type="number" id="age" name="age" min="1" max="120" placeholder="เช่น 45" />
-      </div>
+        <div class="row" style="margin:10px 0 4px">
+          <label style="margin:0">เพศ</label>
+        </div>
+        <div class="gender-row" role="radiogroup" aria-label="gender">
+          <label class="gender-item"><input type="radio" name="gender" value="Male" /> ชาย</label>
+          <label class="gender-item"><input type="radio" name="gender" value="Female" /> หญิง</label>
+          <label class="gender-item"><input type="radio" name="gender" value="Other" /> อื่น ๆ</label>
+        </div>
 
-      <div class="form-group">
-        <label>ข้อตกลง PDPA</label>
+        <div class="row" style="gap:14px; margin-top:14px">
+          <div style="flex:1 1 180px">
+            <label for="age">อายุ</label>
+            <input type="number" id="age" name="age" min="1" max="120" placeholder="เช่น 45" />
+          </div>
+        </div>
+
         <div class="consent">
           <input type="checkbox" id="pdpa" name="pdpa" checked />
           <label for="pdpa">
-            ฉันยินยอมให้คลินิกเก็บและประมวลผลข้อมูลสุขภาพของฉันเพื่อการดูแลรักษา
-            (<a href="https://linecorp.com/en/privacy" target="_blank" rel="noopener">อ่านรายละเอียด</a>)
+            ฉันยินยอมให้คลินิกเก็บและประมวลผลข้อมูลสุขภาพเพื่อการดูแลรักษา
+            (<a href="https://linecorp.com/en/privacy" target="_blank" rel="noopener">อ่านนโยบาย</a>)
           </label>
+        </div>
+
+        <button type="submit" id="submitBtn">ลงทะเบียน</button>
+        <div id="status" class="hidden">กำลังส่งข้อมูล…</div>
+      </form>
+    </div>
+
+    <!-- แดชบอร์ด -->
+    <div id="dash" class="hidden">
+      <div class="card">
+        <h2>ข้อมูลส่วนตัว</h2>
+        <div class="grid3">
+          <div><div class="pill">ชื่อ</div><div id="p_name" style="margin-top:6px">-</div></div>
+          <div><div class="pill">HN</div><div id="p_hn" style="margin-top:6px">-</div></div>
+          <div><div class="pill">เพศ</div><div id="p_gender" style="margin-top:6px">-</div></div>
+        </div>
+        <div class="grid3" style="margin-top:10px">
+          <div><div class="pill">อายุ</div><div id="p_age" style="margin-top:6px">-</div></div>
+          <div><div class="pill">ลงทะเบียนเมื่อ</div><div id="p_reg" style="margin-top:6px">-</div></div>
+          <div><div class="pill">UserID</div><div id="p_uid" style="margin-top:6px; word-break:break-all">-</div></div>
         </div>
       </div>
 
-      <button type="submit" id="submitBtn">ลงทะเบียน</button>
-      <div id="status" class="hidden">กำลังส่งข้อมูล…</div>
-    </form>
+      <div class="card">
+        <h2>เป้าหมายของฉัน</h2>
+        <div id="goalsWrap" class="grid2"></div>
+      </div>
+
+      <div class="card">
+        <h2>ประวัติการบันทึก</h2>
+        <div id="chartsWrap" class="grid2"></div>
+      </div>
+
+      <div class="card">
+        <h2>คำแนะนำ (พี่จุ๋ม พยาบาล AI)</h2>
+        <div id="adviceWrap" class="grid2"></div>
+      </div>
+    </div>
   </div>
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // ====== ของเดิม (ใส่ให้ครบแล้ว) ======
+    // ====== ค่าเดิมของคุณ (เติมให้แล้ว) ======
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec";
     const LIFF_ID = "2007840605-zKl7p3Aa";
 
-    const $ = (sel) => document.querySelector(sel);
+    const $ = (sel)=>document.querySelector(sel);
+    const fmtDate = (d)=>{
+      const t = new Date(d);
+      if (isNaN(+t)) return '-';
+      const dd = String(t.getDate()).padStart(2,'0');
+      const mm = String(t.getMonth()+1).padStart(2,'0');
+      const yy = t.getFullYear();
+      const hh = String(t.getHours()).padStart(2,'0');
+      const mi = String(t.getMinutes()).padStart(2,'0');
+      return `${dd}/${mm}/${yy} ${hh}:${mi}`;
+    };
 
-    async function initLiff() {
-      try {
+    const METRIC_ORDER = ['SBGM','BP','WEIGHT','WAIST','HBA1C','BODY_FAT'];
+
+    function show(el){ el.classList.remove('hidden'); }
+    function hide(el){ el.classList.add('hidden'); }
+
+    async function initLiff(){
+      try{
         await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) {
-          liff.login();
-          return false; // จะรีไดเรกต์ไปล็อกอิน
-        }
-        return true;
-      } catch (e) {
-        console.error("[LIFF] init failed:", e.code, e.message, e);
-        alert("ไม่สามารถเริ่ม LIFF ได้: " + (e.code || "") + " " + (e.message || ""));
-        return false;
+        if(!liff.isLoggedIn()){ liff.login(); return null; }
+        const prof = await liff.getProfile();
+        return prof;
+      }catch(e){
+        console.error('[LIFF] init failed:', e);
+        $('#sub').textContent = 'ไม่สามารถเริ่ม LIFF ได้';
+        alert('ไม่สามารถเริ่ม LIFF ได้: ' + (e.message||e));
+        return null;
       }
     }
 
-    function getSelectedGender() {
-      const el = document.querySelector('input[name="gender"]:checked');
-      return el ? el.value : "";
+    async function fetchDashboard(userId){
+      const url = `${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
+      const res = await fetch(url, { method:'GET', mode:'cors', cache:'no-store' });
+      // GAS เราตั้ง CORS * ไว้แล้ว
+      const json = await res.json().catch(()=> ({}));
+      return json || {};
     }
 
-    async function main() {
-      const ok = await initLiff();
-      if (!ok) return;
+    function bindProfileCard(profile, userId){
+      const p = profile || {};
+      $('#avatar').src = p.PictureURL || $('#avatar').src;
+      $('#uname').textContent = p.NameUse || p.DisplayName || $('#uname').textContent;
+      $('#sub').textContent = 'แดชบอร์ดสุขภาพของคุณ';
 
-      // Autofill ชื่อเล่นจากโปรไฟล์ (ช่วยให้กรอกเร็ว)
-      try {
-        const profile = await liff.getProfile();
-        if (profile?.displayName && !$("#name_use").value) {
-          $("#name_use").value = profile.displayName;
-        }
-      } catch (e) {
-        console.log("getProfile failed (not critical)", e);
+      $('#p_name').textContent = p.NameUse || p.DisplayName || '-';
+      $('#p_hn').textContent = p.HN || '-';
+      $('#p_gender').textContent = p.Gender || '-';
+      $('#p_age').textContent = p.Age || '-';
+      $('#p_reg').textContent = p.Timestamp ? fmtDate(p.Timestamp) : '-';
+      $('#p_uid').textContent = userId || '-';
+    }
+
+    function renderGoals(goals){
+      const wrap = $('#goalsWrap'); wrap.innerHTML = '';
+      if(!Array.isArray(goals) || goals.length===0){
+        const div = document.createElement('div');
+        div.className = 'muted';
+        div.textContent = 'ยังไม่มีเป้าหมาย ลองเริ่มจากเมนู “ตั้งเป้าหมาย” ในแชตนะคะ';
+        wrap.appendChild(div);
+        return;
       }
+      goals.forEach(g=>{
+        const card = document.createElement('div');
+        card.className = 'goal';
+        card.innerHTML = `
+          <div class="title">${g.goal_category || '-'} • ${g.goal_specific || '-'}</div>
+          <div class="muted">วิธีวัดผล: ${g.goal_measurable || '-'}</div>
+          <div class="row" style="margin-top:6px">
+            <span class="tag">ค่าเป้า: ${g.target_value || '-'} ${g.target_unit || ''}</span>
+            <span class="tag">กรอบเวลา: ${g.goal_timebound || '-'}</span>
+            <span class="tag">เหตุผล: ${g.goal_relevant || '-'}</span>
+          </div>`;
+        wrap.appendChild(card);
+      });
+    }
 
-      // HANDLE SUBMIT
-      $("#registrationForm").addEventListener("submit", async (e) => {
-        e.preventDefault();
-        $("#submitBtn").disabled = true;
-        $("#status").classList.remove("hidden");
-        $("#status").textContent = "กำลังลงทะเบียน…";
-
-        try {
-          const profile = await liff.getProfile();
-          const userId = profile.userId;
-          const displayName = profile.displayName || "";
-          const pictureUrl = profile.pictureUrl || "";
-
-          const dataToSend = {
-            action: "registerUser", // สำคัญ! ให้ GAS รู้ว่าจะทำอะไร
-            userId,
-            displayName,
-            pictureUrl,
-            hn: $("#hn").value.trim(),
-            name_use: $("#name_use").value.trim(),
-            gender: getSelectedGender(),
-            age: $("#age").value.trim(),
-            consent: $("#pdpa").checked
-          };
-
-          // ใช้ no-cors แบบ “ของเดิม” เพื่อกัน CORS error
-          await fetch(GAS_WEB_APP_URL, {
-            method: "POST",
-            body: JSON.stringify(dataToSend),
-            headers: { "Content-Type": "application/json" },
-            mode: "no-cors"
-          });
-
-          alert("ลงทะเบียนสำเร็จแล้วค่ะ! ระบบกำลังบันทึกข้อมูล");
-          try { liff.closeWindow(); } catch (_) {
-            // เผื่อเปิดนอกแอป ให้รีเฟรชแทน
-            location.reload();
-          }
-        } catch (error) {
-          console.error("Submission failed", error);
-          alert("เกิดข้อผิดพลาดในการส่งข้อมูล: " + (error.message || error));
-          $("#submitBtn").disabled = false;
-          $("#status").classList.add("hidden");
+    function makeChart(canvas, label, labels, datasets){
+      new Chart(canvas.getContext('2d'), {
+        type:'line',
+        data:{ labels, datasets },
+        options:{
+          responsive:true,
+          interaction:{ intersect:false, mode:'index' },
+          plugins:{ legend:{ labels:{ font:{ size:12 } } } },
+          scales:{ x:{ ticks:{ font:{ size:11 } } }, y:{ ticks:{ font:{ size:11 } } } }
         }
       });
     }
 
-    main();
+    function renderCharts(logsByType){
+      const wrap = $('#chartsWrap'); wrap.innerHTML = '';
+      const keys = Object.keys(logsByType || {});
+      if(keys.length===0){
+        const div = document.createElement('div');
+        div.className = 'muted';
+        div.textContent = 'ยังไม่มีประวัติการบันทึก';
+        wrap.appendChild(div);
+        return;
+      }
+
+      // จัดลำดับตาม METRIC_ORDER และแสดงไม่เกิน 4 กราฟ
+      const ordered = METRIC_ORDER.filter(k=>keys.includes(k)).concat(keys.filter(k=>!METRIC_ORDER.includes(k)));
+      const toShow = ordered.slice(0,4);
+
+      toShow.forEach(k=>{
+        const rows = (logsByType[k]||[]).slice().sort((a,b)=> new Date(a.ts) - new Date(b.ts));
+        if(rows.length===0) return;
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `<h2>ประวัติ ${k}</h2><canvas height="160"></canvas>`;
+        wrap.appendChild(card);
+
+        const labels = rows.map(r=>fmtDate(r.ts));
+        if(k==='BP'){
+          const sbp = rows.map(r=> (typeof r.v1==='number'? r.v1: parseFloat(r.v1)||null));
+          const dbp = rows.map(r=> (typeof r.v2==='number'? r.v2: parseFloat(r.v2)||null));
+          makeChart(card.querySelector('canvas'), 'BP', labels, [
+            { label:'SBP', data: sbp },
+            { label:'DBP', data: dbp }
+          ]);
+        }else{
+          const v = rows.map(r=> (typeof r.v1==='number'? r.v1: parseFloat(r.v1)||null));
+          makeChart(card.querySelector('canvas'), k, labels, [{ label:k, data:v }]);
+        }
+      });
+    }
+
+    function renderAdvice(adviceLatest){
+      const wrap = $('#adviceWrap'); wrap.innerHTML = '';
+      const keys = Object.keys(adviceLatest || {});
+      if(keys.length===0){
+        const div = document.createElement('div');
+        div.className='muted';
+        div.textContent='ยังไม่มีคำแนะนำจากพี่จุ๋ม';
+        wrap.appendChild(div);
+        return;
+      }
+      keys.forEach(m=>{
+        const a = adviceLatest[m] || {};
+        const card = document.createElement('div');
+        card.className='goal';
+        card.innerHTML = `
+          <div class="title">คำแนะนำล่าสุด: ${m}</div>
+          <div class="muted">${a.ts ? fmtDate(a.ts) : '-'}</div>
+          <div style="margin-top:8px; white-space:pre-wrap">${a.advice_text || '-'}</div>`;
+        wrap.appendChild(card);
+      });
+    }
+
+    function getSelectedGender(){
+      const el = document.querySelector('input[name="gender"]:checked');
+      return el ? el.value : '';
+    }
+
+    async function onSubmitRegistration(profile){
+      const btn = $('#submitBtn');
+      const st  = $('#status');
+      btn.disabled = true; st.classList.remove('hidden'); st.textContent = 'กำลังลงทะเบียน…';
+      try{
+        const payload = {
+          action: 'registerUser',
+          userId: profile.userId,
+          displayName: profile.displayName || '',
+          pictureUrl: profile.pictureUrl || '',
+          hn: $('#hn').value.trim(),
+          name_use: $('#name_use').value.trim(),
+          gender: getSelectedGender(),
+          age: $('#age').value.trim(),
+          consent: $('#pdpa').checked
+        };
+        await fetch(GAS_WEB_APP_URL, {
+          method:'POST', headers:{ 'Content-Type':'application/json' },
+          body: JSON.stringify(payload), mode:'no-cors'
+        });
+        alert('ลงทะเบียนสำเร็จแล้วค่ะ! ระบบกำลังบันทึกข้อมูล');
+        try{ liff.closeWindow(); }catch(_){ /* ถ้านอก LINE */ }
+        // เผื่อยังไม่ปิดหน้าต่าง: รีโหลดเพื่อดึงแดชบอร์ด
+        setTimeout(()=> location.reload(), 800);
+      }catch(e){
+        console.error('register failed', e);
+        alert('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + (e.message || e));
+        btn.disabled = false; st.classList.add('hidden');
+      }
+    }
+
+    async function main(){
+      // 1) LIFF
+      const prof = await initLiff();
+      if(!prof) return;
+      $('#avatar').src = prof.pictureUrl || 'https://placehold.co/120x120/ffffff/999?text=LINE';
+      $('#uname').textContent = prof.displayName || 'เพื่อนใหม่ของพี่หวี';
+      $('#sub').textContent   = 'กำลังโหลดข้อมูลจากคลินิก…';
+
+      // 2) ดึงแดชบอร์ดจาก GAS (เช็กลงทะเบียน)
+      let dash = {};
+      try{
+        dash = await fetchDashboard(prof.userId);
+      }catch(e){
+        console.error('fetchDashboard error', e);
+      }
+
+      // รองรับทั้ง 2 โครงสร้างคีย์
+      const ok = !!dash.ok;
+      const profile = (dash.profile || (dash.data && dash.data.profile)) || null;
+      const goals   = dash.goals || (dash.data && dash.data.goals) || [];
+      const logsByType = dash.events || dash.logsByType || {};
+      const adviceLatest = dash.ai_latest || dash.adviceLatest || {};
+
+      const registered = !!profile;
+
+      if(!registered){
+        // 3) ยังไม่ลงทะเบียน ➜ โชว์ฟอร์ม
+        hide($('#dash'));
+        show($('#regCard'));
+        // เติมชื่อเล่นอัตโนมัติ
+        if (prof.displayName && !$('#name_use').value) $('#name_use').value = prof.displayName;
+        $('#registrationForm').addEventListener('submit', (e)=>{
+          e.preventDefault();
+          onSubmitRegistration(prof);
+        });
+        $('#sub').textContent = 'กรุณาลงทะเบียนก่อนเริ่มใช้งาน';
+        return;
+      }
+
+      // 4) ลงทะเบียนแล้ว ➜ แสดงแดชบอร์ด
+      hide($('#regCard')); show($('#dash'));
+      bindProfileCard(profile, prof.userId);
+      renderGoals(goals);
+      renderCharts(logsByType);
+      renderAdvice(adviceLatest);
+    }
+
+    window.addEventListener('load', main);
   </script>
 </body>
 </html>
