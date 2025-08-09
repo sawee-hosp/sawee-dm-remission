@@ -1,483 +1,273 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>สวีคุมหวาน · ลงทะเบียน/แดชบอร์ด</title>
-
-  <!-- Font ไทยสวยอ่านง่าย -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet" />
-
-  <!-- Chart.js สำหรับกราฟ -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <style>
-    :root{
-      --green:#06C755;
-      --bg:#F4F7FB;
-      --card:#fff;
-      --text:#1d2433;
-      --muted:#77839a;
-      --ring:#e6edf7;
-      --shadow: 0 10px 30px rgba(21, 24, 35, .06);
-      --radius: 18px;
-    }
-    *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; background:var(--bg); color:var(--text);
-      font-family: "Noto Sans Thai", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
-    }
-    .wrap{max-width:980px; margin:0 auto; padding:24px 16px 60px}
-    header{display:flex; align-items:center; gap:12px; margin-bottom:14px}
-    header .logo{
-      width:40px; height:40px; border-radius:12px; background:var(--green);
-      display:grid; place-items:center; color:#fff; font-weight:700; box-shadow:var(--shadow)
-    }
-    header h1{font-size:20px; margin:0 0 2px 0}
-    header .sub{color:var(--muted); font-size:13px}
-
-    .card{
-      background:var(--card); border:1px solid var(--ring);
-      border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:18px 16px; margin:14px 0;
-    }
-    .card h2{font-size:18px; margin:0 0 10px 0}
-    .card .meta{color:var(--muted); font-size:13px}
-    .row{display:grid; gap:14px}
-    @media(min-width:820px){ .row.cols-2{grid-template-columns:1fr 1fr} }
-
-    .form{display:grid; gap:14px}
-    .field label{display:block; font-weight:600; margin-bottom:6px}
-    .field input, .field select{
-      width:100%; padding:12px 14px; border:1px solid var(--ring);
-      border-radius:12px; background:#fbfdff; outline:none;
-      font-size:15px;
-    }
-    .consent{display:flex; gap:10px; align-items:flex-start; font-size:14px; color:#223}
-    .btn{
-      width:100%; padding:14px 16px; border:0; border-radius:12px;
-      background:var(--green); color:#fff; font-weight:700; font-size:16px;
-      box-shadow:var(--shadow); cursor:pointer;
-    }
-    .btn[disabled]{opacity:.6; cursor:not-allowed}
-    .ghost{background:#e9f7ee; color:#0a6b2a}
-
-    .profile{
-      display:flex; gap:12px; align-items:center;
-    }
-    .avatar{
-      width:56px; height:56px; border-radius:16px; background:#eef2f7;
-      background-size:cover; background-position:center; flex:none;
-      border:1px solid var(--ring);
-    }
-    .kv{display:grid; grid-template-columns:120px 1fr; gap:6px 10px; font-size:15px}
-    .chip{
-      display:inline-flex; align-items:center; gap:8px;
-      background:#f3f7fd; border:1px solid var(--ring);
-      padding:6px 10px; border-radius:999px; font-size:13px; color:#265;
-    }
-    .goal{
-      border:1px solid var(--ring); border-radius:14px; padding:12px; margin-top:10px; background:#fbfeff;
-    }
-    .goal h3{margin:0 0 6px 0; font-size:16px}
-    .goal .small{font-size:13px; color:var(--muted)}
-    canvas{width:100% !important; height:260px !important}
-    .empty{color:var(--muted); font-style:italic}
-    .note{font-size:12px; color:#666; margin-top:8px}
-    .build{margin-top:10px; color:#9aa6b2; font-size:12px; text-align:center}
-    .actions{display:flex; gap:10px; margin-top:8px; flex-wrap:wrap}
-    .secondary{background:#f5f8fc; color:#1c2a39}
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>สวีคุมหวาน • ลงทะเบียน/แดชบอร์ด</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b1020; --card:#121832; --muted:#bcd0ff; --text:#f8faff; --accent:#6aa5ff; --accent2:#8d84ff; --ok:#00d38f; --warn:#ffd166;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:18px;background:linear-gradient(135deg,#0b1020,#121832);color:var(--text);font-family:'Prompt',system-ui,-apple-system,Segoe UI,Roboto}
+  .container{max-width:980px;margin:0 auto}
+  header{display:flex;align-items:center;gap:14px;margin:6px 0 16px}
+  .avatar{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.2)}
+  h1{font-size:22px;margin:0;line-height:1.2}
+  .sub{color:var(--muted);font-size:14px}
+  .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+  .card h2{font-size:18px;margin:0 0 10px;color:#dfe6ff}
+  label{display:block;margin:8px 0 8px;font-weight:600}
+  input[type="text"],input[type="number"]{width:100%;padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0e1430;color:#f2f4ff;font-size:16px}
+  .row{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .btn{padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;font-weight:700;cursor:pointer;font-size:16px}
+  .btn:disabled{opacity:.6;cursor:not-allowed}
+  .muted{color:var(--muted);font-size:14px}
+  .pill{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);font-size:12px;color:#dfe6ff}
+  .goal{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
+  .goal-title{font-weight:600;margin-bottom:6px}
+  canvas{background:rgba(255,255,255,.02);border-radius:12px;padding:8px}
+  a{color:#8ecbff;text-decoration:underline}
+  .radio-group label{display:inline-flex;align-items:center;gap:8px;margin-right:14px;font-weight:500}
+  .big{font-size:16px}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div class="logo">หวี</div>
+<div class="container">
+  <header>
+    <img id="avatar" class="avatar" src="">
+    <div>
+      <h1 id="uname">กำลังโหลด…</h1>
+      <div id="sub" class="sub">กำลังเตรียมระบบ</div>
+    </div>
+  </header>
+
+  <!-- Registration Card -->
+  <div id="reg" class="card" style="display:none">
+    <h2>ลงทะเบียนผู้ใช้</h2>
+    <div class="grid">
       <div>
-        <h1>สวีคุมหวาน</h1>
-        <div class="sub">ลงทะเบียนผู้ป่วย · แดชบอร์ดส่วนตัว</div>
+        <label class="big" for="hn">รหัสโรงพยาบาล (HN)</label>
+        <input id="hn" type="text" placeholder="เช่น HN 55000123" />
       </div>
-    </header>
-
-    <!-- SECTION: Registration (shown if no profile yet) -->
-    <section id="sec-register" class="card" style="display:none">
-      <h2>ลงทะเบียน</h2>
-      <div class="meta">กรอกข้อมูลเบื้องต้นเพื่อให้พี่หวีดูแลได้เหมาะสม</div>
-      <form id="registrationForm" class="form">
-        <div class="field">
-          <label for="hn">รหัสโรงพยาบาล (HN)</label>
-          <input id="hn" name="hn" type="tel" inputmode="numeric" placeholder="เช่น 550001234 (เฉพาะตัวเลข)" required />
-        </div>
-        <div class="field">
-          <label for="name_use">ชื่อที่อยากให้เรียก</label>
-          <input id="name_use" name="name_use" type="text" placeholder="เช่น น้องส้ม / คุณอารีย์ / ลุงสมชาย" required />
-        </div>
-        <div class="field">
-          <label for="gender">เพศ</label>
-          <select id="gender" name="gender" required>
-            <option value="">— เลือกเพศ —</option>
-            <option value="Male">ชาย</option>
-            <option value="Female">หญิง</option>
-            <option value="Other">อื่น ๆ / ไม่ระบุ</option>
-          </select>
-        </div>
-        <div class="field">
-          <label for="age">อายุ (ปี)</label>
-          <input id="age" name="age" type="tel" inputmode="numeric" pattern="[0-9]*" placeholder="เช่น 52" required />
-        </div>
-        <label class="consent">
-          <input id="pdpa" type="checkbox" required />
-          <span>ฉันยินยอมให้เก็บและประมวลผลข้อมูลส่วนบุคคล/สุขภาพเพื่อการดูแลรักษา (PDPA)</span>
-        </label>
-        <button id="submitBtn" class="btn" type="submit">ลงทะเบียน</button>
-        <div id="regStatus" class="note"></div>
-      </form>
-    </section>
-
-    <!-- SECTION: Dashboard (shown if profile exists) -->
-    <section id="sec-dash" style="display:none">
-      <!-- Profile -->
-      <div class="card">
-        <h2>ข้อมูลส่วนตัว</h2>
-        <div class="profile">
-          <div id="avatar" class="avatar"></div>
-          <div>
-            <div id="displayName" style="font-weight:700; font-size:16px">—</div>
-            <div id="nameUse" class="meta">—</div>
-            <div class="actions">
-              <button id="btnRefresh" class="btn secondary" type="button">รีเฟรชข้อมูล</button>
-              <button id="btnEdit" class="btn secondary" type="button">แก้ไขข้อมูล</button>
-            </div>
-          </div>
-        </div>
-        <div class="kv" style="margin-top:12px">
-          <div class="meta">HN</div><div id="kvHN">—</div>
-          <div class="meta">เพศ</div><div id="kvGender">—</div>
-          <div class="meta">อายุ</div><div id="kvAge">—</div>
-          <div class="meta">ลงทะเบียนเมื่อ</div><div id="kvCreated">—</div>
-        </div>
+      <div>
+        <label class="big" for="nameuse">ชื่อที่อยากให้เรียก</label>
+        <input id="nameuse" type="text" placeholder="เช่น น้องส้ม / คุณส้ม" />
       </div>
-
-      <!-- Goals -->
-      <div class="card">
-        <h2>เป้าหมาย (SMART Goals)</h2>
-        <div id="goalsWrap" class="row"></div>
-        <div id="goalsEmpty" class="empty" style="display:none">ยังไม่มีการตั้งเป้าหมาย</div>
+    </div>
+    <div class="row">
+      <div class="radio-group big">
+        <label><input type="radio" name="gender" value="Male">ชาย</label>
+        <label><input type="radio" name="gender" value="Female">หญิง</label>
+        <label><input type="radio" name="gender" value="Other">อื่น ๆ</label>
       </div>
-
-      <!-- History & Charts -->
-      <div class="card">
-        <h2>ประวัติการบันทึก</h2>
-        <div id="chartsWrap" class="row cols-2"></div>
-        <div id="chartsEmpty" class="empty" style="display:none">ยังไม่มีข้อมูลเพียงพอสำหรับสร้างกราฟ</div>
+      <div>
+        <label class="big" for="age">อายุ</label>
+        <input id="age" type="number" min="1" max="120" placeholder="เช่น 67" />
       </div>
-
-      <!-- AI Advice -->
-      <div class="card">
-        <h2>คำแนะนำ (โดยพี่จุ๋ม · พยาบาล AI)</h2>
-        <div id="aiWrap" class="row"></div>
-        <div id="aiEmpty" class="empty" style="display:none">ยังไม่มีคำแนะนำ</div>
-        <div class="note">หมายเหตุ: พี่จุ๋มคือปัญญาประดิษฐ์ (AI) ที่ช่วยแนะนำในบทบาทพยาบาลคลินิกเบาหวาน โปรดพิจารณาคำแนะนำนี้ หรือปรึกษาบุคลากรทางการแพทย์นะคะ</div>
-      </div>
-    </section>
-
-    <div class="build" id="build">Build: —</div>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="big"><input id="consent" type="checkbox" checked> ฉันยินยอม (PDPA) ให้คลินิกใช้ข้อมูลเพื่อดูแลรักษา</label>
+      <a href="https://example.com/pdpa" target="_blank" rel="noopener">รายละเอียด PDPA</a>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button id="btnSave" class="btn">บันทึกข้อมูล</button>
+    </div>
   </div>
 
-  <!-- libs -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <!-- Dashboard Card -->
+  <div id="dash" style="display:none">
+    <div class="card">
+      <h2>ข้อมูลส่วนตัว</h2>
+      <div class="grid">
+        <div><div class="pill">ชื่อ</div><div id="p_name" style="margin-top:6px">-</div></div>
+        <div><div class="pill">HN</div><div id="p_hn" style="margin-top:6px">-</div></div>
+        <div><div class="pill">เพศ</div><div id="p_gender" style="margin-top:6px">-</div></div>
+        <div><div class="pill">อายุ</div><div id="p_age" style="margin-top:6px">-</div></div>
+      </div>
+      <div class="muted" style="margin-top:6px">ลงทะเบียนเมื่อ <span id="p_reg">-</span></div>
+    </div>
 
-  <script>
-    // ============ CONFIG ============
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec";
-    const LIFF_ID = "2007840605-zKl7p3Aa";
-    const BUILD_ID = new Date().toISOString().replace('T',' ').slice(0,19);
+    <div class="card">
+      <h2>เป้าหมายของฉัน</h2>
+      <div id="goalsWrap" class="grid"></div>
+    </div>
 
-    // ============ STATE ============
-    let gUserId = null;
-    let gProfile = null;
-    let gDashboard = null;
+    <div class="card">
+      <h2>ประวัติการบันทึก</h2>
+      <div id="chartsWrap" class="grid"></div>
+    </div>
 
-    // ============ HELPERS ============
-    const qs = (sel) => document.querySelector(sel);
-    function show(el){ el.style.display=''; }
-    function hide(el){ el.style.display='none'; }
+    <div class="card">
+      <h2>คำแนะนำ (โดยพี่จุ๋ม พยาบาล AI)</h2>
+      <div id="adviceWrap" class="grid"></div>
+    </div>
+  </div>
+</div>
 
-    function fmtDateTH(dstr){
-      if(!dstr) return '—';
-      const d = (dstr instanceof Date)? dstr : new Date(dstr);
-      if(!(d instanceof Date) || isNaN(d)) return '—';
-      const th = ["","ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
-      return `${d.getDate()} ${th[d.getMonth()+1]} ${d.getFullYear()}`;
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // ====== CONFIG ======
+  const GAS_WEB_APP_URL = "YOUR_GAS_WEB_APP_URL"; // e.g. https://script.google.com/macros/s/AKfyc.../exec
+  const LIFF_ID = "YOUR_LIFF_ID";
+
+  // ====== Helpers ======
+  const $ = sel => document.querySelector(sel);
+  function fmtDate(d){
+    const t = new Date(d);
+    return t.toLocaleString('th-TH', { year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' });
+  }
+
+  // ====== Init ======
+  async function main(){
+    try{
+      await liff.init({ liffId: LIFF_ID });
+    }catch(e){
+      console.error('LIFF init fail', e); alert('ไม่สามารถเริ่ม LIFF ได้'); return;
     }
+    if (!liff.isLoggedIn()) { liff.login(); return; }
 
-    function groupBy(arr, keyFn){
-      const out = {};
-      for(const it of arr){
-        const k = keyFn(it) || 'UNKNOWN';
-        (out[k] ||= []).push(it);
-      }
-      return out;
-    }
+    const ctx = liff.getContext?.() || {};
+    const token = liff.getDecodedIDToken?.() || {};
+    const prof = await liff.getProfile();
+    const userId = ctx.userId || token.sub || prof.userId || '';
+    const displayName = prof.displayName || '';
+    const pictureUrl = prof.pictureUrl || '';
 
-    function ensureCors(url){
-      const sep = url.includes('?') ? '&' : '?';
-      return `${url}${sep}_=${Date.now()}`; // cache-bust
-    }
+    $('#avatar').src = pictureUrl || 'https://placehold.co/120x120/121832/FFF?text=LINE';
+    $('#uname').textContent = displayName || 'เพื่อนใหม่ของพี่หวี';
+    $('#sub').textContent = 'กำลังโหลดข้อมูลจากคลินิก…';
 
-    // ============ RENDER ============
-    function renderProfile(p){
-      const avatar = qs('#avatar');
-      if(p?.PictureURL) avatar.style.backgroundImage = `url('${p.PictureURL}')`;
-      qs('#displayName').textContent = p?.DisplayName || '—';
-      qs('#nameUse').textContent = 'ชื่อที่อยากให้เรียก: ' + (p?.NameUse || '—');
-      qs('#kvHN').textContent = p?.HN || '—';
-      qs('#kvGender').textContent = p?.Gender || '—';
-      qs('#kvAge').textContent = p?.Age || '—';
-      qs('#kvCreated').textContent = fmtDateTH(p?.Timestamp);
-    }
+    // Load dashboard (GET with CORS)
+    try{
+      const url = GAS_WEB_APP_URL + '?action=getDashboard&userId=' + encodeURIComponent(userId);
+      const res = await fetch(url, { method:'GET' });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error || 'unknown error');
 
-    function renderGoals(goals){
-      const wrap = qs('#goalsWrap');
-      wrap.innerHTML = '';
-      if(!goals || !goals.length){
-        show(qs('#goalsEmpty')); return;
-      }
-      hide(qs('#goalsEmpty'));
-      goals.forEach(g=>{
-        const el = document.createElement('div');
-        el.className = 'goal';
-        el.innerHTML = `
-          <h3>${g.goal_category || '-'} · <span class="small">${g.goal_id || ''}</span></h3>
-          <div style="margin:6px 0 8px 0; font-weight:600">${g.goal_specific || '-'}</div>
-          <div class="small">วิธีวัดผล: ${g.goal_measurable || '-'}</div>
-          <div class="small">เหมาะสม/ทำได้จริง: ${g.goal_achievable || '-'}</div>
-          <div class="small">เหตุผล: ${g.goal_relevant || '-'}</div>
-          <div class="chip" style="margin-top:8px">กรอบเวลา: ${g.goal_timebound || '-'}</div>
-        `;
-        wrap.appendChild(el);
-      });
-    }
+      if (!json.registered) {
+        // show register
+        $('#reg').style.display = 'block';
+        $('#dash').style.display = 'none';
 
-    function renderCharts(events){
-      const wrap = qs('#chartsWrap');
-      wrap.innerHTML = '';
-      if(!events || !events.length){ show(qs('#chartsEmpty')); return; }
-      hide(qs('#chartsEmpty'));
+        // Save handler (POST no-cors)
+        $('#btnSave').onclick = async ()=>{
+          const gender = document.querySelector('input[name="gender"]:checked')?.value || '';
+          const payload = {
+            action: 'registerUser',
+            userId,
+            displayName,
+            pictureUrl,
+            hn: $('#hn').value.trim(),
+            name_use: $('#nameuse').value.trim() || displayName,
+            gender: gender,
+            age: $('#age').value.trim(),
+            consent: $('#consent').checked
+          };
+          $('#btnSave').disabled = true;
+          try{
+            await fetch(GAS_WEB_APP_URL, {
+              method:'POST',
+              headers:{ 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+              mode:'no-cors'
+            });
+            alert('ลงทะเบียนสำเร็จแล้วค่ะ');
+            location.reload();
+          }catch(err){
+            console.error(err);
+            alert('บันทึกไม่สำเร็จ: ' + err.message);
+            $('#btnSave').disabled = false;
+          }
+        };
 
-      // แปลง timestamp เป็น Date และกรองเฉพาะ metric ที่วาดได้
-      const rows = events.map(r=>({
-        ts: new Date(r.timestamp),
-        type: r.event_type,
-        sub: r.event_subtype || '',
-        v1: (r.value_numeric_1!=null && r.value_numeric_1!=='') ? Number(r.value_numeric_1) : null,
-        v2: (r.value_numeric_2!=null && r.value_numeric_2!=='') ? Number(r.value_numeric_2) : null,
-        unit: r.value_unit || ''
-      })).filter(r=>r.ts instanceof Date && !isNaN(r.ts));
-
-      const byType = groupBy(rows, r=>r.type);
-
-      const wantOrder = ['SBGM','BP','WEIGHT','WAIST','HBA1C','BODY_FAT'];
-      const keys = Object.keys(byType).sort((a,b)=>wantOrder.indexOf(a)-wantOrder.indexOf(b));
-
-      keys.forEach(k=>{
-        const list = byType[k].sort((a,b)=>a.ts-b.ts);
-        const card = document.createElement('div');
-        card.className='card';
-        const titleTH = ({
-          SBGM:'ค่าน้ำตาล (mg/dL)',
-          BP:'ความดัน (mmHg)',
-          WEIGHT:'น้ำหนัก (กก.)',
-          WAIST:'รอบเอว (ซม.)',
-          HBA1C:'HbA1c (%)',
-          BODY_FAT:'ไขมันในร่างกาย (%)'
-        })[k] || k;
-        card.innerHTML = `<h2 style="margin-top:0">${titleTH}</h2><canvas></canvas>`;
-        wrap.appendChild(card);
-
-        const cvs = card.querySelector('canvas');
-        const labels = list.map(r=> r.ts.toLocaleDateString('th-TH', { month:'short', day:'numeric' }));
-        if(k==='BP'){
-          const s = list.map(r=> r.v1);
-          const d = list.map(r=> r.v2);
-          new Chart(cvs, {
-            type:'line',
-            data:{
-              labels,
-              datasets:[
-                { label:'ตัวบน (SBP)', data:s, tension:.25, borderWidth:2, pointRadius:2 },
-                { label:'ตัวล่าง (DBP)', data:d, tension:.25, borderWidth:2, pointRadius:2 }
-              ]
-            },
-            options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{position:'bottom'} } }
-          });
-        }else{
-          const y = list.map(r=> r.v1);
-          new Chart(cvs, {
-            type:'line',
-            data:{ labels, datasets:[{ label:titleTH, data:y, tension:.25, borderWidth:2, pointRadius:2 }] },
-            options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{display:false} } }
-          });
-        }
-      });
-    }
-
-    function renderAI(advs){
-      const wrap = qs('#aiWrap');
-      wrap.innerHTML='';
-      if(!advs || !advs.length){ show(qs('#aiEmpty')); return; }
-      hide(qs('#aiEmpty'));
-      advs.forEach(a=>{
-        const card = document.createElement('div');
-        card.className='goal';
-        card.innerHTML = `
-          <h3>${a.metric_type || '—'} <span class="small">· ${fmtDateTH(a.timestamp)}</span></h3>
-          <div style="white-space:pre-wrap; margin-top:6px">${a.advice_text || '-'}</div>
-          <div class="small" style="margin-top:8px; color:#6a7b8d">โมเดล: ${a.model || '-'} | latency: ${a.latency_ms || '-'} ms</div>
-        `;
-        wrap.appendChild(card);
-      });
-    }
-
-    function renderDashboard(data){
-      gDashboard = data || {};
-      // Profile
-      renderProfile(data.profile || {});
-      // Goals
-      renderGoals(data.goals || []);
-      // Charts
-      renderCharts(data.events || []);
-      // AI latest per metric
-      renderAI(data.ai_latest || []);
-    }
-
-    // ============ LOAD ============
-    async function loadDashboard(){
-      try{
-        const url = ensureCors(`${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(gUserId)}`);
-        const res = await fetch(url, { method:'GET', mode:'cors', headers:{ 'Accept':'application/json' } });
-        if(!res.ok) throw new Error('HTTP '+res.status);
-        const data = await res.json();
-
-        if(data?.profile && (data.profile.Consent === true || String(data.profile.Consent).toUpperCase()==='TRUE')){
-          hide(qs('#sec-register'));
-          show(qs('#sec-dash'));
-          renderDashboard(data);
-        }else{
-          show(qs('#sec-register'));
-          hide(qs('#sec-dash'));
-        }
-      }catch(err){
-        // ถ้า CORS ยังไม่พร้อม → แสดงฟอร์มไว้ก่อน (ผู้ใช้ใหม่)
-        console.warn('getDashboard failed:', err);
-        show(qs('#sec-register'));
-        hide(qs('#sec-dash'));
-      }
-    }
-
-    // ============ MAIN ============
-    async function main(){
-      // กันแคช URL (บังคับรีโหลดเมื่ออัปเดต)
-      if(!/[?&]v=\d+$/.test(location.href)){
-        const sep = location.search ? '&' : '?';
-        location.replace(location.href + sep + 'v=' + Date.now());
         return;
       }
 
-      qs('#build').textContent = 'Build: ' + BUILD_ID;
+      // Render dashboard
+      $('#reg').style.display='none';
+      $('#dash').style.display='block';
+      $('#sub').textContent = 'แดชบอร์ดสุขภาพของคุณ';
 
-      try{
-        await liff.init({ liffId: LIFF_ID });
-      }catch(e){
-        alert('LIFF เริ่มต้นไม่สำเร็จ กรุณาลองใหม่'); return;
+      const p = json.profile || {};
+      $('#avatar').src = p.PictureURL || pictureUrl || '';
+      $('#uname').textContent = p.NameUse || p.DisplayName || displayName || 'เพื่อนใหม่ของพี่หวี';
+
+      $('#p_name').textContent = p.NameUse || p.DisplayName || '-';
+      $('#p_hn').textContent = p.HN || '-';
+      $('#p_gender').textContent = p.Gender || '-';
+      $('#p_age').textContent = p.Age || '-';
+      $('#p_reg').textContent = p.Timestamp ? fmtDate(p.Timestamp) : '-';
+
+      // Goals
+      const gwrap = $('#goalsWrap'); gwrap.innerHTML='';
+      (json.goals||[]).forEach(g=>{
+        const div = document.createElement('div'); div.className='goal';
+        div.innerHTML = `
+          <div class="goal-title">${g.goal_category} • ${g.goal_specific}</div>
+          <div class="muted">วิธีวัดผล: ${g.goal_measurable || '-'}</div>
+          <div class="muted">กรอบเวลา: ${g.goal_timebound || '-'}</div>
+        `;
+        gwrap.appendChild(div);
+      });
+      if ((json.goals||[]).length===0) {
+        const div = document.createElement('div'); div.className='muted'; div.textContent='ยังไม่มีเป้าหมาย';
+        gwrap.appendChild(div);
       }
-      if(!liff.isLoggedIn()){ liff.login(); return; }
 
-      gProfile = await liff.getProfile();
-      gUserId  = gProfile.userId;
-
-      // ปรับ avatar ตั้งต้น
-      if(gProfile?.pictureUrl) qs('#avatar').style.backgroundImage = `url('${gProfile.pictureUrl}')`;
-      qs('#displayName').textContent = gProfile?.displayName || '—';
-
-      // โหลดแดชบอร์ด (หรือแสดงฟอร์ม)
-      await loadDashboard();
-
-      // ฟอร์มลงทะเบียน
-      $('#registrationForm').on('submit', async (e)=>{
-        e.preventDefault();
-        const $btn = $('#submitBtn');
-        $btn.prop('disabled', true).text('กำลังลงทะเบียน...');
-
-        const payload = {
-          action: 'registerUser',
-          userId: gUserId,
-          displayName: gProfile?.displayName || '',
-          pictureUrl: gProfile?.pictureUrl || '',
-          hn: $('#hn').val().trim(),
-          name_use: $('#name_use').val().trim(),
-          gender: $('#gender').val(),
-          age: $('#age').val().trim(),
-          consent: $('#pdpa').is(':checked')
-        };
-
-        try{
-          // พยายามใช้ CORS ก่อน
-          const res = await fetch(GAS_WEB_APP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type':'application/json' },
-            body: JSON.stringify(payload),
-            mode: 'cors'
-          });
-          if(!res.ok){
-            // fallback สไตล์เดิม
-            await fetch(GAS_WEB_APP_URL, {
-              method: 'POST',
-              headers: { 'Content-Type':'application/json' },
-              body: JSON.stringify(payload),
-              mode: 'no-cors'
-            });
-            alert('ลงทะเบียนเสร็จแล้วค่ะ (โหมด no-cors)'); 
-            // ปิดหน้าตามพฤติกรรมเดิม
-            liff.closeWindow();
-            return;
-          }
-          const data = await res.json();
-          if(data?.ok){
-            $('#regStatus').text('ลงทะเบียนสำเร็จ ✓').css('color','#0a6b2a');
-            await loadDashboard();
-            window.scrollTo({top:0, behavior:'smooth'});
-          }else{
-            throw new Error(data?.error || 'บันทึกไม่สำเร็จ');
-          }
-        }catch(err){
-          console.error(err);
-          $('#regStatus').text('เกิดข้อผิดพลาด: ' + err.message).css('color','#b22');
-        }finally{
-          $btn.prop('disabled', false).text('ลงทะเบียน');
+      // Charts
+      const chartsWrap = $('#chartsWrap'); chartsWrap.innerHTML='';
+      const series = json.logsByType || {};
+      Object.keys(series).forEach(k=>{
+        const card = document.createElement('div'); card.className='card';
+        card.innerHTML = `<h2>ประวัติ ${k}</h2><canvas height="140"></canvas>`;
+        chartsWrap.appendChild(card);
+        const ctx2d = card.querySelector('canvas').getContext('2d');
+        const rows = series[k];
+        const labels = rows.map(r => fmtDate(r.ts));
+        if (k==='BP') {
+          const sbp = rows.map(r => r.v1 || null);
+          const dbp = rows.map(r => r.v2 || null);
+          new Chart(ctx2d, { type:'line', data:{ labels, datasets:[
+            { label:'SBP', data: sbp }, { label:'DBP', data: dbp }
+          ]}});
+        } else {
+          const v = rows.map(r=> (typeof r.v1==='number'? r.v1 : (parseFloat(r.v1)||null)) );
+          new Chart(ctx2d, { type:'line', data:{ labels, datasets:[{ label:k, data:v }]}});
         }
       });
+      if (Object.keys(series).length===0) {
+        const div = document.createElement('div'); div.className='muted'; div.textContent='ยังไม่มีประวัติการบันทึก';
+        chartsWrap.appendChild(div);
+      }
 
-      // ปุ่มรีเฟรช
-      $('#btnRefresh').on('click', loadDashboard);
-      // ปุ่มแก้ไข: เปิดฟอร์มพร้อมกรอกค่าเดิม
-      $('#btnEdit').on('click', ()=>{
-        if(!gDashboard?.profile) return;
-        $('#hn').val(gDashboard.profile.HN || '');
-        $('#name_use').val(gDashboard.profile.NameUse || '');
-        $('#gender').val(gDashboard.profile.Gender || '');
-        $('#age').val(gDashboard.profile.Age || '');
-        $('#pdpa').prop('checked', gDashboard.profile.Consent === true || String(gDashboard.profile.Consent).toUpperCase()==='TRUE');
-        show(qs('#sec-register'));
-        window.scrollTo({top:0, behavior:'smooth'});
-      });
+      // Advice
+      const advWrap = $('#adviceWrap'); advWrap.innerHTML='';
+      const adv = json.adviceLatest || {}; const keys = Object.keys(adv);
+      if (keys.length===0) {
+        const div = document.createElement('div'); div.className='muted'; div.textContent='ยังไม่มีคำแนะนำ';
+        advWrap.appendChild(div);
+      } else {
+        keys.forEach(m=>{
+          const a = adv[m]; const card = document.createElement('div'); card.className='goal';
+          card.innerHTML = `
+            <div class="goal-title">คำแนะนำล่าสุด: ${m}</div>
+            <div class="muted">${fmtDate(a.ts)}</div>
+            <div style="margin-top:8px;white-space:pre-wrap">${a.advice_text || '-'}</div>`;
+          advWrap.appendChild(card);
+        });
+      }
+
+    }catch(err){
+      console.error(err);
+      $('#sub').textContent = 'โหลดข้อมูลไม่สำเร็จ';
     }
-
-    main();
-  </script>
+  }
+  main();
+</script>
 </body>
 </html>
