@@ -104,19 +104,38 @@
     #loading .box{background:#fff9e6;border:1px solid #f2dfab;padding:16px 20px;border-radius:14px;box-shadow:var(--shadow)}
 
     /* Modal (ให้อยู่เหนือ loading + scroll ได้) */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;place-items:center;z-index:2000;padding:18px}
-    .modal .panel{
-      width:min(680px,96vw);max-height:90vh;overflow:auto;
-      background:#fffef6;border:1px solid #f0dfb1;border-radius:18px;
-      box-shadow:0 20px 48px rgba(60,46,23,.25);padding:18px
-    }
-    .modal .m-header{display:flex;gap:12px;align-items:center;margin-bottom:8px}
-    .modal .m-avatar{width:72px;height:72px;border-radius:50%;object-fit:cover;border:2px solid #f3d789;background:#fff;box-shadow:var(--shadow)}
-    .modal h3{font-size:24px;margin:0}
-    .modal p{margin:6px 0;font-size:18px}
-    .modal ul{margin:6px 0 0 22px;padding:0}
-    .modal li{margin:6px 0;font-size:18px}
-    .modal .m-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:10px}
+/* แทนที่ของเดิมเกี่ยวกับ .modal/.panel ถ้ามี */
+.modal{ position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; place-items:center; z-index:1200; padding:18px; }
+.modal .panel{
+  width:min(680px,96vw);
+  background:#fffef6;
+  border:1px solid #f0dfb1;
+  border-radius:18px;
+  box-shadow:0 20px 48px rgba(60,46,23,.25);
+  /* fixed header + fixed footer + เนื้อหาเลื่อน */
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+  max-height:90vh;
+  overflow:hidden;
+  padding:0; /* ย้าย padding เข้าไปในส่วนย่อย */
+}
+.modal .m-header{
+  display:flex; gap:12px; align-items:center;
+  padding:16px 18px;
+  background:#fff2c6;                /* ครีมเข้มกว่าพื้นหลัง */
+  border-bottom:1px solid #f2dfab;
+}
+.modal .m-body{
+  padding:12px 18px;
+  overflow-y:auto;                    /* เนื้อหาเลื่อน */
+}
+.modal .m-actions{
+  padding:12px 18px;
+  background:#fffef6;
+  border-top:1px solid #f2dfab;
+  display:flex; justify-content:flex-end; gap:10px;
+}
+
 
     /* Profile card: 30% avatar + 70% info */
     .profile-box{display:flex;gap:14px;align-items:center}
@@ -158,6 +177,31 @@
     }
     .grid{display:grid;gap:14px;grid-template-columns:repeat(2,minmax(0,1fr))}
     @media (max-width:820px){.grid{grid-template-columns:1fr}}
+    .table-wrap.max5{
+  max-height: 320px;      /* ประมาณ 5 แถว + เฮดเดอร์ */
+  overflow:auto;
+  /* โปรไฟล์ 40/60 */
+.profile-grid{
+  display:grid; grid-template-columns: 40% 60%;
+  gap:14px; align-items:center;
+}
+@media (max-width: 700px){
+  .profile-grid{ grid-template-columns: 1fr; }
+}
+.profile-left{ display:flex; justify-content:center; align-items:center; }
+.avatar{
+  width:100%;
+  aspect-ratio:1/1;   /* ทำให้เป็นสี่เหลี่ยมจัตุรัส */
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #f6e3a6;
+  background:#fff;
+  box-shadow:var(--shadow);
+}
+.profile-right .row{ gap:10px; flex-wrap:wrap; }
+
+}
+
   </style>
 </head>
 <body>
@@ -177,15 +221,6 @@
   <div id="loading"><div class="box">กำลังโหลดข้อมูล…</div></div>
 
   <div class="container">
-    <!-- Header (เดิม; ตัดข้อความย่อยใน JS) -->
-    <header class="profile">
-      <img id="avatar" class="avatar" src="" alt="avatar">
-      <div>
-        <h1 id="uname" class="h-title">กำลังโหลด…</h1>
-        <div id="sub" class="h-sub"></div>
-      </div>
-    </header>
-
     <!-- Register form -->
     <div id="reg" class="card" style="display:none">
       <h2>ลงทะเบียนผู้ป่วย</h2>
@@ -229,26 +264,37 @@
     <div id="dash" style="display:none">
       <!-- Profile card (ปรับ 30/70 และบรรทัด) -->
       <div class="card">
-        <h2>ข้อมูลส่วนตัว</h2>
-        <div class="profile-box">
-          <div class="p-left">
-            <img id="p_avatar" class="avatar" src="" alt="avatar in card">
-          </div>
-          <div class="p-right">
-            <div class="line"><strong>ชื่อ</strong> <span id="p_name">-</span> <strong>HN</strong> <span id="p_hn">-</span></div>
-            <div class="line"><strong>เพศ</strong> <span id="p_gender">-</span> <strong>อายุ</strong> <span id="p_age">-</span></div>
-            <div class="muted">ลงทะเบียนเมื่อ <span id="p_reg">-</span></div>
-          </div>
-        </div>
-      </div>
+<h2>ข้อมูลส่วนตัว</h2>
+<div class="profile-grid">
+  <div class="profile-left">
+    <img id="avatar" class="avatar" src="" alt="avatar">
+  </div>
+  <div class="profile-right">
+    <div style="margin-bottom:6px">
+      <span class="pill">ชื่อ</span>
+      <span id="p_name" class="value">-</span>
+    </div>
+    <div style="margin-bottom:6px">
+      <span class="pill">HN</span>
+      <span id="p_hn" class="value">-</span>
+    </div>
+    <div class="row" style="margin-bottom:6px">
+      <span class="pill">เพศ</span><span id="p_gender" class="value">-</span>
+      <span class="pill" style="margin-left:10px">อายุ</span><span id="p_age" class="value">-</span>
+    </div>
+    <div class="muted">ลงทะเบียนเมื่อ <span id="p_reg">-</span></div>
+  </div>
+</div>
+
 
       <!-- Advice carousel + ปุ่ม -->
       <div class="card">
         <h2>คำแนะนำโดยพี่หวี (AI)</h2>
         <div id="adviceCarousel" class="carousel"></div>
-        <div class="row" style="margin-top:8px">
-          <button id="btnAskNurse" class="btn">ขอคำแนะนำพยาบาลพี่หวี</button>
-        </div>
+  <div style="margin-top:10px">
+  <button id="btnAskAI" class="btn" style="width:100%">ขอคำแนะนำพยาบาลพี่หวี</button>
+</div>
+
       </div>
 
       <!-- Goals (เป็นคารูเซล) -->
@@ -256,6 +302,7 @@
         <div class="row" style="justify-content:space-between;align-items:center">
           <h2 style="margin:0">เป้าหมายของฉัน <span id="goalCount" class="pill" style="margin-left:6px">0 เป้าหมาย</span></h2>
           <button id="btnAboutGoals" class="btn" style="padding:10px 14px;font-size:17px">เกี่ยวกับการตั้งเป้าหมาย</button>
+          <button id="btnNewGoal" class="btn" style="padding:10px 14px;font-size:17px">ตั้งเป้าหมายใหม่</button>
         </div>
         <div id="goalsCarousel" class="carousel" style="margin-top:8px"></div>
       </div>
@@ -269,37 +316,38 @@
     </div>
   </div>
 
-  <!-- Disclaimer modal -->
-  <div id="disclaimerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle">
-    <div class="panel">
-      <div class="m-header">
-        <img class="m-avatar" src="https://img2.pic.in.th/pic/ChatGPT-Image-10-..-2568-12_14_20.png" alt="พยาบาลประจำคลินิก">
-        <div>
-          <h3 id="disclaimerTitle">ประกาศสำคัญ</h3>
-          <div class="muted">สวีคุมหวาน • คลินิกลดยาเบาหวาน (DM Remission) รพ.สวี</div>
-        </div>
-      </div>
-      <div class="m-body">
-        <p><strong>บริการนี้จัดทำโดยคลินิกลดยาเบาหวาน รพ.สวี</strong> เพื่อช่วยผู้ป่วยติดตามตนเองและรับคำแนะนำเบื้องต้น</p>
-        <ul>
-          <li>ข้อมูลที่เห็นเกิดจาก <strong>การบันทึกด้วยตนเอง</strong> และการประมวลผลโดย <strong>ปัญญาประดิษฐ์ (AI)</strong> เพื่อการแนะนำ ไม่ใช่การวินิจฉัย</li>
-          <li>โปรดใช้วิจารณญาณ และ <strong>ปรึกษาแพทย์/พยาบาล</strong> เมื่อมีข้อสงสัย</li>
-          <li>ข้อมูลที่ท่านบันทึกจะถูก <strong>แบ่งปันกับ รพ.สวี</strong> เพื่อช่วยดูแลรักษา</li>
-        </ul>
-        <p style="margin-top:10px">
-          <strong>เป้าหมายของคลินิก</strong> คือช่วยให้ผู้ป่วย <strong>ลด/หยุดยาลดน้ำตาล</strong> และควบคุม
-          <strong>HbA1c &lt; 6.5%</strong> ภายใน <strong>3 เดือน</strong> โดยเน้นการควบคุมอาหาร ออกกำลังกาย น้ำหนักตัว การนอน และติดตามค่าน้ำตาลปลายนิ้วอย่างสม่ำเสมอ
-        </p>
-        <p style="margin-top:10px">
-          <strong>วิธีใช้งาน</strong> เมื่อมีการเจาะน้ำตาลก่อน/หลังอาหาร หรือเมื่อวัดความดัน ให้เข้าเมนู
-          <em>บันทึกค่า</em> แล้วใส่ข้อมูลเป็นประจำ ระบบจะสรุปความคืบหน้าและประเมินโอกาสสำเร็จของการคุมเบาหวานให้คุณ
-        </p>
-      </div>
-      <div class="m-actions">
-        <button id="btnAck" class="btn">รับทราบ</button>
+ <!-- Disclaimer modal (แสดงครั้งแรก, fixed header/footer, เลื่อนเนื้อหาได้) -->
+<div id="disclaimerModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="disclaimerTitle">
+  <div class="panel">
+    <div class="m-header">
+      <img class="m-avatar" src="https://img2.pic.in.th/pic/ChatGPT-Image-10-..-2568-12_14_20.png" alt="พยาบาลประจำคลินิก" style="width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #f3d789;background:#fff;box-shadow:var(--shadow)">
+      <div>
+        <h3 id="disclaimerTitle" style="margin:0;font-size:24px">ประกาศสำคัญ</h3>
+        <div class="muted">สวีคุมหวาน • คลินิกลดยาเบาหวาน (DM Remission) รพ.สวี</div>
       </div>
     </div>
+    <div class="m-body">
+      <p><strong>บริการนี้จัดทำโดยคลินิกลดยาเบาหวาน รพ.สวี</strong> เพื่อช่วยผู้ป่วยติดตามตนเองและรับคำแนะนำเบื้องต้น</p>
+      <ul>
+        <li>ข้อมูลที่เห็นเกิดจาก <strong>การบันทึกด้วยตนเอง</strong> และการประมวลผลโดย <strong>ปัญญาประดิษฐ์ (AI)</strong> เพื่อการแนะนำ ไม่ใช่การวินิจฉัย</li>
+        <li>โปรดใช้วิจารณญาณ และ <strong>ปรึกษาแพทย์/พยาบาล</strong> เมื่อมีข้อสงสัย</li>
+        <li>ข้อมูลที่ท่านบันทึกจะถูก <strong>แบ่งปันกับ รพ.สวี</strong> เพื่อช่วยดูแลรักษา</li>
+      </ul>
+      <p style="margin-top:10px">
+        <strong>เป้าหมายของคลินิก</strong> คือช่วยให้ผู้ป่วย <strong>ลด/หยุดยาลดน้ำตาล</strong> และควบคุม
+        <strong>HbA1c &lt; 6.5%</strong> ภายใน <strong>3 เดือน</strong> โดยเน้นการควบคุมอาหาร ออกกำลังกาย น้ำหนักตัว การนอน และติดตามค่าน้ำตาลปลายนิ้วอย่างสม่ำเสมอ
+      </p>
+      <p style="margin-top:10px">
+        <strong>วิธีใช้งาน</strong> เมื่อมีการเจาะน้ำตาลก่อน/หลังอาหาร หรือเมื่อวัดความดัน ให้เข้าเมนู
+        <em>บันทึกค่า</em> แล้วใส่ข้อมูลเป็นประจำ ระบบจะสรุปความคืบหน้าและประเมินโอกาสสำเร็จของการคุมเบาหวานให้คุณ
+      </p>
+    </div>
+    <div class="m-actions">
+      <button id="btnAck" class="btn">รับทราบ</button>
+    </div>
   </div>
+</div>
+
 
   <!-- SMART GOALS modal (เดิม) -->
   <div id="goalsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="goalsTitle">
@@ -355,6 +403,24 @@
         return true;
       }catch(_){ return false; }
     }
+    // ขอคำแนะนำพยาบาลพี่หวี
+const askBtn = document.querySelector('#btnAskAI');
+if (askBtn) {
+  askBtn.onclick = async ()=>{
+    try { await liff.sendMessages([{ type:'text', text:'วิเคราะห์ด้วยAI' }]); } catch(e){ console.warn(e); }
+    finally { liff.closeWindow(); }
+  };
+}
+
+// ตั้งเป้าหมายใหม่
+const newGoalBtn = document.querySelector('#btnNewGoal');
+if (newGoalBtn) {
+  newGoalBtn.onclick = async ()=>{
+    try { await liff.sendMessages([{ type:'text', text:'ตั้งเป้าหมาย' }]); } catch(e){ console.warn(e); }
+    finally { liff.closeWindow(); }
+  };
+}
+
 
     // ====== Renderers ======
     function renderProfile(bundle, displayName, pictureUrl){
@@ -410,43 +476,58 @@
       }
     }
 
-    function renderGoals(bundle){
-      const list = bundle.goals || [];
-      $('#goalCount').textContent = `${list.length} เป้าหมาย`;
+function renderGoals(bundle){
+  const list = bundle.goals || [];
+  document.querySelector('#goalCount').textContent = `${list.length} เป้าหมาย`;
 
-      const host = $('#goalsCarousel');
-      host.innerHTML = '';
-      if(list.length===0){
-        const empty=document.createElement('div');
-        empty.className='c-item';
-        empty.innerHTML=`<h3>ยังไม่มีเป้าหมาย</h3><div class="c-muted">เริ่มตั้ง SMART Goal ผ่านแชตได้เลย</div>`;
-        host.appendChild(empty);
-        return;
-      }
-      const sorted=[...list].sort((a,b)=>{
-        const da=new Date(a.created_timestamp||a.deadline_date||0).getTime();
-        const db=new Date(b.created_timestamp||b.deadline_date||0).getTime();
-        return db-da;
-      });
-      sorted.forEach(g=>{
-        const dleft = daysLeft(g.deadline_date);
-        const status = (String(g.status||'').toUpperCase().includes('DONE') || String(g.status||'').includes('สำเร็จ')) ? 'สำเร็จ' : 'กำลังดำเนินการ';
-        const card=document.createElement('div');
-        card.className='c-item';
-        card.innerHTML = `
-          <h3>${g.goal_category || '-'} • ${g.goal_specific || '-'}</h3>
-          <div class="c-muted" style="margin-bottom:6px">${g.goal_timebound || ''}</div>
-          <div class="row" style="margin:6px 0 8px">
-            <span class="pill">เป้า: ${g.target_value || '-'} ${g.target_unit || ''}</span>
-            <span class="pill">${dleft!=null ? 'เหลืออีก '+dleft+' วัน' : '—'}</span>
-            <span class="pill">${status}</span>
-          </div>
-          ${g.goal_measurable ? `<div class="c-muted">วัดผล: ${g.goal_measurable}</div>`:''}
-          ${g.goal_relevant ? `<div class="c-muted">เหตุผล: ${g.goal_relevant}</div>`:''}
-        `;
-        host.appendChild(card);
-      });
-    }
+  const wrap = document.querySelector('#goalsWrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  // เรียงตามวันที่ล่าสุดก่อน
+  const sorted = [...list].sort((a,b)=>{
+    const da = new Date(a.created_timestamp || a.deadline_date || 0).getTime() || 0;
+    const db = new Date(b.created_timestamp || b.deadline_date || 0).getTime() || 0;
+    return db - da;
+  });
+
+  if (sorted.length === 0){
+    const empty = document.createElement('div');
+    empty.className = 'c-item';
+    empty.innerHTML = `<h3>ยังไม่มีเป้าหมาย</h3><div class="c-muted">เริ่มตั้งเป้าหมายจากเมนูในแชตได้เลยค่ะ</div>`;
+    wrap.appendChild(empty);
+    return;
+  }
+
+  sorted.forEach(g=>{
+    const dleft = (function(deadline){
+      if(!deadline) return null;
+      const d = new Date(deadline);
+      if (isNaN(+d)) return null;
+      return Math.ceil((d.setHours(23,59,59,999)-Date.now())/86400000);
+    })(g.deadline_date);
+
+    const status = (String(g.status||'').toUpperCase().includes('DONE') || String(g.status||'').includes('สำเร็จ'))
+      ? 'สำเร็จ' : 'กำลังดำเนินการ';
+
+    const it = document.createElement('div');
+    it.className = 'c-item';
+    it.innerHTML = `
+      <h3>${g.goal_category || '-'} • ${g.goal_specific || '-'}</h3>
+      <div class="c-muted">${g.goal_timebound || ''}</div>
+      <div class="row" style="margin:8px 0">
+        <span class="tag">ค่าเป้า: ${g.target_value || '-'} ${g.target_unit || ''}</span>
+        <span class="tag">วัดผล: ${g.goal_measurable || '-'}</span>
+        <span class="tag">เกี่ยวข้อง: ${g.goal_relevant || '-'}</span>
+      </div>
+      <div class="row">
+        <span class="pill">เส้นตาย: ${g.deadline_date ? (new Date(g.deadline_date)).toLocaleDateString('th-TH') : '-'}</span>
+        <span class="pill">${dleft!=null ? 'เหลืออีก ' + dleft + ' วัน' : '—'}</span>
+        <span class="pill">${status}</span>
+      </div>`;
+    wrap.appendChild(it);
+  });
+}
 
     function renderChartsAndFood(bundle){
       const chartsWrap = $('#chartsWrap');
