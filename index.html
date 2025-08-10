@@ -63,7 +63,7 @@
     <!-- ฟอร์มลงทะเบียน -->
     <div id="regCard" class="card hidden">
       <h2>ลงทะเบียนผู้ป่วย</h2>
-      <form id="registrationForm">
+      <form id="registrationForm" novalidate>
         <div class="grid2">
           <div>
             <label for="hn">รหัสโรงพยาบาล (HN)</label>
@@ -351,11 +351,29 @@
     return el ? el.value : '';
   }
 
+  function validateRegistration(){
+    const hn = $('#hn').value.trim();
+    const nameUse = $('#name_use').value.trim();
+    const gender = getSelectedGender();
+    const ageStr = $('#age').value.trim();
+    const consent = $('#pdpa').checked;
+
+    if (!hn || !/^\d{6,}$/.test(hn)) throw new Error('กรุณากรอก HN เป็นตัวเลขอย่างน้อย 6 หลัก');
+    if (!nameUse) throw new Error('กรุณากรอกชื่อที่อยากให้เรียก');
+    if (!gender) throw new Error('กรุณาเลือกเพศ');
+    if (ageStr) {
+      const age = +ageStr;
+      if (isNaN(age) || age < 1 || age > 120) throw new Error('อายุต้องอยู่ระหว่าง 1–120 ปี');
+    }
+    if (!consent) throw new Error('กรุณายอมรับนโยบายข้อมูลส่วนบุคคล');
+  }
+
   async function onSubmitRegistration(profile){
     const btn = $('#submitBtn');
     const st  = $('#status');
     btn.disabled = true; st.classList.remove('hidden'); st.textContent = 'กำลังลงทะเบียน…';
     try{
+      validateRegistration();
       const payload = {
         action: 'registerUser',
         userId: profile.userId,
@@ -371,14 +389,14 @@
         method:'POST',
         headers:{ 'Content-Type':'application/json' },
         body: JSON.stringify(payload),
-        mode:'no-cors'
+        mode:'no-cors' // เลือก no-cors เพื่อเลี่ยง preflight; ฝั่ง GAS บันทึกได้อยู่แล้ว
       });
       alert('ลงทะเบียนสำเร็จแล้วค่ะ! ระบบกำลังบันทึกข้อมูล');
       try{ liff.closeWindow(); }catch(_){}
       setTimeout(()=> location.reload(), 800);
     }catch(e){
       console.error('register failed', e);
-      alert('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + (e.message || e));
+      alert('เกิดข้อผิดพลาด: ' + (e.message || e));
       btn.disabled = false; st.classList.add('hidden');
     }
   }
