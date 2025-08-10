@@ -58,11 +58,15 @@
       box-shadow: 0 4px 16px rgba(213,159,0,.08);
     }
     .nav-inner{max-width:1100px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:12px}
-    .brand-logo{
-      width:40px;height:40px;border-radius:50%;object-fit:cover;
-      border:2px solid rgba(60,46,23,.08);box-shadow: inset 0 0 8px rgba(0,0,0,.08);
-      flex:0 0 auto;
-    }
+.brand-logo{
+  width: 100px;
+  height: 100px;
+  border: none;           /* ไม่มีขอบ */
+  box-shadow: none;       /* ไม่มีเงาด้านใน */
+  border-radius: 0;       /* จัตุรัส */
+  object-fit: contain;    /* ไม่ตัดโลโก้ */
+  flex: 0 0 auto;
+}
     .brand-title{font-weight:700;font-size:var(--fs-h1);letter-spacing:.2px}
     .brand-sub{font-size:var(--fs-small);color:var(--muted);margin-top:-4px}
 
@@ -132,10 +136,15 @@
     @media (max-width:700px){ .profile-grid{ grid-template-columns: 1fr; } }
     .profile-left{ display:flex; justify-content:center; align-items:center; }
     /* avatar ใหญ่เต็มคอลัมน์ซ้าย */
-    .profile-left .avatar{
-      width:100%; aspect-ratio:1/1; border-radius:50%; object-fit:cover;
-      border:3px solid #f6e3a6; background:#fff; box-shadow:var(--shadow);
-    }
+.profile-left .avatar{
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #f6e3a6;
+  background: #fff;
+  box-shadow: var(--shadow);
+}
     .profile-right .row{ gap:10px; flex-wrap:wrap; }
 
     /* Carousel (AI & Goals) */
@@ -236,7 +245,10 @@
 
       <!-- Profile card (40/60) -->
       <div class="card">
-        <h2>ข้อมูลส่วนตัว</h2>
+        <div class="row" style="justify-content:space-between;align-items:center; margin-bottom:6px">
+  <h2 style="margin:0">ข้อมูลส่วนตัว</h2>
+  <button id="btnEditProfile" class="btn" style="padding:8px 12px; font-size:16px">แก้ไขข้อมูล</button>
+</div>
         <div class="profile-grid">
           <div class="profile-left">
             <img id="avatar" class="avatar" src="" alt="avatar">
@@ -559,6 +571,10 @@
     }
 
     function renderDashboard(bundle, userId, displayName, pictureUrl){
+      window.__userId = userId; // เก็บไว้ใช้ตอนส่งอัปเดต
+const editBtn = document.querySelector('#btnEditProfile');
+if (editBtn) editBtn.onclick = () => startEditProfile(bundle.profile || {}, displayName, pictureUrl);
+
       $('#reg').style.display='none';
       $('#dash').style.display='block';
       renderProfile(bundle, displayName, pictureUrl);
@@ -591,13 +607,66 @@
     // ====== Modals ======
     function openModal(el){ el.style.display='grid'; }
     function closeModal(el){ el.style.display='none'; }
-    function maybeShowDisclaimer(){
-      const key='dm_disclaimer_ack_v1';
-      if(!localStorage.getItem(key)){
-        openModal($('#disclaimerModal'));
-        $('#btnAck').onclick=()=>{ localStorage.setItem(key,'1'); closeModal($('#disclaimerModal')); };
+function maybeShowDisclaimer(){
+  // แสดงทุกครั้งที่เปิดหน้าใหม่
+  const m = document.querySelector('#disclaimerModal');
+  if (!m) return;
+  openModal(m);
+  const btn = document.querySelector('#btnAck');
+  if (btn) btn.onclick = () => closeModal(m);
+}
+function startEditProfile(profile, displayName, pictureUrl){
+  // เปิดฟอร์มลงทะเบียนแบบแก้ไข
+  document.querySelector('#reg').style.display = 'block';
+  document.querySelector('#dash').style.display = 'none';
+
+  // เปลี่ยนหัวข้อปุ่ม/หัวฟอร์มเพื่อสื่อว่าเป็นโหมดแก้ไข
+  const h2 = document.querySelector('#reg h2');
+  if (h2) h2.textContent = 'แก้ไขข้อมูลผู้ป่วย';
+  const btn = document.querySelector('#btnSave');
+  if (btn) btn.textContent = 'อัปเดตข้อมูล';
+
+  // Prefill ค่าจากโปรไฟล์เดิม
+  document.querySelector('#hn').value      = profile?.HN || '';
+  document.querySelector('#nameuse').value = profile?.NameUse || profile?.DisplayName || displayName || '';
+  document.querySelector('#gender').value  = profile?.Gender || '';
+  document.querySelector('#age').value     = profile?.Age || '';
+  document.querySelector('#consent').checked =
+    String(profile?.Consent).toUpperCase() === 'TRUE' || profile?.Consent === true;
+
+  // กำหนดการส่งอัปเดต (ใช้ endpoint เดิม)
+  if (btn) {
+    btn.onclick = async ()=>{
+      const payload = {
+        userId:       (window.__userId || ''),          // จะกำหนดด้านล่างใน renderDashboard
+        displayName:  displayName || '',
+        pictureUrl:   pictureUrl || '',
+        hn:           document.querySelector('#hn').value.trim(),
+        name_use:     document.querySelector('#nameuse').value.trim() || displayName || '',
+        gender:       document.querySelector('#gender').value,
+        age:          document.querySelector('#age').value.trim(),
+        consent:      document.querySelector('#consent').checked
+      };
+      if (!payload.consent) { alert('โปรดยอมรับการใช้งานข้อมูลเพื่อการดูแลรักษา'); return; }
+      btn.disabled = true;
+      try {
+        await fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'registerUser', ...payload }),
+          mode: 'no-cors' // fire-and-forget เหมือนเดิม
+        });
+        location.reload();
+      } catch(e){
+        console.warn(e);
+        alert('อัปเดตไม่สำเร็จ กรุณาลองใหม่ค่ะ');
+      } finally {
+        btn.disabled = false;
       }
-    }
+    };
+  }
+}
+
     function initGoalsModal(){
       $('#btnAboutGoals').onclick=()=>openModal($('#goalsModal'));
       $('#btnGoalsClose').onclick=()=>closeModal($('#goalsModal'));
