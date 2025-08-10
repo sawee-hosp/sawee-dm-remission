@@ -6,11 +6,7 @@
   <title>สวีคุมหวาน — ลงทะเบียน/แดชบอร์ด</title>
   <link rel="icon" href="data:;base64,=" />
   <style>
-    :root {
-      --brand:#06C755; --brand2:#10b981;
-      --text:#1d2733; --muted:#58677a;
-      --bg:#F3F6F9; --card:#ffffff; --border:#E6ECF2;
-    }
+    :root { --brand:#06C755; --brand2:#10b981; --text:#1d2733; --muted:#58677a; --bg:#F3F6F9; --card:#ffffff; --border:#E6ECF2; }
     *{box-sizing:border-box}
     body{ margin:0; padding:20px; background:var(--bg);
       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; color:var(--text); }
@@ -40,8 +36,7 @@
       border-radius:12px; background:#FBFDFF; cursor:pointer; font-size:16px; }
     .consent{ display:flex; align-items:flex-start; gap:10px; background:#FBFDFF; border:1px solid var(--border);
       padding:12px; border-radius:12px; margin-top:6px; font-size:15px; }
-    .consent a{ color:#0a7cff; text-decoration:none; }
-    .consent a:hover{ text-decoration:underline; }
+    .consent a{ color:#0a7cff; text-decoration:none; } .consent a:hover{ text-decoration:underline; }
     button{ width:100%; padding:16px; margin-top:6px; background:linear-gradient(90deg,var(--brand),var(--brand2));
       color:#fff; border:0; border-radius:12px; font-size:18px; font-weight:800; cursor:pointer;
       box-shadow:0 6px 14px rgba(6,199,85,.25); transition:.15s; }
@@ -145,9 +140,11 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // ====== ค่าเดิมของคุณ (เติมให้แล้ว) ======
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec";
+    // ====== ค่าของคุณ (EXEC/LIFF ใช้ของเดิม) ======
+    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec"; // POST register (no-cors)
     const LIFF_ID = "2007840605-zKl7p3Aa";
+    // JSONP URL (อันที่คุณทดสอบแล้วขึ้น CB({...}))
+    const GAS_JSONP_URL = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLiYze9r2al69Kg_QJslxZOafAX_MMoQCZroAlQMqIX9tqZDzWFsFlB_0lM5nPKCzdz5VWNIP621hFEgxbuFOXqoYhpVm5GCyUOfwt2-12cM4zewDOqu9UWQd2DKYCXYDjDOdO405ABpAjz66OAIWniYt4V95uqiQAml9Q_lpgZclozFkomijcD9EEMeYmtGPUDcohG7E2IJU_MHbBhv9gxO_WnRkZzZKdgJ_HzyAKaYffPzzQUl-D87094NzmT5zuxWQYqlB3JZ6rIikZVwTkp-PWMimgGvZArFoJCteLfNNz7YCh4rf3E5XaBWvOPx1d6g0EIW-PrXCEqter4ovbXSdZ1Z5A&lib=MYSeY63sh27-IRB2KYN8tF2v-JVo0zMKk";
 
     const $ = (sel)=>document.querySelector(sel);
     const fmtDate = (d)=>{
@@ -160,39 +157,33 @@
       const mi = String(t.getMinutes()).padStart(2,'0');
       return `${dd}/${mm}/${yy} ${hh}:${mi}`;
     };
-
     const METRIC_ORDER = ['SBGM','BP','WEIGHT','WAIST','HBA1C','BODY_FAT'];
-
     function show(el){ el.classList.remove('hidden'); }
     function hide(el){ el.classList.add('hidden'); }
 
-    // -------- JSONP helper (กัน CORS) --------
-    function jsonp(url, params={}) {
-      return new Promise((resolve, reject) => {
-        const cbName = 'cb_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-        const qs = new URLSearchParams({ ...params, callback: cbName }).toString();
-        const script = document.createElement('script');
-        script.src = url + (url.includes('?') ? '&' : '?') + qs;
-        let done = false;
-
-        window[cbName] = (data) => {
-          if (done) return;
-          done = true;
-          delete window[cbName];
-          script.remove();
-          resolve(data);
+    // ---------- JSONP (กัน CORS) ----------
+    function fetchDashboardJSONP(userId){
+      return new Promise((resolve, reject)=>{
+        const cb = 'SAWEE_JSONP_' + Math.random().toString(36).slice(2);
+        window[cb] = (payload)=>{
+          try { resolve(payload); } finally {
+            delete window[cb];
+            if (script && script.parentNode) script.parentNode.removeChild(script);
+          }
         };
-        script.onerror = () => {
-          if (done) return;
-          done = true;
-          delete window[cbName];
-          script.remove();
+        const q = new URLSearchParams({ action:'getDashboard', userId, callback:cb, t:Date.now() });
+        const script = document.createElement('script');
+        script.src = `${GAS_JSONP_URL}&${q.toString()}`;
+        script.onerror = ()=>{
+          delete window[cb];
+          if (script && script.parentNode) script.parentNode.removeChild(script);
           reject(new Error('JSONP load failed'));
         };
         document.body.appendChild(script);
       });
     }
 
+    // ---------- LIFF ----------
     async function initLiff(){
       try{
         await liff.init({ liffId: LIFF_ID });
@@ -207,76 +198,18 @@
       }
     }
 
-    // ใช้ JSONP เรียก GAS → ไม่ติด CORS
-  async function fetchDashboard(userId){
-    // 1) ลอง CORS (จะสำเร็จถ้า GAS ตอบ JSON + CORS)
-    try {
-      const url = `${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
-      const res = await fetch(url, { method:'GET', mode:'cors', cache:'no-store' });
-      if (!res.ok) throw new Error('HTTP '+res.status);
-      return await res.json();
-    } catch (_) {
-      // 2) ถ้า CORS พัง -> ตกมาที่ JSONP (ต้องใช้ doGet ใหม่ที่รองรับ callback แล้ว)
-      return await jsonpGet(GAS_WEB_APP_URL, {
-        action: 'getDashboard',
-        userId: userId,
-        t: Date.now()
-      });
+    // ---------- Helpers ----------
+    function sanitizeGender(g) {
+      if (g === true || g === false || g == null || g === '') return '';
+      const s = String(g).toLowerCase();
+      if (s.includes('male') || s === 'm' || s === 'ชาย') return 'Male';
+      if (s.includes('female') || s === 'f' || s === 'หญิง') return 'Female';
+      return 'Other';
     }
-  }
-
-  function jsonpGet(baseUrl, params) {
-    return new Promise((resolve, reject) => {
-      const cbName = 'CB_' + Math.random().toString(36).slice(2);
-      const q = new URLSearchParams({ ...params, callback: cbName });
-      const s = document.createElement('script');
-      s.src = `${baseUrl}?${q.toString()}`;
-      let done = false;
-
-      window[cbName] = (data) => {
-        if (done) return;
-        done = true;
-        cleanup();
-        resolve(data);
-      };
-      s.onerror = () => {
-        if (done) return;
-        done = true;
-        cleanup();
-        reject(new Error('JSONP load failed'));
-      };
-      document.body.appendChild(s);
-
-      function cleanup(){
-        try { delete window[cbName]; } catch {}
-        if (s && s.parentNode) s.parentNode.removeChild(s);
-      }
-    });
-  }
-   function fetchDashboardJSONP(userId){
-    return new Promise((resolve, reject)=>{
-      const cb = 'SAWEE_JSONP_' + Date.now();
-      window[cb] = (payload)=>{
-        try { resolve(payload); } finally {
-          delete window[cb];
-          script.remove();
-        }
-      };
-      const script = document.createElement('script');
-      script.src = `${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(userId)}&callback=${cb}`;
-      script.onerror = ()=>{ cleanup(new Error('JSONP load failed')); };
-      const to = setTimeout(()=> cleanup(new Error('JSONP timeout')), 8000);
-      function cleanup(err){
-        delete window[cb];
-        try{ script.remove(); }catch(_){}
-        clearTimeout(to);
-        reject(err);
-      }
-      document.body.appendChild(script);
-    });
-  }
     function bindProfileCard(profile, userId){
-      const p = profile || {};
+      const p = {...(profile||{})};
+      p.Gender = sanitizeGender(p.Gender);
+
       $('#avatar').src = p.PictureURL || $('#avatar').src;
       $('#uname').textContent = p.NameUse || p.DisplayName || $('#uname').textContent;
       $('#sub').textContent = 'แดชบอร์ดสุขภาพของคุณ';
@@ -432,7 +365,7 @@
       $('#uname').textContent = prof.displayName || 'เพื่อนใหม่ของพี่หวี';
       $('#sub').textContent   = 'กำลังโหลดข้อมูลจากคลินิก…';
 
-      // 2) ดึงแดชบอร์ดจาก GAS (JSONP)
+      // 2) ดึงแดชบอร์ดจาก GAS ผ่าน JSONP (กัน CORS)
       let dash = {};
       try{
         dash = await fetchDashboardJSONP(userId);
@@ -446,12 +379,9 @@
       const logsByType = dash.events || dash.logsByType || {};
       const adviceLatest = dash.ai_latest || dash.adviceLatest || {};
 
-      const registered = !!profile;
-
-      if(!registered){
-        // 3) ยังไม่ลงทะเบียน ➜ โชว์ฟอร์ม
-        hide($('#dash'));
-        show($('#regCard'));
+      // ถ้าโปรไฟล์ไม่มี → โชว์ฟอร์มลงทะเบียน
+      if(!profile){
+        hide($('#dash')); show($('#regCard'));
         if (prof.displayName && !$('#name_use').value) $('#name_use').value = prof.displayName;
         $('#registrationForm').addEventListener('submit', (e)=>{
           e.preventDefault();
@@ -461,7 +391,7 @@
         return;
       }
 
-      // 4) ลงทะเบียนแล้ว ➜ แสดงแดชบอร์ด
+      // มีโปรไฟล์แล้ว → โชว์แดชบอร์ด
       hide($('#regCard')); show($('#dash'));
       bindProfileCard(profile, userId);
       renderGoals(goals);
