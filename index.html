@@ -145,7 +145,7 @@
   const LIFF_ID         = "2007840605-zKl7p3Aa";
 
   // ✅ JSONP echo URL ที่ตอบกลับเป็น CB(...)
-  const GAS_JSONP_URL   = "https://script.googleusercontent.com/macros/echo?user_content_key=AehSKLiYze9r2al69Kg_QJslxZOafAX_MMoQCZroAlQMqIX9tqZDzWFsFlB_0lM5nPKCzdz5VWNIP621hFEgxbuFOXqoYhpVm5GCyUOfwt2-12cM4zewDOqu9UWQd2DKYCXYDjDOdO405ABpAjz66OAIWniYt4V95uqiQAml9Q_lpgZclozFkomijcD9EEMeYmtGPUDcohG7E2IJU_MHbBhv9gxO_WnRkZzZKdgJ_HzyAKaYffPzzQUl-D87094NzmT5zuxWQYqlB3JZ6rIikZVwTkp-PWMimgGvZArFoJCteLfNNz7YCh4rf3E5XaBWvOPx1d6g0EIW-PrXCEqter4ovbXSdZ1Z5A&lib=MYSeY63sh27-IRB2KYN8tF2v-JVo0zMKk";
+const GAS_JSONP_URL   = GAS_WEB_APP_URL; // ใช้ตัวเดียวกัน
 
   // ====== Helpers ======
   const $ = (sel)=>document.querySelector(sel);
@@ -194,44 +194,26 @@
     }
   }
 
-  function fetchDashboardJSONP(userId){
-    return new Promise((resolve, reject)=>{
-      const cbName = 'CB'; // ต้องชื่อ CB เพราะ server ตอบ CB(...)
-      let finished = false;
+ function fetchDashboardJSONP(userId){
+  return new Promise((resolve, reject)=>{
+    const cbName = 'CB'; // ต้องตรงกับ server
+    let finished = false;
 
-      window[cbName] = (payload)=>{
-        if (finished) return;
-        finished = true;
-        cleanup();
-        resolve(payload);
-      };
+    window[cbName] = (payload)=>{ if (!finished){ finished=true; cleanup(); resolve(payload); } };
 
-      const script = document.createElement('script');
-      const sep = GAS_JSONP_URL.includes('?') ? '&' : '?';
-      script.src = `${GAS_JSONP_URL}${sep}action=getDashboard&userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
-      script.onerror = ()=>{
-        if (finished) return;
-        finished = true;
-        cleanup();
-        reject(new Error('JSONP load failed'));
-      };
+    const script = document.createElement('script');
+    const sep = GAS_JSONP_URL.includes('?') ? '&' : '?';
+    script.src = `${GAS_JSONP_URL}${sep}action=getDashboard&userId=${encodeURIComponent(userId)}&callback=${cbName}&t=${Date.now()}`;
+    script.onerror = fail;
+    const to = setTimeout(fail, 10000);
 
-      const to = setTimeout(()=>{
-        if (finished) return;
-        finished = true;
-        cleanup();
-        reject(new Error('JSONP timeout'));
-      }, 10000);
+    function fail(){ if(!finished){ finished=true; cleanup(); reject(new Error('JSONP load failed/timeout')); } }
+    function cleanup(){ try{ delete window[cbName]; }catch{} try{ document.body.removeChild(script);}catch{} clearTimeout(to); }
 
-      function cleanup(){
-        try { delete window[cbName]; } catch {}
-        try { document.body.removeChild(script); } catch {}
-        clearTimeout(to);
-      }
+    document.body.appendChild(script);
+  });
+}
 
-      document.body.appendChild(script);
-    });
-  }
 
   // ====== UI Bindings ======
   function bindProfileCard(profile, userId){
