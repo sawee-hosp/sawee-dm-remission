@@ -140,254 +140,224 @@
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // ====== CONFIG (ของคุณ) ======
-  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec";
-  const LIFF_ID         = "2007840605-zKl7p3Aa";
+/** =========================
+ *  CONFIG
+ *  ========================= */
+const GAS_URL = "https://script.google.com/macros/s/AKfycbyUmJKG7zE0WC7yL4XB4M9qFUYWgQPiUjzuc4WuYGasTy9FotqubfegZOJIpeFeT9gP3w/exec"; // /exec ตัวเดียวใช้ทั้ง JSONP
+const LIFF_ID = "2007840605-zKl7p3Aa";
 
-  // ✅ JSONP echo URL ที่ตอบกลับเป็น CB(...)
-const GAS_JSONP_URL   = GAS_WEB_APP_URL; // ใช้ตัวเดียวกัน
+/** =========================
+ *  Helpers (DOM + UI)
+ *  ========================= */
+const $ = (sel)=>document.querySelector(sel);
+function show(el){ el.classList.remove('hidden'); }
+function hide(el){ el.classList.add('hidden'); }
 
-  // ====== Helpers ======
-  const $ = (sel)=>document.querySelector(sel);
-  function show(el){ el.classList.remove('hidden'); }
-  function hide(el){ el.classList.add('hidden'); }
-  const METRIC_ORDER = ['SBGM','BP','WEIGHT','WAIST','HBA1C','BODY_FAT'];
+function fmtDate(d){
+  const t = new Date(d);
+  if (isNaN(+t)) return '-';
+  const dd = String(t.getDate()).padStart(2,'0');
+  const mm = String(t.getMonth()+1).padStart(2,'0');
+  const yy = t.getFullYear();
+  const hh = String(t.getHours()).padStart(2,'0');
+  const mi = String(t.getMinutes()).padStart(2,'0');
+  return `${dd}/${mm}/${yy} ${hh}:${mi}`;
+}
 
-  function fmtDate(d){
-    const t = new Date(d);
-    if (isNaN(+t)) return '-';
-    const dd = String(t.getDate()).padStart(2,'0');
-    const mm = String(t.getMonth()+1).padStart(2,'0');
-    const yy = t.getFullYear();
-    const hh = String(t.getHours()).padStart(2,'0');
-    const mi = String(t.getMinutes()).padStart(2,'0');
-    return `${dd}/${mm}/${yy} ${hh}:${mi}`;
-  }
+const METRIC_ORDER = ['SBGM','BP','WEIGHT','WAIST','HBA1C','BODY_FAT'];
 
-  async function initLiff(){
-    try{
-      await liff.init({ liffId: LIFF_ID });
-      if(!liff.isLoggedIn()){ liff.login(); return null; }
-      const prof  = await liff.getProfile();
-      const ctx   = liff.getContext?.();
-      const token = liff.getDecodedIDToken?.();
-      return { prof, ctx, token };
-    }catch(e){
-      console.error('[LIFF] init failed:', e);
-      $('#sub').textContent = 'ไม่สามารถเริ่ม LIFF ได้';
-      alert('ไม่สามารถเริ่ม LIFF ได้: ' + (e.message||e));
-      return null;
-    }
-  }
-
-  // ====== Dashboard Fetchers ======
-  async function fetchDashboard(userId){
-    // 1) พยายาม CORS -> /exec
-    try {
-      const url = `${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
-      const res = await fetch(url, { method:'GET', mode:'cors', cache:'no-store' });
-      if (!res.ok) throw new Error('HTTP '+res.status);
-      return await res.json();
-    } catch (_){
-      // 2) ถ้า CORS ล้มเหลว -> ใช้ JSONP (ฝั่ง server ตอบ CB(...) ตายตัว)
-      return await fetchDashboardJSONP(userId);
-    }
-  }
-
- function fetchDashboardJSONP(userId){
+/** =========================
+ *  JSONP helper (no CORS)
+ *  ========================= */
+function jsonp(params = {}, timeoutMs = 12000) {
   return new Promise((resolve, reject)=>{
-    const cbName = 'CB'; // ต้องตรงกับ server
-    let finished = false;
+    const cbName = 'CB_' + Math.random().toString(36).slice(2);
+    let done = false;
+    window[cbName] = (payload)=>{ if(!done){ done = true; cleanup(); resolve(payload); } };
 
-    window[cbName] = (payload)=>{ if (!finished){ finished=true; cleanup(); resolve(payload); } };
+    const qs = Object.entries({ ...params, callback: cbName })
+      .map(([k,v])=> `${encodeURIComponent(k)}=${encodeURIComponent(v==null?'':String(v))}`)
+      .join('&');
 
-    const script = document.createElement('script');
-    const sep = GAS_JSONP_URL.includes('?') ? '&' : '?';
-    script.src = `${GAS_JSONP_URL}${sep}action=getDashboard&userId=${encodeURIComponent(userId)}&callback=${cbName}&t=${Date.now()}`;
-    script.onerror = fail;
-    const to = setTimeout(fail, 10000);
+    const s = document.createElement('script');
+    s.src = GAS_URL + (GAS_URL.includes('?')? '&':'?') + qs;
+    s.onerror = fail;
+    const to = setTimeout(fail, timeoutMs);
 
-    function fail(){ if(!finished){ finished=true; cleanup(); reject(new Error('JSONP load failed/timeout')); } }
-    function cleanup(){ try{ delete window[cbName]; }catch{} try{ document.body.removeChild(script);}catch{} clearTimeout(to); }
-
-    document.body.appendChild(script);
+    function fail(){ if(!done){ done = true; cleanup(); reject(new Error('JSONP load failed/timeout')); } }
+    function cleanup(){
+      try{ delete window[cbName]; }catch(_){}
+      try{ document.head.removeChild(s); }catch(_){}
+      clearTimeout(to);
+    }
+    document.head.appendChild(s);
   });
 }
 
+/** =========================
+ *  Fetchers (JSONP)
+ *  ========================= */
+function fetchDashboardJSONP(userId){
+  return jsonp({ action:'getDashboard', userId, t: Date.now() });
+}
+function registerUserJSONP(payload){
+  // ส่งด้วย GET (JSONP) ทั้งหมด
+  return jsonp({ action:'registerUser', ...payload, t: Date.now() });
+}
 
-  // ====== UI Bindings ======
-  function bindProfileCard(profile, userId){
-    const p = profile || {};
-    $('#avatar').src      = p.PictureURL || $('#avatar').src;
-    $('#uname').textContent = p.NameUse || p.DisplayName || $('#uname').textContent;
-    $('#sub').textContent   = 'แดชบอร์ดสุขภาพของคุณ';
+/** =========================
+ *  UI binders
+ *  ========================= */
+function bindProfileCard(profile, userId){
+  const p = profile || {};
+  $('#avatar').src          = p.PictureURL || $('#avatar').src;
+  $('#uname').textContent   = p.NameUse || p.DisplayName || $('#uname').textContent;
+  $('#sub').textContent     = 'แดชบอร์ดสุขภาพของคุณ';
 
-    $('#p_name').textContent = p.NameUse || p.DisplayName || '-';
-    $('#p_hn').textContent   = p.HN || '-';
-    $('#p_gender').textContent = p.Gender || '-';
-    $('#p_age').textContent  = p.Age || '-';
-    $('#p_reg').textContent  = p.Timestamp ? fmtDate(p.Timestamp) : '-';
-    $('#p_uid').textContent  = userId || '-';
+  $('#p_name').textContent  = p.NameUse || p.DisplayName || '-';
+  $('#p_hn').textContent    = p.HN || '-';
+  $('#p_gender').textContent= p.Gender || '-';
+  $('#p_age').textContent   = p.Age || '-';
+  $('#p_reg').textContent   = p.Timestamp ? fmtDate(p.Timestamp) : '-';
+  $('#p_uid').textContent   = userId || '-';
+}
+
+function renderGoals(goals){
+  const wrap = $('#goalsWrap'); wrap.innerHTML = '';
+  if(!Array.isArray(goals) || goals.length===0){
+    const div = document.createElement('div');
+    div.className = 'muted';
+    div.textContent = 'ยังไม่มีเป้าหมาย ลองเริ่มจากเมนู “ตั้งเป้าหมาย” ในแชตนะคะ';
+    wrap.appendChild(div); return;
   }
+  goals.forEach(g=>{
+    const card = document.createElement('div');
+    card.className = 'goal';
+    card.innerHTML = `
+      <div class="title">${g.goal_category || '-'} • ${g.goal_specific || '-'}</div>
+      <div class="muted">วิธีวัดผล: ${g.goal_measurable || '-'}</div>
+      <div class="row" style="margin-top:6px">
+        <span class="tag">ค่าเป้า: ${g.target_value || '-'} ${g.target_unit || ''}</span>
+        <span class="tag">กรอบเวลา: ${g.goal_timebound || '-'}</span>
+        <span class="tag">เหตุผล: ${g.goal_relevant || '-'}</span>
+      </div>`;
+    wrap.appendChild(card);
+  });
+}
 
-  function renderGoals(goals){
-    const wrap = $('#goalsWrap'); wrap.innerHTML = '';
-    if(!Array.isArray(goals) || goals.length===0){
-      const div = document.createElement('div');
-      div.className = 'muted';
-      div.textContent = 'ยังไม่มีเป้าหมาย ลองเริ่มจากเมนู “ตั้งเป้าหมาย” ในแชตนะคะ';
-      wrap.appendChild(div);
-      return;
+function makeChart(canvas, label, labels, datasets){
+  new Chart(canvas.getContext('2d'), {
+    type:'line',
+    data:{ labels, datasets },
+    options:{
+      responsive:true,
+      interaction:{ intersect:false, mode:'index' },
+      plugins:{ legend:{ labels:{ font:{ size:12 } } } },
+      scales:{ x:{ ticks:{ font:{ size:11 } } }, y:{ ticks:{ font:{ size:11 } } } }
     }
-    goals.forEach(g=>{
-      const card = document.createElement('div');
-      card.className = 'goal';
-      card.innerHTML = `
-        <div class="title">${g.goal_category || '-'} • ${g.goal_specific || '-'}</div>
-        <div class="muted">วิธีวัดผล: ${g.goal_measurable || '-'}</div>
-        <div class="row" style="margin-top:6px">
-          <span class="tag">ค่าเป้า: ${g.target_value || '-'} ${g.target_unit || ''}</span>
-          <span class="tag">กรอบเวลา: ${g.goal_timebound || '-'}</span>
-          <span class="tag">เหตุผล: ${g.goal_relevant || '-'}</span>
-        </div>`;
-      wrap.appendChild(card);
-    });
-  }
+  });
+}
 
-  function makeChart(canvas, label, labels, datasets){
-    new Chart(canvas.getContext('2d'), {
-      type:'line',
-      data:{ labels, datasets },
-      options:{
-        responsive:true,
-        interaction:{ intersect:false, mode:'index' },
-        plugins:{ legend:{ labels:{ font:{ size:12 } } } },
-        scales:{ x:{ ticks:{ font:{ size:11 } } }, y:{ ticks:{ font:{ size:11 } } } }
-      }
-    });
+function renderCharts(logsByType){
+  const wrap = $('#chartsWrap'); wrap.innerHTML = '';
+  const keys = Object.keys(logsByType || {});
+  if(keys.length===0){
+    const div = document.createElement('div');
+    div.className = 'muted';
+    div.textContent = 'ยังไม่มีประวัติการบันทึก';
+    wrap.appendChild(div); return;
   }
-
-  function renderCharts(logsByType){
-    const wrap = $('#chartsWrap'); wrap.innerHTML = '';
-    const keys = Object.keys(logsByType || {});
-    if(keys.length===0){
-      const div = document.createElement('div');
-      div.className = 'muted';
-      div.textContent = 'ยังไม่มีประวัติการบันทึก';
-      wrap.appendChild(div);
-      return;
+  const ordered = METRIC_ORDER.filter(k=>keys.includes(k)).concat(keys.filter(k=>!METRIC_ORDER.includes(k)));
+  const toShow = ordered.slice(0,4);
+  toShow.forEach(k=>{
+    const rows = (logsByType[k]||[]).slice().sort((a,b)=> new Date(a.ts) - new Date(b.ts));
+    if(rows.length===0) return;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `<h2>ประวัติ ${k}</h2><canvas height="160"></canvas>`;
+    wrap.appendChild(card);
+    const labels = rows.map(r=>fmtDate(r.ts));
+    if(k==='BP'){
+      const sbp = rows.map(r=> (typeof r.v1==='number'? r.v1: parseFloat(r.v1)||null));
+      const dbp = rows.map(r=> (typeof r.v2==='number'? r.v2: parseFloat(r.v2)||null));
+      makeChart(card.querySelector('canvas'), 'BP', labels, [
+        { label:'SBP', data: sbp },
+        { label:'DBP', data: dbp }
+      ]);
+    } else {
+      const v = rows.map(r=> (typeof r.v1==='number'? r.v1: parseFloat(r.v1)||null));
+      makeChart(card.querySelector('canvas'), k, labels, [{ label:k, data:v }]);
     }
+  });
+}
 
-    const ordered = METRIC_ORDER.filter(k=>keys.includes(k)).concat(keys.filter(k=>!METRIC_ORDER.includes(k)));
-    const toShow = ordered.slice(0,4);
-
-    toShow.forEach(k=>{
-      const rows = (logsByType[k]||[]).slice().sort((a,b)=> new Date(a.ts) - new Date(b.ts));
-      if(rows.length===0) return;
-
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `<h2>ประวัติ ${k}</h2><canvas height="160"></canvas>`;
-      wrap.appendChild(card);
-
-      const labels = rows.map(r=>fmtDate(r.ts));
-      if(k==='BP'){
-        const sbp = rows.map(r=> (typeof r.v1==='number'? r.v1: parseFloat(r.v1)||null));
-        const dbp = rows.map(r=> (typeof r.v2==='number'? r.v2: parseFloat(r.v2)||null));
-        makeChart(card.querySelector('canvas'), 'BP', labels, [
-          { label:'SBP', data: sbp },
-          { label:'DBP', data: dbp }
-        ]);
-      }else{
-        const v = rows.map(r=> (typeof r.v1==='number'? r.v1: parseFloat(r.v1)||null));
-        makeChart(card.querySelector('canvas'), k, labels, [{ label:k, data:v }]);
-      }
-    });
+function renderAdvice(adviceLatest){
+  const wrap = $('#adviceWrap'); wrap.innerHTML = '';
+  const keys = Object.keys(adviceLatest || {});
+  if(keys.length===0){
+    const div = document.createElement('div');
+    div.className='muted';
+    div.textContent='ยังไม่มีคำแนะนำจากพี่จุ๋ม';
+    wrap.appendChild(div); return;
   }
+  keys.forEach(m=>{
+    const a = adviceLatest[m] || {};
+    const card = document.createElement('div');
+    card.className='goal';
+    card.innerHTML = `
+      <div class="title">คำแนะนำล่าสุด: ${m}</div>
+      <div class="muted">${a.ts ? fmtDate(a.ts) : '-'}</div>
+      <div style="margin-top:8px; white-space:pre-wrap">${a.advice_text || '-'}</div>`;
+    wrap.appendChild(card);
+  });
+}
 
-  function renderAdvice(adviceLatest){
-    const wrap = $('#adviceWrap'); wrap.innerHTML = '';
-    const keys = Object.keys(adviceLatest || {});
-    if(keys.length===0){
-      const div = document.createElement('div');
-      div.className='muted';
-      div.textContent='ยังไม่มีคำแนะนำจากพี่จุ๋ม';
-      wrap.appendChild(div);
-      return;
+/** =========================
+ *  Registration helpers
+ *  ========================= */
+function getSelectedGender(){
+  const el = document.querySelector('input[name="gender"]:checked');
+  return el ? el.value : '';
+}
+
+async function onSubmitRegistration(profile){
+  const btn = $('#submitBtn');
+  const st  = $('#status');
+  btn.disabled = true; st.classList.remove('hidden'); st.textContent = 'กำลังลงทะเบียน…';
+  try{
+    const payload = {
+      userId: profile.userId,
+      displayName: profile.displayName || '',
+      pictureUrl: profile.pictureUrl || '',
+      hn: $('#hn').value.trim(),
+      name_use: $('#name_use').value.trim(),
+      gender: getSelectedGender(),
+      age: $('#age').value.trim(),
+      consent: $('#pdpa').checked ? 'true' : 'false'
+    };
+    await registerUserJSONP(payload);
+    alert('ลงทะเบียนสำเร็จแล้วค่ะ! ระบบกำลังบันทึกข้อมูล');
+    try{ liff.closeWindow(); }catch(_){}
+    setTimeout(()=> location.reload(), 500);
+  }catch(e){
+    console.error('register failed', e);
+    alert('เกิดข้อผิดพลาดในการส่งข้อมูล: ' + (e.message || e));
+    btn.disabled = false; st.classList.add('hidden');
+  }
+}
+
+/** =========================
+ *  Main
+ *  ========================= */
+async function main(){
+  try{
+    await liff.init({ liffId: LIFF_ID });
+    if(!liff.isLoggedIn()){
+      liff.login({ redirectUri: location.href }); return;
     }
-    keys.forEach(m=>{
-      const a = adviceLatest[m] || {};
-      const card = document.createElement('div');
-      card.className='goal';
-      card.innerHTML = `
-        <div class="title">คำแนะนำล่าสุด: ${m}</div>
-        <div class="muted">${a.ts ? fmtDate(a.ts) : '-'}</div>
-        <div style="margin-top:8px; white-space:pre-wrap">${a.advice_text || '-'}</div>`;
-      wrap.appendChild(card);
-    });
-  }
-
-  // ====== Registration ======
-  function getSelectedGender(){
-    const el = document.querySelector('input[name="gender"]:checked');
-    return el ? el.value : '';
-  }
-
-  function validateRegistration(){
-    const hn = $('#hn').value.trim();
-    const nameUse = $('#name_use').value.trim();
-    const gender = getSelectedGender();
-    const ageStr = $('#age').value.trim();
-    const consent = $('#pdpa').checked;
-
-    if (!hn || !/^\d{6,}$/.test(hn)) throw new Error('กรุณากรอก HN เป็นตัวเลขอย่างน้อย 6 หลัก');
-    if (!nameUse) throw new Error('กรุณากรอกชื่อที่อยากให้เรียก');
-    if (!gender) throw new Error('กรุณาเลือกเพศ');
-    if (ageStr) {
-      const age = +ageStr;
-      if (isNaN(age) || age < 1 || age > 120) throw new Error('อายุต้องอยู่ระหว่าง 1–120 ปี');
-    }
-    if (!consent) throw new Error('กรุณายอมรับนโยบายข้อมูลส่วนบุคคล');
-  }
-
-  async function onSubmitRegistration(profile){
-    const btn = $('#submitBtn');
-    const st  = $('#status');
-    btn.disabled = true; st.classList.remove('hidden'); st.textContent = 'กำลังลงทะเบียน…';
-    try{
-      validateRegistration();
-      const payload = {
-        action: 'registerUser',
-        userId: profile.userId,
-        displayName: profile.displayName || '',
-        pictureUrl: profile.pictureUrl || '',
-        hn: $('#hn').value.trim(),
-        name_use: $('#name_use').value.trim(),
-        gender: getSelectedGender(),
-        age: $('#age').value.trim(),
-        consent: $('#pdpa').checked
-      };
-      await fetch(GAS_WEB_APP_URL, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(payload),
-        mode:'no-cors' // เลือก no-cors เพื่อเลี่ยง preflight; ฝั่ง GAS บันทึกได้อยู่แล้ว
-      });
-      alert('ลงทะเบียนสำเร็จแล้วค่ะ! ระบบกำลังบันทึกข้อมูล');
-      try{ liff.closeWindow(); }catch(_){}
-      setTimeout(()=> location.reload(), 800);
-    }catch(e){
-      console.error('register failed', e);
-      alert('เกิดข้อผิดพลาด: ' + (e.message || e));
-      btn.disabled = false; st.classList.add('hidden');
-    }
-  }
-
-  // ====== Main ======
-  async function main(){
-    const init = await initLiff();
-    if(!init) return;
-    const { prof, ctx, token } = init;
+    const prof  = await liff.getProfile();
+    const ctx   = liff.getContext?.();
+    const token = liff.getDecodedIDToken?.();
     const userId = (ctx && ctx.userId) || (token && token.sub) || prof.userId;
 
     $('#avatar').src = prof.pictureUrl || 'https://placehold.co/120x120/ffffff/999?text=LINE';
@@ -396,7 +366,7 @@ const GAS_JSONP_URL   = GAS_WEB_APP_URL; // ใช้ตัวเดียวก
 
     let dash = {};
     try{
-      dash = await fetchDashboard(userId); // ลอง CORS → ถ้าไม่ได้จะ fallback JSONP อัตโนมัติ
+      dash = await fetchDashboardJSONP(userId); // JSONP — ไม่ติด CORS
     }catch(e){
       console.error('fetchDashboard error', e);
       $('#sub').textContent = 'โหลดข้อมูลไม่สำเร็จ';
@@ -414,7 +384,7 @@ const GAS_JSONP_URL   = GAS_WEB_APP_URL; // ใช้ตัวเดียวก
       if (prof.displayName && !$('#name_use').value) $('#name_use').value = prof.displayName;
       $('#registrationForm').addEventListener('submit', (e)=>{
         e.preventDefault();
-        onSubmitRegistration(prof);
+        onSubmitRegistration({ userId, displayName: prof.displayName, pictureUrl: prof.pictureUrl });
       });
       $('#sub').textContent = 'กรุณาลงทะเบียนก่อนเริ่มใช้งาน';
       return;
@@ -425,9 +395,14 @@ const GAS_JSONP_URL   = GAS_WEB_APP_URL; // ใช้ตัวเดียวก
     renderGoals(goals);
     renderCharts(logsByType);
     renderAdvice(adviceLatest);
+  }catch(e){
+    console.error('[LIFF] init failed:', e);
+    $('#sub').textContent = 'ไม่สามารถเริ่ม LIFF ได้';
+    alert('ไม่สามารถเริ่ม LIFF ได้: ' + (e.message||e));
   }
+}
 
-  window.addEventListener('load', main);
+window.addEventListener('load', main);
 </script>
 
 </body>
