@@ -208,11 +208,41 @@
     }
 
     // ใช้ JSONP เรียก GAS → ไม่ติด CORS
-    async function fetchDashboardJSONP(userId){
-      const res = await jsonp(GAS_WEB_APP_URL, { action:'getDashboard', userId, t: Date.now() });
-      return res || {};
+  async function fetchDashboard(userId){
+    const url = `${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(userId)}&t=${Date.now()}`;
+    try {
+      // ลอง CORS ปกติก่อน
+      const res = await fetch(url, { method:'GET', mode:'cors', cache:'no-store' });
+      if (!res.ok) throw new Error('HTTP '+res.status);
+      return await res.json();
+    } catch (e) {
+      console.warn('CORS fetch failed → fallback JSONP', e);
+      // ใช้ JSONP (ไม่ติด CORS)
+      return await fetchDashboardJSONP(userId);
     }
-
+  }
+   function fetchDashboardJSONP(userId){
+    return new Promise((resolve, reject)=>{
+      const cb = 'SAWEE_JSONP_' + Date.now();
+      window[cb] = (payload)=>{
+        try { resolve(payload); } finally {
+          delete window[cb];
+          script.remove();
+        }
+      };
+      const script = document.createElement('script');
+      script.src = `${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(userId)}&callback=${cb}`;
+      script.onerror = ()=>{ cleanup(new Error('JSONP load failed')); };
+      const to = setTimeout(()=> cleanup(new Error('JSONP timeout')), 8000);
+      function cleanup(err){
+        delete window[cb];
+        try{ script.remove(); }catch(_){}
+        clearTimeout(to);
+        reject(err);
+      }
+      document.body.appendChild(script);
+    });
+  }
     function bindProfileCard(profile, userId){
       const p = profile || {};
       $('#avatar').src = p.PictureURL || $('#avatar').src;
