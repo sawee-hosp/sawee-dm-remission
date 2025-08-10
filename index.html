@@ -7,35 +7,28 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#0b1020; --card:#121832; --muted:#9fb0ff; --text:#f8faff; --accent:#6aa5ff; --accent2:#8d84ff; --ok:#00d38f; --warn:#ffd166;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;padding:16px;background:linear-gradient(135deg,#0b1020,#121832);color:var(--text);font-family:'Prompt','Inter',system-ui,-apple-system,Segoe UI,Roboto}
+    :root{ --bg:#0b1020; --card:#121832; --muted:#9fb0ff; --text:#f8faff; --accent:#6aa5ff; --accent2:#8d84ff; }
+    *{box-sizing:border-box} body{margin:0;padding:16px;background:linear-gradient(135deg,#0b1020,#121832);color:var(--text);font-family:'Prompt','Inter',system-ui}
     .container{max-width:980px;margin:0 auto}
     header{display:flex;align-items:center;gap:14px;margin:8px 0 20px}
     .avatar{width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid rgba(255,255,255,.2)}
-    h1{font-size:22px;margin:0;line-height:1.2}
-    .sub{color:var(--muted);font-size:12px}
+    h1{font-size:22px;margin:0;line-height:1.2} .sub{color:var(--muted);font-size:12px}
     .card{background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.03));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;margin:14px 0;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    .card h2{font-size:16px;margin:0 0 10px;display:flex;align-items:center;gap:8px;color:#dfe6ff}
+    .card h2{font-size:16px;margin:0 0 10px;color:#dfe6ff}
     .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
     .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
     .pill{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);font-size:12px;color:#dfe6ff}
     label{font-size:13px;color:#dfe6ff;margin-bottom:6px;display:block}
     input,select{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0e1430;color:#f2f4ff}
     .btn{padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:linear-gradient(90deg,var(--accent),var(--accent2));color:white;font-weight:600;cursor:pointer}
     .btn:disabled{opacity:.6;cursor:not-allowed}
-    .muted{color:var(--muted);font-size:12px}
     .goal{padding:12px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}
     .goal-title{font-weight:600;margin-bottom:6px}
-    canvas{background:rgba(255,255,255,.02);border-radius:12px;padding:8px}
     .divider{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);margin:12px 0}
-    .tag{font-size:11px;color:#cce2ff;background:rgba(106,165,255,.15);padding:4px 8px;border-radius:999px;border:1px solid rgba(106,165,255,.25)}
-    .ok{color:var(--ok)} .warn{color:var(--warn)}
     #loading{position:fixed;inset:0;background:rgba(10,12,20,.7);display:none;place-items:center;z-index:50}
     #loading .box{background:#0f1533;border:1px solid rgba(255,255,255,.14);padding:16px 20px;border-radius:14px}
+    .muted{color:#9fb0ff;font-size:12px}
+    .tag{font-size:11px;color:#cce2ff;background:rgba(106,165,255,.15);padding:4px 8px;border-radius:999px;border:1px solid rgba(106,165,255,.25)}
   </style>
 </head>
 <body>
@@ -53,14 +46,8 @@
     <div id="reg" class="card" style="display:none">
       <h2>ลงทะเบียนผู้ป่วย</h2>
       <div class="grid">
-        <div>
-          <label>HN</label>
-          <input id="hn" type="text" placeholder="">
-        </div>
-        <div>
-          <label>ชื่อที่อยากให้เรียก</label>
-          <input id="nameuse" type="text" placeholder="">
-        </div>
+        <div><label>HN</label><input id="hn" type="text"></div>
+        <div><label>ชื่อที่อยากให้เรียก</label><input id="nameuse" type="text"></div>
       </div>
       <div class="grid">
         <div>
@@ -72,10 +59,7 @@
             <option value="Other">อื่น ๆ</option>
           </select>
         </div>
-        <div>
-          <label>อายุ</label>
-          <input id="age" type="number" min="1" max="120" placeholder="">
-        </div>
+        <div><label>อายุ</label><input id="age" type="number" min="1" max="120"></div>
       </div>
       <div class="row" style="margin:12px 0">
         <input id="consent" type="checkbox"> <span class="muted">ฉันยินยอม (PDPA) ให้คลินิกใช้ข้อมูลเพื่อดูแลรักษา</span>
@@ -117,85 +101,60 @@
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    // ====== CONFIG ======
-    const LIFF_ID  = '2007840605-zKl7p3Aa';
-    const GAS_BASE = 'https://script.google.com/macros/s/AKfycbzP533st24BckpABeSBxDE9d47-ZfBEApKB3xkcgY0u55SGcHX1l9AX3zZ8ZJfNhiQdZA/exec';
+    // ====== CONFIG (ปรับตามที่ให้มา) ======
+    const LIFF_ID = '2007840605-zKl7p3Aa';
+    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzP533st24BckpABeSBxDE9d47-ZfBEApKB3xkcgY0u55SGcHX1l9AX3zZ8ZJfNhiQdZA/exec';
 
     // ====== Helpers ======
-    const el = sel => document.querySelector(sel);
-    function fmtDate(d){
-      const t = new Date(d);
-      if (isNaN(+t)) return '-';
-      const dd = t.getDate().toString().padStart(2,'0');
-      const mm = (t.getMonth()+1).toString().padStart(2,'0');
-      const yy = t.getFullYear();
-      const hh = t.getHours().toString().padStart(2,'0');
-      const mi = t.getMinutes().toString().padStart(2,'0');
-      return dd+'/'+mm+'/'+yy+' '+hh+':'+mi;
-    }
-    function showLoading(v){ el('#loading').style.display = v ? 'grid' : 'none'; }
+    const $ = sel => document.querySelector(sel);
+    const showLoading = v => { $('#loading').style.display = v ? 'grid' : 'none'; };
+    const fmtDate = d => {
+      const t = new Date(d); if (isNaN(+t)) return '-';
+      const dd=t.getDate().toString().padStart(2,'0'), mm=(t.getMonth()+1).toString().padStart(2,'0'), yy=t.getFullYear();
+      const hh=t.getHours().toString().padStart(2,'0'), mi=t.getMinutes().toString().padStart(2,'0');
+      return `${dd}/${mm}/${yy} ${hh}:${mi}`;
+    };
 
-    // ====== JSONP fallback helper ======
-    function jsonp(url, timeout = 8000) {
-      return new Promise((resolve, reject) => {
-        const cbName = '__jsonp_' + Date.now() + '_' + Math.floor(Math.random()*1e6);
-        const s = document.createElement('script');
-        const clean = () => { try { delete window[cbName]; } catch(_){} s.remove(); clearTimeout(t); };
-        const t = setTimeout(() => { clean(); reject(new Error('JSONP timeout')); }, timeout);
-        window[cbName] = (data) => { clean(); resolve(data); };
-        s.onerror = () => { clean(); reject(new Error('JSONP load error')); };
-        s.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
-        document.head.appendChild(s);
-      });
+    // ====== GET dashboard — fetch() ตรงๆ ไม่ใส่ header/mode ======
+    async function fetchDashboard(userId){
+      const url = `${GAS_WEB_APP_URL}?action=getDashboard&userId=${encodeURIComponent(userId)}&_=${Date.now()}`;
+      const res = await fetch(url);                // <— จุดสำคัญ: ไม่กำหนด headers/mode
+      if(!res.ok) throw new Error('HTTP '+res.status);
+      return await res.json();
     }
 
-    // ====== Dashboard fetch: CORS -> JSONP fallback ======
-    async function fetchDashboard(userId) {
-      const url = GAS_BASE + '?action=getDashboard&userId=' + encodeURIComponent(userId) + '&_=' + Date.now();
-      try {
-        const res = await fetch(url, { method:'GET', mode:'cors', credentials:'omit' });
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const json = await res.json();
-        return json;
-      } catch (err) {
-        console.warn('CORS failed, fallback to JSONP:', err);
-        return await jsonp(url, 10000);
+    // ====== POST register — ใช้ no-cors (fire-and-forget) ======
+    async function submitRegistrationNoCors(payload){
+      try{
+        await fetch(GAS_WEB_APP_URL, {
+          method: 'POST',
+          headers: { 'Content-Type':'application/json' }, // จะถูก strip เป็น simple header หากจำเป็น แต่ GAS ยังอ่าน body ได้
+          body: JSON.stringify({ action:'registerUser', ...payload }),
+          mode: 'no-cors'                                  // <— จุดกัน CORS
+        });
+        return true; // เราไม่อ่านผลตอบกลับ (opaque)
+      }catch(e){
+        console.error('register no-cors error', e);
+        return false;
       }
     }
 
-    // ====== Registration submit (POST JSON, CORS) ======
-    async function submitRegistration(payload) {
-      const res = await fetch(GAS_BASE, {
-        method: 'POST',
-        mode: 'cors',
-        credentials: 'omit',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action:'registerUser', ...payload })
-      });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
-      if (!json || json.ok !== true) throw new Error(json && json.error ? json.error : 'register failed');
-      return true;
-    }
-
     function renderDashboard(bundle, userId, displayName, pictureUrl){
-      el('#dash').style.display='block';
+      $('#dash').style.display='block';
       const p = bundle.profile || {};
-      el('#avatar').src = p.PictureURL || pictureUrl || '';
-      el('#uname').textContent = p.NameUse || p.DisplayName || displayName || 'เพื่อนใหม่ของพี่หวี';
-      el('#sub').textContent = 'แดชบอร์ดสุขภาพของคุณ';
+      $('#avatar').src = p.PictureURL || pictureUrl || '';
+      $('#uname').textContent = p.NameUse || p.DisplayName || displayName || 'เพื่อนใหม่ของพี่หวี';
+      $('#sub').textContent = 'แดชบอร์ดสุขภาพของคุณ';
 
-      // Profile
-      el('#p_name').textContent = p.NameUse || p.DisplayName || '-';
-      el('#p_hn').textContent = p.HN || '-';
-      el('#p_gender').textContent = p.Gender || '-';
-      el('#p_age').textContent = p.Age || '-';
-      el('#p_reg').textContent = p.Timestamp ? fmtDate(p.Timestamp) : '-';
+      $('#p_name').textContent = p.NameUse || p.DisplayName || '-';
+      $('#p_hn').textContent = p.HN || '-';
+      $('#p_gender').textContent = p.Gender || '-';
+      $('#p_age').textContent = p.Age || '-';
+      $('#p_reg').textContent = p.Timestamp ? fmtDate(p.Timestamp) : '-';
 
-      // Goals
       const gwrap = document.getElementById('goalsWrap');
-      gwrap.innerHTML = '';
-      (bundle.goals || []).forEach(g=>{
+      gwrap.innerHTML='';
+      (bundle.goals||[]).forEach(g=>{
         const div = document.createElement('div');
         div.className='goal';
         div.innerHTML = `
@@ -211,11 +170,10 @@
       if((bundle.goals||[]).length===0){
         const div = document.createElement('div');
         div.className='muted';
-        div.textContent = 'ยังไม่มีเป้าหมาย ลองเริ่มจากเมนู “ตั้งเป้าหมาย” ในแชตนะคะ';
+        div.textContent='ยังไม่มีเป้าหมาย ลองเริ่มที่เมนู “ตั้งเป้าหมาย” ในแชตนะคะ';
         gwrap.appendChild(div);
       }
 
-      // Charts
       const chartsWrap = document.getElementById('chartsWrap');
       chartsWrap.innerHTML='';
       const series = bundle.events || {};
@@ -225,36 +183,22 @@
         card.innerHTML = '<h2>ประวัติ '+k+'</h2><canvas height="140"></canvas>';
         chartsWrap.appendChild(card);
         const ctx = card.querySelector('canvas').getContext('2d');
-        const rows = series[k];
-        const labels = rows.map(r=>fmtDate(r.ts));
+        const rows = series[k]; const labels = rows.map(r=>fmtDate(r.ts));
         if(k==='BP'){
-          const sbp = rows.map(r=>r.v1 || null);
-          const dbp = rows.map(r=>r.v2 || null);
-          new Chart(ctx, {
-            type:'line',
-            data:{ labels, datasets:[
-              { label:'ตัวบน (SBP)', data: sbp },
-              { label:'ตัวล่าง (DBP)', data: dbp }
-            ]},
-            options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#cbd5ff'}}, y:{ticks:{color:'#cbd5ff'}}} }
-          });
+          const sbp = rows.map(r=>r.v1 || null), dbp = rows.map(r=>r.v2 || null);
+          new Chart(ctx,{type:'line',data:{labels,datasets:[{label:'SBP',data:sbp},{label:'DBP',data:dbp}]},options:{responsive:true}});
         }else{
           const v = rows.map(r=> (typeof r.v1==='number'? r.v1 : (parseFloat(r.v1)||null)) );
-          new Chart(ctx, {
-            type:'line',
-            data:{ labels, datasets:[{ label:k, data:v }]},
-            options:{ responsive:true, plugins:{legend:{labels:{color:'#fff'}}}, scales:{x:{ticks:{color:'#cbd5ff'}}, y:{ticks:{color:'#cbd5ff'}}} }
-          });
+          new Chart(ctx,{type:'line',data:{labels,datasets:[{label:k,data:v}]},options:{responsive:true}});
         }
       });
       if(Object.keys(series).length===0){
         const div = document.createElement('div');
         div.className='muted';
-        div.textContent = 'ยังไม่มีประวัติการบันทึก';
+        div.textContent='ยังไม่มีประวัติการบันทึก';
         chartsWrap.appendChild(div);
       }
 
-      // Advice
       const advWrap = document.getElementById('adviceWrap');
       advWrap.innerHTML='';
       const adv = bundle.ai_latest || {};
@@ -279,47 +223,34 @@
     }
 
     function renderRegister(userId, displayName, pictureUrl){
-      el('#reg').style.display='block';
-      el('#dash').style.display='none';
-      el('#hn').placeholder = 'เช่น HN 55000123';
-      el('#nameuse').placeholder = 'เช่น น้องส้ม / คุณส้ม';
-      el('#gender').value = '';
-      el('#age').placeholder = 'เช่น 45';
-      el('#consent').checked = false;
-
-      el('#btnSave').onclick = async ()=>{
+      $('#reg').style.display='block';
+      $('#dash').style.display='none';
+      $('#hn').placeholder='เช่น HN 55000123';
+      $('#nameuse').placeholder='เช่น คุณส้ม';
+      $('#age').placeholder='เช่น 45';
+      $('#btnSave').onclick = async ()=>{
         const payload = {
-          userId: userId,
-          displayName: displayName,
-          pictureUrl: pictureUrl,
-          hn: el('#hn').value.trim(),
-          name_use: el('#nameuse').value.trim() || displayName,
-          gender: el('#gender').value,
-          age: el('#age').value.trim(),
-          consent: el('#consent').checked
+          userId, displayName, pictureUrl,
+          hn: $('#hn').value.trim(),
+          name_use: $('#nameuse').value.trim() || displayName,
+          gender: $('#gender').value,
+          age: $('#age').value.trim(),
+          consent: $('#consent').checked
         };
-        el('#btnSave').disabled = true;
-        showLoading(true);
-        try{
-          await submitRegistration(payload);
-          location.reload();
-        }catch(err){
-          alert('บันทึกไม่สำเร็จ: '+err.message);
-          el('#btnSave').disabled=false;
-        }finally{
-          showLoading(false);
-        }
+        $('#btnSave').disabled=true; showLoading(true);
+        const ok = await submitRegistrationNoCors(payload); // <— no-cors
+        showLoading(false); $('#btnSave').disabled=false;
+        // เพราะเราไม่อ่านผลลัพธ์ ให้รีโหลดเพื่อดึงโปรไฟล์ใหม่จากชีต
+        if (ok) location.reload(); else alert('ส่งข้อมูลไม่สำเร็จ ลองใหม่อีกครั้งค่ะ');
       };
     }
 
-    // ====== Boot LIFF + load dashboard ======
+    // ====== Boot & Load ======
     async function init(){
       showLoading(true);
-      el('#reg').style.display='none';
-      el('#dash').style.display='none';
       try{
         await liff.init({ liffId: LIFF_ID });
-        if(!liff.isLoggedIn()) liff.login();
+        if(!liff.isLoggedIn()) { liff.login(); return; }
 
         const ctx = liff.getContext?.() || {};
         const tok = liff.getDecodedIDToken?.() || {};
@@ -327,29 +258,28 @@
         const userId = ctx.userId || tok.sub || prof.userId || '';
         const displayName = prof.displayName || '';
         const pictureUrl = prof.pictureUrl || '';
-        el('#avatar').src = pictureUrl || 'https://placehold.co/120x120/121832/FFF?text=LINE';
-        el('#uname').textContent = displayName || 'เพื่อนใหม่ของพี่หวี';
-        el('#sub').textContent = 'กำลังโหลดข้อมูลจากคลินิก…';
+        $('#avatar').src = pictureUrl || 'https://placehold.co/120x120/121832/FFF?text=LINE';
+        $('#uname').textContent = displayName || 'เพื่อนใหม่ของพี่หวี';
+        $('#sub').textContent = 'กำลังโหลดข้อมูลจากคลินิก…';
 
-        const bundle = await fetchDashboard(userId);
+        const bundle = await fetchDashboard(userId); // <— GET แบบตรงๆ
         if (!bundle || bundle.ok === false) {
-          el('#sub').textContent = 'โหลดข้อมูลไม่สำเร็จ: ' + (bundle && bundle.error ? bundle.error : 'unknown');
+          $('#sub').textContent = 'โหลดข้อมูลไม่สำเร็จ';
           renderRegister(userId, displayName, pictureUrl);
-        } else if (!bundle.profile || bundle.profile === null) {
-          el('#sub').textContent = '';
+        } else if (!bundle.profile) {
+          $('#sub').textContent = '';
           renderRegister(userId, displayName, pictureUrl);
         } else {
-          el('#sub').textContent = '';
+          $('#sub').textContent = '';
           renderDashboard(bundle, userId, displayName, pictureUrl);
         }
       }catch(e){
         console.error('init error', e);
-        el('#sub').textContent='มีปัญหาในการเชื่อมต่อ LIFF';
-      } finally {
+        $('#sub').textContent='มีปัญหาในการเชื่อมต่อ LIFF';
+      }finally{
         showLoading(false);
       }
     }
-
     window.addEventListener('load', init);
   </script>
 </body>
