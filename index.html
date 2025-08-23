@@ -351,7 +351,7 @@
             </div>`;
     }
     
-    // [MODIFIED]
+  // [MODIFIED & FIXED]
     function renderChartsAndFood(bundle){
       const chartsWrap = $('#chartsWrap');
       const foodWrap = $('#foodWrap');
@@ -388,6 +388,7 @@
 
       const foodEvents = (series.FOOD || []).map(r => ({...r, ts: new Date(r.ts)})).sort((a,b) => b.ts - a.ts);
       if(foodEvents.length > 0){
+        // สร้าง HTML สำหรับตารางอาหาร
         foodWrap.innerHTML=`<h2>บันทึกอาหาร</h2>
           <div class="table-wrap max5">
             <table>
@@ -395,7 +396,13 @@
               <tbody id="foodBody"></tbody>
             </table>
           </div>`;
-        const body=card.querySelector('#foodBody');
+        
+        // ✅ [FIXED] แก้ไขจุดที่ผิดพลาดตรงนี้
+        // จากเดิม: const body=card.querySelector('#foodBody');
+        // แก้เป็น:
+        const body = foodWrap.querySelector('#foodBody'); // ค้นหา tbody จาก foodWrap ที่เพิ่งสร้าง
+        
+        // วนลูปเพื่อเติมข้อมูลลงในตาราง
         foodEvents.forEach(r=>{
           const tr=document.createElement('tr');
           const qty = r.value_numeric_1 ? `${r.value_numeric_1} ${r.value_unit || ''}`.trim() : '-';
