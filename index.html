@@ -511,7 +511,7 @@
 
       } catch(e) {
         console.error('Initialization Error:', e);
-        $('body').innerHTML = `<div class="container card"><h2>เกิดข้อผิดพลาด</h2><p>${e.message}</p></div>`;
+        $('.container').innerHTML = `<div class="card"><h2>เกิดข้อผิดพลาด</h2><p>ไม่สามารถโหลดข้อมูลได้ อาจมีปัญหาการเชื่อมต่อ หรือ CORS</p><p style="font-size:14px; color: #999;">${e.message}</p></div>`;
       } finally {
         showLoading(false);
       }
