@@ -15,8 +15,8 @@
   <style>
     :root{
       --bg: #fff7e0; --card: #ffffff; --ink: #3c2e17; --muted: #6f5b2e; --brand: #d59f00;
-      --shadow: 0 10px 24px rgba(60,46,23,.08);
-      --radius-lg: 18px; --fs-body: 18px;
+      --brand2:#f3c200; --ok: #0a9d67; --warn:#d98324; --line:#ead9ad; --shadow: 0 10px 24px rgba(60,46,23,.08);
+      --radius-lg: 18px; --radius-md: 14px; --radius-sm: 10px; --gap: 16px; --fs-body: 18px;
     }
     *{box-sizing:border-box}
     html,body{height:100%; scroll-behavior: smooth;}
@@ -28,7 +28,7 @@
     .brand-title{font-weight:700;font-size:28px;letter-spacing:.2px}
     .brand-sub{font-size:16px;color:var(--muted);margin-top:-4px}
     .container{max-width:1100px;margin:0 auto;padding:16px}
-    .card{ background:var(--card);border:1px solid #f2dfab;border-radius:var(--radius-lg); padding:16px;margin:12px 0;box-shadow:var(--shadow) }
+    .card{ background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg); padding:16px;margin:12px 0;box-shadow:var(--shadow) }
     .card h2{font-size:24px;margin:0 0 12px;display:flex;align-items:center;gap:10px}
     .pill{ display:inline-block;padding:6px 12px;border-radius:999px;background:#fff8d8; border:1px solid #f2dfab;color:#4b3a1a;font-weight:600;font-size:17px }
     .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -41,8 +41,11 @@
     .profile-grid{ display:grid; grid-template-columns: 150px 1fr; gap:16px; align-items:center; }
     @media (max-width:700px){ .profile-grid{ grid-template-columns: 1fr; text-align: center;} }
     .profile-left .avatar{ width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid #f6e3a6; background: #fff; box-shadow: var(--shadow); }
-    .carousel{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
-    .c-item{ flex:0 0 86%;max-width:520px;min-width:320px;scroll-snap-align:start; background:#fff;border:1px solid #f2dfab;border-radius:14px;padding:14px;box-shadow:var(--shadow) }
+    .goal-item { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f0e6c8; }
+    .goal-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .goal-item p { margin: 4px 0; font-size: 16px; }
+    .goal-item strong { color: var(--ink); }
+    .goal-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
     table{width:100%;border-collapse:collapse;font-size:16px}
     th,td{border-bottom:1px solid #f2dfab;padding:10px 8px;text-align:left;vertical-align:top}
     th{background:#fff7d2}
@@ -66,8 +69,8 @@
     .btn-close { font-size: 16px; padding: 8px 12px; background: #f0f0f0; border-color: #ddd; color: #555; box-shadow: none; }
 
     .filter-controls { margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-    .filter-btn { padding: 6px 12px; font-size: 15px; border-radius: 999px; cursor: pointer; background: #fff; border: 1px solid var(--line); color: var(--muted); }
-    .filter-btn.active { background: #d59f00; color: #fff; font-weight: 700; border-color: var(--brand); }
+    .filter-btn { padding: 6px 12px; font-size: 15px; border-radius: 999px; cursor: pointer; background: #fff; border: 1px solid #ddd; color: var(--muted); }
+    .filter-btn.active { background: var(--brand2); color: var(--ink); font-weight: 700; border-color: var(--brand); }
     
     .btn-small { padding: 4px 8px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 2px; border: 1px solid transparent; }
     .btn-small.edit { background: #e3f2fd; border-color: #bbdefb; color: #1565c0; }
@@ -86,35 +89,26 @@
     #confirm-dialog { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; place-items: center; z-index: 2000; padding: 16px; }
     #confirm-dialog .panel { background: var(--card); padding: 20px; border-radius: var(--radius-lg); text-align: center; max-width: 400px; }
     #notification { display:none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2100; }
+    
+    body.history-only .navbar, body.history-only #profile-card, body.history-only #main-menu,
+    body.history-only .content-card:not(#historyCard), body.history-only #historyCard .card-header,
+    body.history-only #historyCard h3, body.history-only #historyCard .filter-controls,
+    body.history-only #chartsWrap { display: none !important; }
+    body.history-only #dashboard-view, body.history-only #historyCard { display: block !important; }
+    body.history-only #historyCard { padding: 0; margin: 0; border: none; box-shadow: none; background-color: transparent; }
+    body.history-only .container { padding: 8px; }
+    body.history-only .table-wrap { max-height: none; }
+    
+    /* ✅✅✅ [NEW] Styles for Help Modal ✅✅✅ */
+    .btn-nav-help { margin-left: auto; padding: 6px 14px; font-size: 16px; background: #fff7d2; border-color: #f2dfab; box-shadow: none; }
+    #help-modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; place-items: center; z-index: 1900; padding: 16px; }
+    #help-modal .panel { background: #fffef6; width: min(800px, 98vw); max-height: 90vh; display: grid; grid-template-rows: auto 1fr auto; border: 1px solid #f2dfab; border-radius: 18px; box-shadow: var(--shadow); }
+    #help-modal .m-header { padding: 14px 20px; background: #fff2c6; border-bottom: 1px solid #f2dfab; font-size: 22px; font-weight: 700; }
+    #help-modal .m-body { padding: 0 20px; overflow-y: auto; }
+    #help-modal .m-body h3 { font-size: 20px; margin-top: 20px; margin-bottom: 8px; color: var(--brand); }
+    #help-modal .m-actions { padding: 12px 20px; border-top: 1px solid #f2dfab; text-align: right; }
+    .btn-command { background: var(--ok); color: white; border-color: #0a8f5e; padding: 8px 14px; font-size: 16px; margin-top: 8px; }
 
-    /* ✅✅✅ [NEW] CSS for History-Only View ✅✅✅ */
-    body.history-only .navbar,
-    body.history-only #profile-card,
-    body.history-only #main-menu,
-    body.history-only .content-card:not(#historyCard),
-    body.history-only #historyCard .card-header,
-    body.history-only #historyCard h3,
-    body.history-only #historyCard .filter-controls,
-    body.history-only #chartsWrap {
-      display: none !important;
-    }
-    body.history-only #dashboard-view,
-    body.history-only #historyCard {
-      display: block !important;
-    }
-    body.history-only #historyCard {
-      padding: 0;
-      margin: 0;
-      border: none;
-      box-shadow: none;
-      background-color: transparent;
-    }
-    body.history-only .container {
-      padding: 8px; /* Reduce padding for table-only view */
-    }
-    body.history-only .table-wrap {
-        max-height: none; /* Show full table */
-    }
   </style>
 </head>
 <body>
@@ -124,8 +118,10 @@
       <img class="brand-logo" src="https://img2.pic.in.th/pic/ChatGPT-Image-10-..-2568-12_48_07.png" alt="โลโก้">
       <div>
         <div class="brand-title">สวีคุมหวาน</div>
-        <div class="brand-sub">ข้อมูลส่วนตัว • คลินิกลดยาเบาหวาน (DM Remission) รพ.สวี</div>
+        <div class="brand-sub">ข้อมูลส่วนตัว • คลินิกลดยาเบาหวาน</div>
       </div>
+      <!-- ✅✅✅ [NEW] Help Button ✅✅✅ -->
+      <button id="btn-help" class="btn btn-nav-help">วิธีใช้งาน</button>
     </div>
   </nav>
 
@@ -209,6 +205,44 @@
     </div>
   </div>
 
+  <!-- ✅✅✅ [NEW] Help Modal Structure ✅✅✅ -->
+  <div id="help-modal">
+      <div class="panel">
+          <div class="m-header">คู่มือการใช้งาน "สวีคุมหวาน"</div>
+          <div class="m-body">
+              <p>ยินดีต้อนรับสู่ไลน์ "สวีคุมหวาน" เครื่องมือที่จะช่วยให้การดูแลเบาหวานของคุณเป็นเรื่องง่าย สนุก และมีเป้าหมายที่ชัดเจนยิ่งขึ้นค่ะ</p>
+              
+              <h3>หมวดที่ 1: การบันทึกข้อมูลสุขภาพประจำวัน 📝</h3>
+              <p>การจดบันทึกข้อมูลสุขภาพอย่างสม่ำเสมอ คือหัวใจสำคัญของการคุมเบาหวานให้สงบค่ะ</p>
+              <p class="muted"><strong>วิธีใช้:</strong> กดปุ่ม "📝 บันทึกผลประจำวัน" จากเมนูหลัก หรือพิมพ์ชื่อข้อมูลที่ต้องการบันทึกได้โดยตรง เช่น พิมพ์ว่า "น้ำตาล" หรือ "ความดัน" แล้วบอทจะเข้าสู่โหมดการบันทึกนั้นๆ ทันที!</p>
+              <button class="btn btn-command" data-command="บันทึกผลประจำวัน">ลองบันทึกผลประจำวันเลย! &gt;</button>
+
+              <h3>หมวดที่ 2: การบันทึกอาหาร...เรื่องง่ายๆ! 🍽️</h3>
+              <p>ไม่ต้องจดลงสมุดอีกต่อไป แค่บอกน้องหวาน (AI) ว่าคุณทานอะไรบ้าง โดยการบันทึกอาหารจะอยู่ใน "บันทึกผลประจำวัน"</p>
+              <p class="muted"><strong>วิธีใช้:</strong> กด "บันทึกผลประจำวัน" แล้วเลือก "อาหาร" จากนั้นพิมพ์บอกรายการอาหารและปริมาณ (เช่น ข้าวกะเพรา 1 จาน)</p>
+              <button class="btn btn-command" data-command="อาหาร">ลองบันทึกอาหารเลย! &gt;</button>
+
+              <h3>หมวดที่ 3: ให้พี่หวีช่วยวิเคราะห์ข้อมูล 🧠</h3>
+              <p>อยากรู้ว่าสุขภาพช่วงนี้เป็นอย่างไร? ให้พี่หวี (AI) ช่วยสรุปให้ฟัง!</p>
+              <p class="muted"><strong>วิธีใช้:</strong> กดปุ่ม "🧠 วิเคราะห์โดย AI" จากเมนูหลัก หรือพิมพ์คำว่า "วิเคราะห์" คุณสามารถระบุสิ่งที่ต้องการวิเคราะห์ให้ชัดเจนขึ้นได้ เช่น พิมพ์ว่า "วิเคราะห์น้ำตาล 7 วัน"</p>
+              <button class="btn btn-command" data-command="วิเคราะห์ผล">ลองให้ AI วิเคราะห์เลย! &gt;</button>
+              
+              <h3>หมวดที่ 4: ตั้งเป้าหมาย S.M.A.R.T. 🎯</h3>
+              <p>การเดินทางสู่ภาวะเบาหวานสงบ จะง่ายขึ้นเมื่อเรามีเป้าหมายที่ชัดเจน</p>
+              <p class="muted"><strong>วิธีใช้:</strong> กดปุ่ม "🎯 เป้าหมายของฉัน" จากเมนูหลัก แล้วทำตามขั้นตอนเพื่อตั้งเป้าหมายแบบ S.M.A.R.T.</p>
+              <button class="btn btn-command" data-command="เป้าหมายของฉัน">ลองตั้งเป้าหมายเลย! &gt;</button>
+              
+              <h3>หมวดที่ 5: ให้น้องหวานแนะนำเมนู 🥗</h3>
+              <p>หมดปัญหา "วันนี้กินอะไรดี?" ให้น้องหวานช่วยคิดเมนูอร่อยและดีต่อสุขภาพให้สิคะ!</p>
+              <p class="muted"><strong>วิธีใช้:</strong> กดปุ่ม "🥗 แนะนำเมนู" จากเมนูหลัก หรือพิมพ์ว่า "แนะนำอาหาร"</p>
+              <button class="btn btn-command" data-command="แนะนำอาหาร">ลองขอเมนูแนะนำเลย! &gt;</button>
+          </div>
+          <div class="m-actions">
+              <button id="btn-help-close" class="btn btn-close">ปิด</button>
+          </div>
+      </div>
+  </div>
+
 <script>
     // ====== CONFIG ======
     const LIFF_ID = '2007840605-zKl7p3Aa';
@@ -217,13 +251,15 @@
     // ====== State & Helpers ======
     let liffProfile = {};
     let currentEventData = {};
-    let allEventsData = []; // Store all events for filtering
+    let allEventsData = [];
     let currentHistoryFilter = 'ALL';
+    let chartInstances = {};
 
     const $  = s => document.querySelector(s);
     const $$ = s => document.querySelectorAll(s);
     const showLoading = v => { $('#loading').style.display = v ? 'grid' : 'none'; };
-    const fmtDate = d => { const t=new Date(d); if(isNaN(+t)) return '-'; const dd=String(t.getDate()).padStart(2,'0'); const mm=String(t.getMonth()+1).padStart(2,'0'); const yy=t.getFullYear(); const hh=String(t.getHours()).padStart(2,'0'); const mi=String(t.getMinutes()).padStart(2,'0'); return `${dd}/${mm}/${yy} ${hh}:${mi}`; };
+    const fmtDate = d => { const t=new Date(d); if(isNaN(+t)) return '-'; return t.toLocaleString('th-TH'); };
+    const fmtDateOnly = d => { const t=new Date(d); if(isNaN(+t)) return '-'; return t.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }); };
     const thaiGender = g => g==='Male'?'ชาย':g==='Female'?'หญิง':g? 'อื่น ๆ':'-';
     
     const EVENT_TYPE_THAI = {
@@ -277,6 +313,27 @@
         });
     }
 
+    // ✅✅✅ [NEW] Setup for Help Modal ✅✅✅
+    function setupHelpModal() {
+        const modal = $('#help-modal');
+        $('#btn-help').onclick = () => { modal.style.display = 'grid'; };
+        $('#btn-help-close').onclick = () => { modal.style.display = 'none'; };
+        modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+        $$('.btn-command').forEach(btn => {
+            btn.onclick = async () => {
+                const command = btn.dataset.command;
+                if (!command) return;
+                try {
+                    await liff.sendMessages([{ type: 'text', text: command }]);
+                    liff.closeWindow();
+                } catch (err) {
+                    showNotification('ไม่สามารถส่งข้อความได้ โปรดลองในแอป LINE');
+                }
+            };
+        });
+    }
+
     // ====== Renderers ======
     function renderProfile(bundle){
       const p = bundle.profile || {};
@@ -286,7 +343,7 @@
       $('#p_gender').textContent = thaiGender(p.Gender);
       $('#p_age').textContent    = p.Age || '-';
     }
-
+    
     function renderGoals(bundle) {
         const list = bundle.goals || [];
         const card = $('#goalsCard');
@@ -294,7 +351,16 @@
         if (list.length === 0) {
             html += `<div class="muted">ยังไม่มีเป้าหมาย</div>`;
         } else {
-            html += `<div class="carousel">${list.map(g => `<div class="c-item"><h3>${g.goal_specific || '-'}</h3><p class="muted">${g.target_value || ''} ${g.target_unit || ''}</p></div>`).join('')}</div>`;
+            html += list.map(g => `
+                <div class="goal-item">
+                    <div class="goal-title">${g.goal_specific || '-'}</div>
+                    <p><strong>สถานะ:</strong> ${g.status || '-'}</p>
+                    <p><strong>เป้าหมาย:</strong> ${g.target_value || '-'} ${g.target_unit || ''} (ค่าตั้งต้น: ${g.patient_baseline || '-'})</p>
+                    <p><strong>วิธีวัดผล:</strong> ${g.goal_measurable || '-'}</p>
+                    <p><strong>ความเกี่ยวข้อง:</strong> ${g.goal_relevant || '-'}</p>
+                    <p><strong>กรอบเวลา:</strong> ${g.goal_timebound || '-'} (สิ้นสุด: ${g.deadline_date ? fmtDateOnly(g.deadline_date) : '-'})</p>
+                </div>
+            `).join('');
         }
         card.innerHTML = html;
         card.querySelector('.btn-close-card').onclick = showMainMenu;
@@ -317,7 +383,6 @@
         const items = bundle.food_exchange || [];
         const card = $('#foodCard');
         let html = `<div class="card-header"><h2>🥗 การจัดการอาหาร</h2><button class="btn-close-card btn btn-close">ปิด</button></div>`;
-
         if (items.length === 0) {
             html += `<div class="muted">ยังไม่มีข้อมูล</div>`;
         } else {
@@ -353,10 +418,8 @@
     function renderHistory(bundle) {
         const card = $('#historyCard');
         const headerHtml = `<div class="card-header"><h2>📈 ประวัติการบันทึกผล</h2><button class="btn-close-card btn btn-close">ปิด</button></div>`;
-
         const filterOptions = ['ALL', 'BP', 'WEIGHT', 'SBGM', 'WAIST', 'FOOD', 'EXERCISE', 'ADVERSE', 'DEPRESSION'];
         const filterHtml = `<div class="row filter-controls">${filterOptions.map(f => `<button class="filter-btn ${f === 'ALL' ? 'active' : ''}" data-filter="${f}">${EVENT_TYPE_THAI[f]}</button>`).join('')}</div>`;
-        
         const contentHtml = `
             <h3 style="margin-top: 20px;">บันทึกทั้งหมด</h3>
             ${filterHtml}
@@ -364,10 +427,8 @@
             <h3 style="margin-top: 20px;">กราฟสุขภาพ</h3>
             <div id="chartsWrap" class="charts-grid"></div>
         `;
-        
         card.innerHTML = headerHtml + contentHtml;
         card.querySelector('.btn-close-card').onclick = showMainMenu;
-        
         $$('.filter-btn').forEach(btn => {
             btn.onclick = () => {
                 $$('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -376,7 +437,6 @@
                 renderHistoryTable();
             };
         });
-        
         renderHistoryTable();
         renderHistoryCharts(bundle.events || {});
     }
@@ -398,13 +458,12 @@
                 let detail = e.value_text || '-';
                 let value = '-';
                 if (e.type === 'BP') {
-                    value = `${e.v1 || e.value_numeric_1 || '-'}/${e.v2 || e.value_numeric_2 || '-'}`;
-                } else if (e.v1 || e.value_numeric_1) {
-                    value = `${e.v1 || e.value_numeric_1} ${e.unit || e.value_unit || ''}`.trim();
+                    value = `${e.value_numeric_1 || '-'}/${e.value_numeric_2 || '-'}`;
+                } else if (e.value_numeric_1) {
+                    value = `${e.value_numeric_1} ${e.value_unit || ''}`.trim();
                 }
 
-                if(e.type === 'FOOD') detail = `${thaiMealSubtype(e.subtype || e.event_subtype)}: ${detail}`;
-                
+                if(e.type === 'FOOD') detail = `${thaiMealSubtype(e.event_subtype)}: ${detail}`;
                 const isoTs = new Date(e.ts).toISOString();
 
                 return `<tr>
@@ -427,6 +486,9 @@
     function renderHistoryCharts(events) {
         const chartsWrap = $('#chartsWrap');
         chartsWrap.innerHTML = '';
+        Object.values(chartInstances).forEach(chart => chart.destroy());
+        chartInstances = {};
+
         const metricKeys = Object.keys(events).filter(k => ['WEIGHT','BP','WAIST','SBGM','HBA1C','BODY_FAT'].includes(k));
         
         if (metricKeys.length === 0) {
@@ -437,24 +499,24 @@
         metricKeys.forEach(k => {
             const chartContainer = document.createElement('div');
             chartContainer.className = 'chart-card';
-            chartContainer.innerHTML = `<h3>${EVENT_TYPE_THAI[k]}</h3><div class="chart-box"><canvas></canvas></div>`;
+            chartContainer.innerHTML = `<h3>${EVENT_TYPE_THAI[k]}</h3><div class="chart-box"><canvas id="chart-${k}"></canvas></div>`;
             chartsWrap.appendChild(chartContainer);
             
-            const ctx = chartContainer.querySelector('canvas').getContext('2d');
+            const ctx = $(`#chart-${k}`).getContext('2d');
             const rows = (events[k]||[]).map(r=>({...r, ts:new Date(r.ts)})).sort((a,b)=>a.ts-b.ts);
             const labels = rows.map(r=>fmtDate(r.ts));
             const chartLabel = EVENT_TYPE_THAI[k] || k;
 
             if (k === 'BP') {
-                const sbpData = rows.map(r => parseFloat(r.v1 || r.value_numeric_1) || null);
-                const dbpData = rows.map(r => parseFloat(r.v2 || r.value_numeric_2) || null);
-                new Chart(ctx, {
+                const sbpData = rows.map(r => parseFloat(r.value_numeric_1) || null);
+                const dbpData = rows.map(r => parseFloat(r.value_numeric_2) || null);
+                chartInstances[k] = new Chart(ctx, {
                     type: 'line', data: { labels: labels, datasets: [ { label: 'ตัวบน (SBP)', data: sbpData, borderColor: 'rgba(255, 99, 132, 1)', tension: 0.1, fill: false }, { label: 'ตัวล่าง (DBP)', data: dbpData, borderColor: 'rgba(54, 162, 235, 1)', tension: 0.1, fill: false } ] },
                     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false } }
                 });
             } else {
-                const dataPoints = rows.map(r => parseFloat(r.v1 || r.value_numeric_1) || null);
-                new Chart(ctx, {
+                const dataPoints = rows.map(r => parseFloat(r.value_numeric_1) || null);
+                chartInstances[k] = new Chart(ctx, {
                     type: 'line', data: { labels: labels, datasets: [{ label: chartLabel, data: dataPoints, borderColor: 'rgba(75, 192, 192, 1)', tension: 0.1, fill: false }] },
                     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false } }
                 });
@@ -529,7 +591,6 @@
         
         if (initialView) {
             showCard(`${initialView}Card`);
-            // ✅✅✅ [FIXED] Hide profile and menu if a specific view is requested ✅✅✅
             if ($('#profile-card')) $('#profile-card').style.display = 'none';
             if ($('#main-menu')) $('#main-menu').style.display = 'none';
         }
@@ -561,7 +622,7 @@
         else detailsHtml += `<div class="data-point"><span class="label">รายละเอียด:</span> ${value_text || '-'}</div>`;
         detailsHtml += `<div class="data-point"><span class="label">ค่าที่บันทึก:</span> ${valueDisplay}</div>`;
         $('#single-event-details').innerHTML = detailsHtml;
-        $('#btn-cancel-single').onclick = () => { window.location.href = window.location.pathname; };
+        $('#btn-cancel-single').onclick = () => { window.location.href = window.location.pathname + '?view=history'; };
         if (action === 'edit') {
             $('#edit-form').style.display = 'block';
             $('#edit-label').textContent = `แก้ไขค่า (${value_unit || 'ค่า'})`;
@@ -594,7 +655,6 @@
         setTimeout(() => { window.location.href = window.location.pathname + '?view=history'; }, 1500);
     }
     
-    // ✅✅✅ [FIXED] This function is now updated to handle the `view` parameter ✅✅✅
     async function main() {
       showLoading(true);
       try {
@@ -602,6 +662,8 @@
         if (!liff.isLoggedIn()) { liff.login(); return; }
         liffProfile = await liff.getProfile();
         
+        setupHelpModal(); // Setup help modal listeners
+
         $('#btn-confirm-cancel').onclick = () => $('#confirm-dialog').style.display = 'none';
         $('#btn-confirm-delete').onclick = () => { $('#confirm-dialog').style.display = 'none'; handleDeleteEvent(); };
         
@@ -610,12 +672,13 @@
         const ts = urlParams.get('ts');
         const view = urlParams.get('view');
 
-        // This router determines what to show on the page
+        if (view === 'history' && !action) {
+            document.body.classList.add('history-only');
+        }
+
         if ((action === 'edit' || action === 'delete') && ts) {
-          // If editing/deleting, show only that view
           await loadSingleEventMode(action, ts);
         } else {
-          // Otherwise, load the main dashboard and handle the 'view' parameter inside
           await loadDashboardMode(view);
         }
 
@@ -631,3 +694,4 @@
 </script>
 </body>
 </html>
+
