@@ -15,8 +15,8 @@
   <style>
     :root{
       --bg: #fff7e0; --card: #ffffff; --ink: #3c2e17; --muted: #6f5b2e; --brand: #d59f00;
-      --brand2:#f3c200; --ok: #0a9d67; --warn:#d98324; --line:#ead9ad; --shadow: 0 10px 24px rgba(60,46,23,.08);
-      --radius-lg: 18px; --radius-md: 14px; --radius-sm: 10px; --gap: 16px; --fs-body: 18px;
+      --shadow: 0 10px 24px rgba(60,46,23,.08);
+      --radius-lg: 18px; --fs-body: 18px;
     }
     *{box-sizing:border-box}
     html,body{height:100%; scroll-behavior: smooth;}
@@ -28,7 +28,7 @@
     .brand-title{font-weight:700;font-size:28px;letter-spacing:.2px}
     .brand-sub{font-size:16px;color:var(--muted);margin-top:-4px}
     .container{max-width:1100px;margin:0 auto;padding:16px}
-    .card{ background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg); padding:16px;margin:12px 0;box-shadow:var(--shadow) }
+    .card{ background:var(--card);border:1px solid #f2dfab;border-radius:var(--radius-lg); padding:16px;margin:12px 0;box-shadow:var(--shadow) }
     .card h2{font-size:24px;margin:0 0 12px;display:flex;align-items:center;gap:10px}
     .pill{ display:inline-block;padding:6px 12px;border-radius:999px;background:#fff8d8; border:1px solid #f2dfab;color:#4b3a1a;font-weight:600;font-size:17px }
     .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
@@ -67,14 +67,13 @@
 
     .filter-controls { margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
     .filter-btn { padding: 6px 12px; font-size: 15px; border-radius: 999px; cursor: pointer; background: #fff; border: 1px solid var(--line); color: var(--muted); }
-    .filter-btn.active { background: var(--brand2); color: var(--ink); font-weight: 700; border-color: var(--brand); }
+    .filter-btn.active { background: #d59f00; color: #fff; font-weight: 700; border-color: var(--brand); }
     
     .btn-small { padding: 4px 8px; font-size: 14px; border-radius: 8px; text-decoration: none; display: inline-block; margin-top: 2px; border: 1px solid transparent; }
     .btn-small.edit { background: #e3f2fd; border-color: #bbdefb; color: #1565c0; }
     .btn-small.delete { background: #ffebee; border-color: #ffcdd2; color: #c62828; }
     td .row { gap: 6px; }
 
-    /* ✅✅✅ [NEW] Added styles for Food Exchange card ✅✅✅ */
     .fx-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     @media (max-width: 500px) { .fx-grid { grid-template-columns: 1fr; } }
     .fx-item { padding: 8px; border-radius: 12px; background: #fffde7; }
@@ -87,6 +86,35 @@
     #confirm-dialog { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; place-items: center; z-index: 2000; padding: 16px; }
     #confirm-dialog .panel { background: var(--card); padding: 20px; border-radius: var(--radius-lg); text-align: center; max-width: 400px; }
     #notification { display:none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background-color: #333; color: white; padding: 12px 20px; border-radius: 8px; z-index: 2100; }
+
+    /* ✅✅✅ [NEW] CSS for History-Only View ✅✅✅ */
+    body.history-only .navbar,
+    body.history-only #profile-card,
+    body.history-only #main-menu,
+    body.history-only .content-card:not(#historyCard),
+    body.history-only #historyCard .card-header,
+    body.history-only #historyCard h3,
+    body.history-only #historyCard .filter-controls,
+    body.history-only #chartsWrap {
+      display: none !important;
+    }
+    body.history-only #dashboard-view,
+    body.history-only #historyCard {
+      display: block !important;
+    }
+    body.history-only #historyCard {
+      padding: 0;
+      margin: 0;
+      border: none;
+      box-shadow: none;
+      background-color: transparent;
+    }
+    body.history-only .container {
+      padding: 8px; /* Reduce padding for table-only view */
+    }
+    body.history-only .table-wrap {
+        max-height: none; /* Show full table */
+    }
   </style>
 </head>
 <body>
@@ -121,7 +149,7 @@
     </div>
 
     <div id="dashboard-view" style="display:none">
-      <div class="card">
+      <div id="profile-card" class="card">
         <div class="card-header">
           <h2 style="margin:0">ข้อมูลส่วนตัว</h2>
           <button id="btnEditProfile" class="btn" style="padding:8px 12px; font-size:16px">แก้ไขข้อมูล</button>
@@ -184,7 +212,7 @@
 <script>
     // ====== CONFIG ======
     const LIFF_ID = '2007840605-zKl7p3Aa';
-    const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwDi08IqlCBBESqXYkQgvA1EdvCjLchwZdBYAtobMr83NEWkvtgwVdTnzts5T9tvbM0/exec';
+    const GAS_WEB_APP_URL = '!!! วาง URL ที่ถูกต้องและทำงานอยู่ของคุณที่นี่ !!!';
 
     // ====== State & Helpers ======
     let liffProfile = {};
@@ -217,14 +245,13 @@
         url.searchParams.set('action', action);
         for(const key in params) { url.searchParams.set(key, params[key]); }
         const res = await fetch(url);
-        if(!res.ok) throw new Error('Network error: ' + res.status);
+        if(!res.ok) throw new Error(`Network error: ${res.status} ${res.statusText}`);
         const json = await res.json();
         if(json.ok === false) throw new Error(json.error || 'API returned an error');
         return json;
     }
 
     async function apiPost(action, payload) {
-        // We use 'text/plain' to avoid CORS preflight requests with 'no-cors' mode
         await fetch(GAS_WEB_APP_URL, {
             method: 'POST',
             mode: 'no-cors', 
@@ -286,7 +313,6 @@
         card.querySelector('.btn-close-card').onclick = showMainMenu;
     }
     
-    // ✅✅✅ [FIXED] This is the updated function ✅✅✅
     function renderFood(bundle) {
         const items = bundle.food_exchange || [];
         const card = $('#foodCard');
@@ -342,17 +368,16 @@
         card.innerHTML = headerHtml + contentHtml;
         card.querySelector('.btn-close-card').onclick = showMainMenu;
         
-        // Add event listeners for filter buttons
         $$('.filter-btn').forEach(btn => {
             btn.onclick = () => {
                 $$('.filter-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 currentHistoryFilter = btn.dataset.filter;
-                renderHistoryTable(); // Re-render table with new filter
+                renderHistoryTable();
             };
         });
         
-        renderHistoryTable(); // Initial render
+        renderHistoryTable();
         renderHistoryCharts(bundle.events || {});
     }
     
@@ -401,7 +426,7 @@
     
     function renderHistoryCharts(events) {
         const chartsWrap = $('#chartsWrap');
-        chartsWrap.innerHTML = ''; // Clear previous charts
+        chartsWrap.innerHTML = '';
         const metricKeys = Object.keys(events).filter(k => ['WEIGHT','BP','WAIST','SBGM','HBA1C','BODY_FAT'].includes(k));
         
         if (metricKeys.length === 0) {
@@ -424,24 +449,13 @@
                 const sbpData = rows.map(r => parseFloat(r.v1 || r.value_numeric_1) || null);
                 const dbpData = rows.map(r => parseFloat(r.v2 || r.value_numeric_2) || null);
                 new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [
-                            { label: 'ตัวบน (SBP)', data: sbpData, borderColor: 'rgba(255, 99, 132, 1)', tension: 0.1, fill: false },
-                            { label: 'ตัวล่าง (DBP)', data: dbpData, borderColor: 'rgba(54, 162, 235, 1)', tension: 0.1, fill: false }
-                        ]
-                    },
+                    type: 'line', data: { labels: labels, datasets: [ { label: 'ตัวบน (SBP)', data: sbpData, borderColor: 'rgba(255, 99, 132, 1)', tension: 0.1, fill: false }, { label: 'ตัวล่าง (DBP)', data: dbpData, borderColor: 'rgba(54, 162, 235, 1)', tension: 0.1, fill: false } ] },
                     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false } }
                 });
             } else {
                 const dataPoints = rows.map(r => parseFloat(r.v1 || r.value_numeric_1) || null);
                 new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{ label: chartLabel, data: dataPoints, borderColor: 'rgba(75, 192, 192, 1)', tension: 0.1, fill: false }]
-                    },
+                    type: 'line', data: { labels: labels, datasets: [{ label: chartLabel, data: dataPoints, borderColor: 'rgba(75, 192, 192, 1)', tension: 0.1, fill: false }] },
                     options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false } }
                 });
             }
@@ -454,26 +468,12 @@
         $('#reg-view').style.display = 'block';
         $('#dashboard-view').style.display = 'none';
         $('#btnSave').onclick = async () => {
-            const payload = {
-                userId: liffProfile.userId,
-                displayName: liffProfile.displayName,
-                pictureUrl: liffProfile.pictureUrl,
-                hn: $('#hn').value.trim(),
-                name_use: $('#nameuse').value.trim() || liffProfile.displayName,
-                gender: $('#gender').value,
-                age: $('#age').value.trim(),
-                consent: $('#consent').checked
-            };
-            if (!payload.consent) {
-                showNotification('โปรดยอมรับการใช้งานข้อมูลเพื่อการดูแลรักษา');
-                return;
-            }
+            const payload = { userId: liffProfile.userId, displayName: liffProfile.displayName, pictureUrl: liffProfile.pictureUrl, hn: $('#hn').value.trim(), name_use: $('#nameuse').value.trim() || liffProfile.displayName, gender: $('#gender').value, age: $('#age').value.trim(), consent: $('#consent').checked };
+            if (!payload.consent) { showNotification('โปรดยอมรับการใช้งานข้อมูลเพื่อการดูแลรักษา'); return; }
             const btn = $('#btnSave');
-            btn.disabled = true;
-            showLoading(true);
+            btn.disabled = true; showLoading(true);
             await apiPost('registerUser', payload);
-            showLoading(false);
-            btn.disabled = false;
+            showLoading(false); btn.disabled = false;
             showNotification('บันทึกข้อมูลเรียบร้อยแล้ว');
             setTimeout(() => location.reload(), 1500);
         };
@@ -489,25 +489,13 @@
         $('#gender').value = profile?.Gender || '';
         $('#age').value = profile?.Age || '';
         $('#consent').checked = String(profile?.Consent).toUpperCase() === 'TRUE' || profile?.Consent === true;
-        // Re-use the save logic
         $('#btnSave').onclick = async () => {
-            const payload = {
-                userId: liffProfile.userId,
-                displayName: liffProfile.displayName,
-                pictureUrl: liffProfile.pictureUrl,
-                hn: $('#hn').value.trim(),
-                name_use: $('#nameuse').value.trim() || liffProfile.displayName,
-                gender: $('#gender').value,
-                age: $('#age').value.trim(),
-                consent: $('#consent').checked
-            };
+            const payload = { userId: liffProfile.userId, displayName: liffProfile.displayName, pictureUrl: liffProfile.pictureUrl, hn: $('#hn').value.trim(), name_use: $('#nameuse').value.trim() || liffProfile.displayName, gender: $('#gender').value, age: $('#age').value.trim(), consent: $('#consent').checked };
             if (!payload.consent) { showNotification('โปรดยอมรับการใช้งานข้อมูล'); return; }
             const btn = $('#btnSave');
-            btn.disabled = true;
-            showLoading(true);
+            btn.disabled = true; showLoading(true);
             await apiPost('registerUser', payload);
-            showLoading(false);
-            btn.disabled = false;
+            showLoading(false); btn.disabled = false;
             showNotification('อัปเดตข้อมูลเรียบร้อยแล้ว');
             setTimeout(() => location.reload(), 1500);
         };
@@ -523,25 +511,15 @@
             return;
         }
         
-        // Prepare all events data for filtering
         allEventsData = [];
         Object.keys(bundle.events).forEach(type => {
             bundle.events[type].forEach(e => {
-                // Normalize inconsistent keys from older scripts
-                const normalizedEvent = {
-                    ts: e.ts,
-                    type: type,
-                    event_subtype: e.event_subtype || e.subtype,
-                    value_numeric_1: e.value_numeric_1 || e.v1,
-                    value_numeric_2: e.value_numeric_2 || e.v2,
-                    value_text: e.value_text || e.vt,
-                    value_unit: e.value_unit || e.unit
-                };
+                const normalizedEvent = { ts: e.ts, type: type, event_subtype: e.event_subtype || e.subtype, value_numeric_1: e.value_numeric_1 || e.v1, value_numeric_2: e.value_numeric_2 || e.v2, value_text: e.value_text || e.vt, value_unit: e.value_unit || e.unit };
                 allEventsData.push(normalizedEvent);
             });
         });
         allEventsData.sort((a, b) => new Date(b.ts) - new Date(a.ts));
-
+        
         $('#btnEditProfile').onclick = () => startEditProfile(bundle.profile);
         renderProfile(bundle);
         renderGoals(bundle);
@@ -549,12 +527,11 @@
         renderFood(bundle);
         renderHistory(bundle);
         
-        // Handle direct view link
         if (initialView) {
-            const targetCard = `${initialView}Card`;
-            if ($(`#${targetCard}`)) {
-                showCard(targetCard);
-            }
+            showCard(`${initialView}Card`);
+            // ✅✅✅ [FIXED] Hide profile and menu if a specific view is requested ✅✅✅
+            if ($('#profile-card')) $('#profile-card').style.display = 'none';
+            if ($('#main-menu')) $('#main-menu').style.display = 'none';
         }
     }
 
@@ -562,25 +539,21 @@
         $('#dashboard-view').style.display = 'none';
         $('#reg-view').style.display = 'none';
         $('#single-event-view').style.display = 'block';
-
         const result = await apiFetch('getEvent', { userId: liffProfile.userId, ts });
         if (!result.ok || !result.data) {
             $('#single-event-details').innerHTML = '<h2>ไม่พบข้อมูล</h2><p>อาจเป็นข้อมูลที่ถูกลบไปแล้ว หรือคุณไม่มีสิทธิ์เข้าถึง</p>';
             return;
         }
-        
         currentEventData = result.data;
         const { event_type, event_subtype, value_numeric_1, value_numeric_2, value_unit, value_text, timestamp } = currentEventData;
         const title = (action === 'edit' ? 'แก้ไข' : 'ลบ') + `ข้อมูล: ${EVENT_TYPE_THAI[event_type] || event_type}`;
         $('#single-event-title').textContent = title;
-        
         let valueDisplay = '-';
         if (event_type === 'BP') {
           valueDisplay = `${value_numeric_1 || '-'}/${value_numeric_2 || '-'}`;
         } else if (value_numeric_1) {
           valueDisplay = `${value_numeric_1} ${value_unit || ''}`.trim();
         }
-
         let detailsHtml = `
             <div class="data-point"><span class="label">เวลา:</span> ${fmtDate(timestamp)}</div>
             <div class="data-point"><span class="label">ประเภท:</span> ${EVENT_TYPE_THAI[event_type] || event_type}</div>`;
@@ -588,16 +561,14 @@
         else detailsHtml += `<div class="data-point"><span class="label">รายละเอียด:</span> ${value_text || '-'}</div>`;
         detailsHtml += `<div class="data-point"><span class="label">ค่าที่บันทึก:</span> ${valueDisplay}</div>`;
         $('#single-event-details').innerHTML = detailsHtml;
-
-        $('#btn-cancel-single').onclick = () => { window.location.href = window.location.pathname; }; // Go back to dashboard
-
+        $('#btn-cancel-single').onclick = () => { window.location.href = window.location.pathname; };
         if (action === 'edit') {
             $('#edit-form').style.display = 'block';
             $('#edit-label').textContent = `แก้ไขค่า (${value_unit || 'ค่า'})`;
             $('#edit-value-input').value = value_numeric_1;
             $('#btn-action-single').textContent = 'บันทึกการแก้ไข';
             $('#btn-action-single').onclick = handleUpdateEvent;
-        } else { // 'delete'
+        } else {
             $('#edit-form').style.display = 'none';
             $('#btn-action-single').textContent = 'ดำเนินการลบ';
             $('#btn-action-single').classList.add('danger');
@@ -607,11 +578,7 @@
     
     async function handleUpdateEvent() {
         showLoading(true);
-        const payload = {
-            userId: liffProfile.userId,
-            ts: new Date(currentEventData.timestamp).toISOString(),
-            newValue: $('#edit-value-input').value
-        };
+        const payload = { userId: liffProfile.userId, ts: new Date(currentEventData.timestamp).toISOString(), newValue: $('#edit-value-input').value };
         await apiPost('updateEvent', payload);
         showLoading(false);
         showNotification('แก้ไขข้อมูลเรียบร้อยแล้ว');
@@ -620,39 +587,35 @@
 
     async function handleDeleteEvent() {
         showLoading(true);
-        const payload = {
-            userId: liffProfile.userId,
-            ts: new Date(currentEventData.timestamp).toISOString()
-        };
+        const payload = { userId: liffProfile.userId, ts: new Date(currentEventData.timestamp).toISOString() };
         await apiPost('deleteEvent', payload);
         showLoading(false);
         showNotification('ลบข้อมูลเรียบร้อยแล้ว');
         setTimeout(() => { window.location.href = window.location.pathname + '?view=history'; }, 1500);
     }
     
-    // ====== Init Function ======
+    // ✅✅✅ [FIXED] This function is now updated to handle the `view` parameter ✅✅✅
     async function main() {
       showLoading(true);
       try {
         await liff.init({ liffId: LIFF_ID });
         if (!liff.isLoggedIn()) { liff.login(); return; }
-        
         liffProfile = await liff.getProfile();
         
         $('#btn-confirm-cancel').onclick = () => $('#confirm-dialog').style.display = 'none';
-        $('#btn-confirm-delete').onclick = () => {
-            $('#confirm-dialog').style.display = 'none';
-            handleDeleteEvent();
-        };
-
+        $('#btn-confirm-delete').onclick = () => { $('#confirm-dialog').style.display = 'none'; handleDeleteEvent(); };
+        
         const urlParams = new URLSearchParams(window.location.search);
         const action = urlParams.get('action');
         const ts = urlParams.get('ts');
         const view = urlParams.get('view');
 
+        // This router determines what to show on the page
         if ((action === 'edit' || action === 'delete') && ts) {
+          // If editing/deleting, show only that view
           await loadSingleEventMode(action, ts);
         } else {
+          // Otherwise, load the main dashboard and handle the 'view' parameter inside
           await loadDashboardMode(view);
         }
 
@@ -665,7 +628,6 @@
     }
 
     window.addEventListener('load', main);
-  </script>
+</script>
 </body>
 </html>
-
