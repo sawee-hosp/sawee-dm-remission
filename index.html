@@ -317,7 +317,7 @@
     // CONFIGURATION & GLOBAL STATE
     // ============================================================
     const LIFF_ID = '2007840605-zKl7p3Aa';
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwDi08IqlCBBESqXYkQgvA1EdvCjLchwZdBYAtobMr83NEWkvtgwVdTnzts5T9tvbM0/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyWaYMApmNc9opDQJM0ZuBmDTz5Oediunw512uelvs4vk_cxn5EBlcVVZoRy5bL6cwp/exec';
 
     // *** STRICT VALIDATION RULES (Matched with Chatbot Code) ***
     const METRIC_CONFIG = {
@@ -382,7 +382,7 @@
     let currentHistoryFilter = 'ALL';
     let chartInstances = {};
 
-    // *** FIX: Changed from getElementById to querySelector to handle '#' correctly ***
+    // *** HELPER FUNCTIONS ***
     const $ = selector => document.querySelector(selector);
     const $$ = selector => document.querySelectorAll(selector);
     const show = id => $(id).classList.add('active');
@@ -399,15 +399,29 @@
       if(loadingEl) loadingEl.style.display = 'flex';
 
       try {
+        // 1. Initialize LIFF
         await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
-        liffProfile = await liff.getProfile();
+
+        // 2. Check Login Status
+        if (!liff.isLoggedIn()) { 
+            liff.login(); 
+            return; 
+        }
+
+        // 3. Try to get Profile
+        try {
+            liffProfile = await liff.getProfile();
+        } catch (profileError) {
+            console.warn("Token expired or invalid, forcing re-login...", profileError);
+            liff.logout();
+            liff.login();
+            return;
+        }
 
         // Router Logic
         const params = new URLSearchParams(window.location.search);
         const view = params.get('view');
         
-        // Setup Event Listeners
         setupGlobalListeners();
 
         if (view === 'note') {
@@ -420,7 +434,7 @@
         }
 
       } catch (err) {
-        alert('เกิดข้อผิดพลาด: ' + err.message);
+        alert('เกิดข้อผิดพลาด: ' + err.message + '\nกรุณาลองรีเฟรชหน้าจอ');
         if(loadingEl) loadingEl.style.display = 'none';
       }
     }
@@ -444,7 +458,7 @@
 
       let html = '';
 
-      // 1. Subtype Selector (Optional)
+      // 1. Subtype Selector
       if (conf.subtypes) {
         html += `
           <div class="form-group">
@@ -458,7 +472,6 @@
 
       // 2. Main Input Fields
       if (conf.type === 'select') {
-        // Dropdown Input
         html += `
           <div class="form-group">
             <label class="form-label">ระบุข้อมูล</label>
@@ -469,7 +482,6 @@
           </div>
         `;
       } else if (metric === 'BP') {
-        // Dual Input for Blood Pressure
         html += `
           <div class="form-group">
             <label class="form-label">ตัวบน (Systolic)</label>
@@ -483,7 +495,6 @@
           </div>
         `;
       } else if (metric === 'FOOD') {
-        // Text Area for Food
         html += `
           <div class="form-group">
             <label class="form-label">รายการอาหารและปริมาณ</label>
@@ -492,7 +503,6 @@
           </div>
         `;
       } else {
-        // Standard Number Input
         html += `
           <div class="form-group">
             <label class="form-label">ค่าที่วัดได้ (${conf.unit})</label>
@@ -505,7 +515,6 @@
       modalBody.innerHTML = html;
       $('#form-modal').style.display = 'flex';
       
-      // Focus on first input
       setTimeout(() => {
         const firstInput = modalBody.querySelector('input, textarea, select');
         if(firstInput) firstInput.focus();
@@ -524,11 +533,8 @@
       const checkRange = (id, min, max) => {
         const el = $(id);
         if(!el) return false;
-        
-        // Find alert element by matching ID suffix
-        const suffix = id.split('-').pop(); // e.g. val1
+        const suffix = id.split('-').pop();
         const alert = $('#alert-' + suffix);
-        
         const val = parseFloat(el.value);
         if (isNaN(val) || val < min || val > max) {
           el.classList.add('invalid');
@@ -543,17 +549,10 @@
       if (metric === 'BP') {
         const sysValid = checkRange('#inp-val1', conf.sys_min, conf.sys_max);
         const diaValid = checkRange('#inp-val2', conf.dia_min, conf.dia_max);
-        
-        // Logical check: Systolic must be > Diastolic
         const sysVal = parseFloat($('#inp-val1').value);
         const diaVal = parseFloat($('#inp-val2').value);
-        
-        if (sysValid && diaValid && sysVal <= diaVal) {
-           // If values are technically in range but logically wrong
-           isValid = false; 
-        } else {
-           isValid = sysValid && diaValid;
-        }
+        if (sysValid && diaValid && sysVal <= diaVal) isValid = false; 
+        else isValid = sysValid && diaValid;
       } else if (metric === 'FOOD') {
         const el = $('#inp-val1');
         if (el.value.trim().length < 3) {
@@ -584,7 +583,6 @@
         timestamp: new Date().toISOString()
       };
 
-      // Safe Data Collection
       const elSubtype = $('#inp-subtype');
       const elVal1 = $('#inp-val1');
       const elVal2 = $('#inp-val2');
@@ -595,10 +593,8 @@
 
       try {
         await apiPost('logEvent', payload);
-        
         closeNoteForm();
         
-        // Show Success Card with Flex-like details
         let msg = 'บันทึกเรียบร้อย';
         if (metric === 'BP') msg = `ความดัน ${payload.v1}/${payload.v2} mmHg`;
         else if (metric === 'FOOD') msg = 'บันทึกรายการอาหารแล้ว';
@@ -607,10 +603,7 @@
         $('#success-msg').innerText = msg;
         $('#success-modal').style.display = 'flex';
 
-        // Auto close window
-        setTimeout(() => {
-          liff.closeWindow();
-        }, 2500);
+        setTimeout(() => { liff.closeWindow(); }, 2500);
 
       } catch (err) {
         alert('บันทึกไม่สำเร็จ: ' + err.message);
@@ -620,9 +613,8 @@
     }
 
     // ============================================================
-    // PART 2: DASHBOARD & LEGACY LOGIC (History, Graphs)
+    // PART 2: DASHBOARD & LEGACY LOGIC
     // ============================================================
-    
     async function loadDashboardData() {
       $('#loading').style.display = 'flex';
       const res = await apiFetch('getDashboard', { userId: liffProfile.userId });
@@ -633,12 +625,10 @@
         return;
       }
 
-      // Render Profile
       $('#avatar').src = res.profile.PictureURL || liffProfile.pictureUrl;
       $('#p_name').innerText = res.profile.NameUse || liffProfile.displayName;
       $('#p_hn').innerText = res.profile.HN;
 
-      // Process Events
       allEventsData = [];
       if (res.events) {
         Object.keys(res.events).forEach(type => {
@@ -657,11 +647,9 @@
 
       renderHistoryTable();
       renderCharts(res.events);
-      
       switchView('dashboard');
       $('#loading').style.display = 'none';
       
-      // Auto-open card logic
       const view = new URLSearchParams(window.location.search).get('view');
       if (view === 'history') openContentCard('historyCard');
     }
@@ -670,13 +658,11 @@
       const tableBody = $('#history-table tbody');
       const filters = $('#history-filters');
       
-      // Render Filters
       const types = ['ALL', 'SBGM', 'BP', 'WEIGHT', 'FOOD', 'EXERCISE'];
       filters.innerHTML = types.map(t => 
         `<button class="filter-btn ${t === currentHistoryFilter ? 'active' : ''}" onclick="filterHistory('${t}')">${t === 'ALL' ? 'ทั้งหมด' : METRIC_CONFIG[t]?.title || t}</button>`
       ).join('');
 
-      // Filter Data
       const data = currentHistoryFilter === 'ALL' ? allEventsData : allEventsData.filter(e => e.type === currentHistoryFilter);
 
       if (data.length === 0) {
@@ -710,11 +696,9 @@
     function renderCharts(events) {
       const wrap = $('#chartsWrap');
       wrap.innerHTML = '';
-      
       const keys = ['SBGM', 'BP', 'WEIGHT'];
       keys.forEach(k => {
         if (!events[k] || events[k].length < 2) return;
-        
         const div = document.createElement('div');
         div.className = 'chart-card';
         div.innerHTML = `<h3>${METRIC_CONFIG[k].title}</h3><div class="chart-box"><canvas id="c-${k}"></canvas></div>`;
@@ -722,7 +706,6 @@
         
         const ctx = div.querySelector('canvas').getContext('2d');
         const sorted = events[k].sort((a,b) => new Date(a.ts) - new Date(b.ts));
-        
         const datasets = [];
         if (k === 'BP') {
           datasets.push({ label: 'Systolic', data: sorted.map(d=>d.v1), borderColor: '#e74c3c', fill:false });
@@ -730,13 +713,9 @@
         } else {
           datasets.push({ label: 'Value', data: sorted.map(d=>d.v1), borderColor: '#f39c12', fill:false });
         }
-
         new Chart(ctx, {
           type: 'line',
-          data: {
-            labels: sorted.map(d => fmtDate(d.ts).split(' ')[0]),
-            datasets: datasets
-          },
+          data: { labels: sorted.map(d => fmtDate(d.ts).split(' ')[0]), datasets: datasets },
           options: { responsive: true, maintainAspectRatio: false }
         });
       });
@@ -746,7 +725,7 @@
       if(!confirm(`ต้องการลบรายการ ${type} นี้ใช่หรือไม่?`)) return;
       $('#loading').style.display = 'flex';
       await apiPost('deleteEvent', { userId: liffProfile.userId, ts: ts });
-      await loadDashboardData(); // Reload
+      await loadDashboardData();
     }
 
     // ============================================================
@@ -770,14 +749,12 @@
     }
 
     function setupGlobalListeners() {
-      // Content Card Toggles
       $$('.menu-btn').forEach(btn => {
         if(btn.dataset.target) {
           btn.onclick = () => openContentCard(btn.dataset.target);
         }
       });
 
-      // Registration
       $('#btnSaveReg').onclick = async () => {
         if (!$('#consent').checked) return alert('กรุณายอมรับเงื่อนไข');
         $('#loading').style.display = 'flex';
@@ -806,7 +783,6 @@
       $('#main-menu').style.display = 'block';
     }
 
-    // Start App
     window.addEventListener('load', main);
 
 </script>
