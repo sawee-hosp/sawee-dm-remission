@@ -710,25 +710,43 @@
     // ============================================================
     // API HELPERS (CORS FIXED)
     // ============================================================
-    async function apiFetch(action, params) {
-      const url = new URL(GAS_URL);
-      url.searchParams.set('action', action);
-      Object.keys(params).forEach(k => url.searchParams.set(k, params[k]));
-      const res = await fetch(url);
-      return await res.json();
+ // ====== API Calls (Robust Version) ======
+    async function apiFetch(action, params = {}) {
+        const url = new URL(GAS_WEB_APP_URL);
+        url.searchParams.set('action', action);
+        for(const key in params) { url.searchParams.set(key, params[key]); }
+        const res = await fetch(url);
+        return await res.json();
     }
 
-    // 🔥 FIX: Changed to allow CORS response reading
     async function apiPost(action, payload) {
-      const response = await fetch(GAS_URL, {
-        redirect: "follow", 
-        method: 'POST',
-        headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify({ action, payload })
-      });
-      return await response.json();
-    }
+        // Log เพื่อตรวจสอบก่อนส่ง
+        console.log("Sending...", action, payload);
 
+        // ใช้ URL ใหม่เสมอ
+        const url = GAS_WEB_APP_URL;
+
+        // เทคนิคแก้ Fail to fetch:
+        // 1. method: POST
+        // 2. headers: content-type เป็น text/plain (ห้าม application/json)
+        // 3. body: stringify JSON
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8" 
+            },
+            body: JSON.stringify({ 
+                action: action, 
+                payload: payload 
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Server Error: ${response.status}`);
+        }
+
+        return await response.json();
+    }
     function setupGlobalListeners() {
       $$('.menu-btn').forEach(btn => { if(btn.dataset.target) btn.onclick = () => openContentCard(btn.dataset.target); });
       $('#btnSaveReg').onclick = async () => {
