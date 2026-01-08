@@ -99,7 +99,6 @@
     body.history-only .container { padding: 8px; }
     body.history-only .table-wrap { max-height: none; }
     
-    /* ✅✅✅ [NEW] Styles for Help Modal ✅✅✅ */
     .btn-nav-help { margin-left: auto; padding: 6px 14px; font-size: 16px; background: #fff7d2; border-color: #f2dfab; box-shadow: none; }
     #help-modal { position: fixed; inset: 0; background: rgba(0,0,0,.5); display: none; place-items: center; z-index: 1900; padding: 16px; }
     #help-modal .panel { background: #fffef6; width: min(800px, 98vw); max-height: 90vh; display: grid; grid-template-rows: auto 1fr auto; border: 1px solid #f2dfab; border-radius: 18px; box-shadow: var(--shadow); }
@@ -109,6 +108,10 @@
     #help-modal .m-actions { padding: 12px 20px; border-top: 1px solid #f2dfab; text-align: right; }
     .btn-command { background: var(--ok); color: white; border-color: #0a8f5e; padding: 8px 14px; font-size: 16px; margin-top: 8px; }
 
+    /* --- [NEW] Style for Note Form --- */
+    #note-form-grid { display: grid; gap: 14px; }
+    .input-group label { margin-top: 0; }
+    .input-unit { font-size: 14px; color: var(--muted); text-align: right; margin-top: 4px; }
   </style>
 </head>
 <body>
@@ -120,7 +123,6 @@
         <div class="brand-title">สวีคุมหวาน</div>
         <div class="brand-sub">ข้อมูลส่วนตัว • คลินิกลดยาเบาหวาน</div>
       </div>
-      <!-- ✅✅✅ [NEW] Help Button ✅✅✅ -->
       <button id="btn-help" class="btn btn-nav-help">วิธีใช้งาน</button>
     </div>
   </nav>
@@ -165,13 +167,63 @@
 
       <div id="main-menu">
         <div class="menu-grid">
-          <button class="menu-btn" data-target="historyCard"><span class="emoji">📈</span><span>ประวัติการบันทึกผล</span></button>
-          <button class="menu-btn" data-target="goalsCard"><span class="emoji">🎯</span><span>เป้าหมายของฉัน</span></button>
-          <button class="menu-btn" data-target="foodCard"><span class="emoji">🥗</span><span>การจัดการอาหาร</span></button>
-          <button class="menu-btn" data-target="adviceCard"><span class="emoji">🤖</span><span>คำแนะนำโดย AI</span></button>
+          <button class="menu-btn" data-target="noteCard"><span class="emoji">📝</span><span>บันทึกผล</span></button>
+          
+          <button class="menu-btn" data-target="historyCard"><span class="emoji">📈</span><span>ประวัติ</span></button>
+          <button class="menu-btn" data-target="goalsCard"><span class="emoji">🎯</span><span>เป้าหมาย</span></button>
+          <button class="menu-btn" data-target="foodCard"><span class="emoji">🥗</span><span>เมนูแนะนำ</span></button>
+          <button class="menu-btn" data-target="adviceCard"><span class="emoji">🤖</span><span>วิเคราะห์ AI</span></button>
         </div>
       </div>
       
+      <div id="noteCard" class="content-card card">
+        <div class="card-header">
+          <h2>📝 บันทึกผลใหม่</h2>
+          <button class="btn-close-card btn btn-close">ปิด</button>
+        </div>
+        <div id="note-form-grid">
+          <div class="input-group">
+            <label>ประเภทข้อมูล</label>
+            <select id="note-type">
+              <option value="SBGM">🩸 น้ำตาลปลายนิ้ว (SBGM)</option>
+              <option value="BP">🩸 ความดันโลหิต (BP)</option>
+              <option value="WEIGHT">⚖️ น้ำหนัก</option>
+              <option value="WAIST">📏 รอบเอว</option>
+            </select>
+          </div>
+          
+          <div id="input-area-sbgm" class="input-group">
+             <label>ช่วงเวลา</label>
+             <select id="sbgm-subtype">
+               <option value="ก่อนอาหาร">ก่อนอาหาร</option>
+               <option value="หลังอาหาร 2 ชม.">หลังอาหาร 2 ชม.</option>
+               <option value="อื่นๆ">อื่นๆ</option>
+             </select>
+             <label style="margin-top:10px">ค่าน้ำตาล (mg/dL)</label>
+             <input type="number" id="sbgm-val" placeholder="เช่น 120">
+          </div>
+
+          <div id="input-area-bp" class="input-group" style="display:none">
+            <div class="grid">
+              <div><label>ตัวบน (SYS)</label><input type="number" id="bp-sys" placeholder="120"></div>
+              <div><label>ตัวล่าง (DIA)</label><input type="number" id="bp-dia" placeholder="80"></div>
+            </div>
+          </div>
+
+          <div id="input-area-weight" class="input-group" style="display:none">
+             <label>น้ำหนัก (กก.)</label>
+             <input type="number" id="weight-val" placeholder="เช่น 65.5">
+          </div>
+
+          <div id="input-area-waist" class="input-group" style="display:none">
+             <label>รอบเอว (ซม.)</label>
+             <input type="number" id="waist-val" placeholder="เช่น 85">
+          </div>
+
+          <button id="btn-submit-note" class="btn" style="margin-top:12px; width:100%">บันทึกข้อมูล</button>
+        </div>
+      </div>
+
       <div id="goalsCard" class="content-card card"></div>
       <div id="adviceCard" class="content-card card"></div>
       <div id="foodCard" class="content-card card"></div>
@@ -205,7 +257,6 @@
     </div>
   </div>
 
-  <!-- ✅✅✅ [NEW] Help Modal Structure ✅✅✅ -->
   <div id="help-modal">
       <div class="panel">
           <div class="m-header">คู่มือการใช้งาน "สวีคุมหวาน"</div>
@@ -213,28 +264,18 @@
               <p>ยินดีต้อนรับสู่ไลน์ "สวีคุมหวาน" เครื่องมือที่จะช่วยให้การดูแลเบาหวานของคุณเป็นเรื่องง่าย สนุก และมีเป้าหมายที่ชัดเจนยิ่งขึ้นค่ะ</p>
               
               <h3>หมวดที่ 1: การบันทึกข้อมูลสุขภาพประจำวัน 📝</h3>
-              <p>การจดบันทึกข้อมูลสุขภาพอย่างสม่ำเสมอ คือหัวใจสำคัญของการคุมเบาหวานให้สงบค่ะ</p>
-              <p class="muted"><strong>วิธีใช้:</strong> กดปุ่ม "📝 บันทึกผลประจำวัน" จากเมนูหลัก หรือพิมพ์ชื่อข้อมูลที่ต้องการบันทึกได้โดยตรง เช่น พิมพ์ว่า "น้ำตาล" หรือ "ความดัน" แล้วบอทจะเข้าสู่โหมดการบันทึกนั้นๆ ทันที!</p>
               <button class="btn btn-command" data-command="บันทึกผลประจำวัน">ลองบันทึกผลประจำวันเลย! &gt;</button>
 
               <h3>หมวดที่ 2: การบันทึกอาหาร...เรื่องง่ายๆ! 🍽️</h3>
-              <p>ไม่ต้องจดลงสมุดอีกต่อไป แค่บอกน้องหวาน (AI) ว่าคุณทานอะไรบ้าง โดยการบันทึกอาหารจะอยู่ใน "บันทึกผลประจำวัน"</p>
-              <p class="muted"><strong>วิธีใช้:</strong> กด "บันทึกผลประจำวัน" แล้วเลือก "อาหาร" จากนั้นพิมพ์บอกรายการอาหารและปริมาณ (เช่น ข้าวกะเพรา 1 จาน)</p>
               <button class="btn btn-command" data-command="อาหาร">ลองบันทึกอาหารเลย! &gt;</button>
 
               <h3>หมวดที่ 3: ให้พี่หวีช่วยวิเคราะห์ข้อมูล 🧠</h3>
-              <p>อยากรู้ว่าสุขภาพช่วงนี้เป็นอย่างไร? ให้พี่หวี (AI) ช่วยสรุปให้ฟัง!</p>
-              <p class="muted"><strong>วิธีใช้:</strong> กดปุ่ม "🧠 วิเคราะห์โดย AI" จากเมนูหลัก หรือพิมพ์คำว่า "วิเคราะห์" คุณสามารถระบุสิ่งที่ต้องการวิเคราะห์ให้ชัดเจนขึ้นได้ เช่น พิมพ์ว่า "วิเคราะห์น้ำตาล 7 วัน"</p>
               <button class="btn btn-command" data-command="วิเคราะห์ผล">ลองให้ AI วิเคราะห์เลย! &gt;</button>
               
               <h3>หมวดที่ 4: ตั้งเป้าหมาย S.M.A.R.T. 🎯</h3>
-              <p>การเดินทางสู่ภาวะเบาหวานสงบ จะง่ายขึ้นเมื่อเรามีเป้าหมายที่ชัดเจน</p>
-              <p class="muted"><strong>วิธีใช้:</strong> กดปุ่ม "🎯 เป้าหมายของฉัน" จากเมนูหลัก แล้วทำตามขั้นตอนเพื่อตั้งเป้าหมายแบบ S.M.A.R.T.</p>
               <button class="btn btn-command" data-command="เป้าหมายของฉัน">ลองตั้งเป้าหมายเลย! &gt;</button>
               
               <h3>หมวดที่ 5: ให้น้องหวานแนะนำเมนู 🥗</h3>
-              <p>หมดปัญหา "วันนี้กินอะไรดี?" ให้น้องหวานช่วยคิดเมนูอร่อยและดีต่อสุขภาพให้สิคะ!</p>
-              <p class="muted"><strong>วิธีใช้:</strong> กดปุ่ม "🥗 แนะนำเมนู" จากเมนูหลัก หรือพิมพ์ว่า "แนะนำอาหาร"</p>
               <button class="btn btn-command" data-command="แนะนำอาหาร">ลองขอเมนูแนะนำเลย! &gt;</button>
           </div>
           <div class="m-actions">
@@ -301,7 +342,8 @@
     function showCard(cardId) {
         $('#main-menu').style.display = 'none';
         $$('.content-card').forEach(c => c.style.display = 'none');
-        $(`#${cardId}`).style.display = 'block';
+        const target = $(`#${cardId}`);
+        if(target) target.style.display = 'block';
     }
     function showMainMenu() {
         $$('.content-card').forEach(c => c.style.display = 'none');
@@ -311,9 +353,60 @@
         $$('.menu-btn').forEach(btn => {
             btn.onclick = () => showCard(btn.dataset.target);
         });
+        
+        // Close buttons for cards
+        $$('.btn-close-card').forEach(btn => {
+            btn.onclick = showMainMenu;
+        });
+
+        // ✅ [NEW] Setup Note Form Interactions
+        $('#note-type').addEventListener('change', (e) => {
+            const val = e.target.value;
+            // Hide all first
+            ['sbgm','bp','weight','waist'].forEach(k => $(`#input-area-${k}`).style.display = 'none');
+            // Show selected
+            const targetId = val === 'SBGM' ? 'sbgm' : val === 'BP' ? 'bp' : val === 'WEIGHT' ? 'weight' : 'waist';
+            $(`#input-area-${targetId}`).style.display = 'block';
+        });
+
+        $('#btn-submit-note').onclick = async () => {
+            const type = $('#note-type').value;
+            const payload = { userId: liffProfile.userId, type: type };
+            
+            // Validate & Build Payload
+            if(type === 'SBGM') {
+                payload.subtype = $('#sbgm-subtype').value;
+                payload.v1 = $('#sbgm-val').value;
+                if(!payload.v1) return showNotification('กรุณาระบุค่าน้ำตาล');
+            } else if (type === 'BP') {
+                payload.v1 = $('#bp-sys').value;
+                payload.v2 = $('#bp-dia').value;
+                if(!payload.v1 || !payload.v2) return showNotification('กรุณาระบุค่าความดันให้ครบ');
+            } else if (type === 'WEIGHT') {
+                payload.v1 = $('#weight-val').value;
+                if(!payload.v1) return showNotification('กรุณาระบุน้ำหนัก');
+            } else if (type === 'WAIST') {
+                payload.v1 = $('#waist-val').value;
+                if(!payload.v1) return showNotification('กรุณาระบุรอบเอว');
+            }
+
+            showLoading(true);
+            try {
+                // IMPORTANT: You need to ensure GAS 'logEvent' action exists/handles this
+                // For now, assume a generic 'logEvent' or reuse 'updateEvent' logic if applicable,
+                // BUT typically creating new requires a dedicated action.
+                // Assuming GAS handles `action: 'logEvent'`
+                await apiPost('logEvent', payload); 
+                showLoading(false);
+                showNotification('บันทึกสำเร็จ!');
+                setTimeout(() => location.reload(), 1500);
+            } catch(e) {
+                showLoading(false);
+                showNotification('บันทึกไม่สำเร็จ: ' + e.message);
+            }
+        };
     }
 
-    // ✅✅✅ [NEW] Setup for Help Modal ✅✅✅
     function setupHelpModal() {
         const modal = $('#help-modal');
         $('#btn-help').onclick = () => { modal.style.display = 'grid'; };
@@ -356,14 +449,13 @@
                     <div class="goal-title">${g.goal_specific || '-'}</div>
                     <p><strong>สถานะ:</strong> ${g.status || '-'}</p>
                     <p><strong>เป้าหมาย:</strong> ${g.target_value || '-'} ${g.target_unit || ''} (ค่าตั้งต้น: ${g.patient_baseline || '-'})</p>
-                    <p><strong>วิธีวัดผล:</strong> ${g.goal_measurable || '-'}</p>
-                    <p><strong>ความเกี่ยวข้อง:</strong> ${g.goal_relevant || '-'}</p>
-                    <p><strong>กรอบเวลา:</strong> ${g.goal_timebound || '-'} (สิ้นสุด: ${g.deadline_date ? fmtDateOnly(g.deadline_date) : '-'})</p>
+                    <p><strong>กรอบเวลา:</strong> สิ้นสุด ${g.deadline_date ? fmtDateOnly(g.deadline_date) : '-'}</p>
                 </div>
             `).join('');
         }
         card.innerHTML = html;
-        card.querySelector('.btn-close-card').onclick = showMainMenu;
+        // Re-attach listener because innerHTML wiped it
+        card.querySelector('.btn-close-card').onclick = showMainMenu; 
     }
     
     function renderAdvice(bundle) {
@@ -382,7 +474,7 @@
     function renderFood(bundle) {
         const items = bundle.food_exchange || [];
         const card = $('#foodCard');
-        let html = `<div class="card-header"><h2>🥗 การจัดการอาหาร</h2><button class="btn-close-card btn btn-close">ปิด</button></div>`;
+        let html = `<div class="card-header"><h2>🥗 เมนูแนะนำ</h2><button class="btn-close-card btn btn-close">ปิด</button></div>`;
         if (items.length === 0) {
             html += `<div class="muted">ยังไม่มีข้อมูล</div>`;
         } else {
@@ -391,23 +483,7 @@
                 <div class="muted" style="margin-bottom: 12px;">ข้อมูลล่าสุดเมื่อ ${fmtDate(latest.timestamp)}</div>
                 <div class="fx-grid">
                     <div class="fx-item"><div class="label">น้ำหนัก</div><div class="value">${latest.weight_kg || '-'} kg</div></div>
-                    <div class="fx-item"><div class="label">พลังงานที่ต้องการ</div><div class="value">${latest.total_kcal || '-'} kcal</div></div>
-                </div>
-                <div style="margin: 16px 0;"><h4>สัดส่วนพลังงาน (CHO:PRO:FAT)</h4><p>${latest.macro_cho_ratio||'-'}:${latest.macro_pro_ratio||'-'}:${latest.macro_fat_ratio||'-'}</p></div>
-                <h4>ส่วนอาหารแลกเปลี่ยนต่อวัน</h4>
-                <div class="table-wrap">
-                    <table>
-                        <thead><tr><th>หมวดอาหาร</th><th>จำนวนส่วน</th></tr></thead>
-                        <tbody>
-                            <tr><td>🍚 ข้าว/แป้ง</td><td>${latest.srv_grain_80kcal || '-'}</td></tr>
-                            <tr><td>🍓 ผลไม้</td><td>${latest.srv_fruit_60kcal || '-'}</td></tr>
-                            <tr><td>🥦 ผัก</td><td>${latest.srv_vegB_25kcal || '-'}</td></tr>
-                            <tr><td>🥛 นม</td><td>${latest.srv_milk_90kcal || '-'}</td></tr>
-                            <tr><td>🥩 เนื้อสัตว์ไขมันต่ำ-ปานกลาง</td><td>${(Number(latest.srv_meat_lean_35kcal) || 0) + (Number(latest.srv_meat_lowfat_55kcal) || 0)}</td></tr>
-                            <tr><td>🥓 เนื้อสัตว์ไขมันสูง</td><td>${latest.srv_meat_highfat_100kcal || '-'}</td></tr>
-                            <tr><td>🥑 ไขมัน/ถั่ว</td><td>${(Number(latest.srv_oil_45kcal) || 0) + (Number(latest.srv_nuts_45kcal) || 0)}</td></tr>
-                        </tbody>
-                    </table>
+                    <div class="fx-item"><div class="label">พลังงาน</div><div class="value">${latest.total_kcal || '-'} kcal</div></div>
                 </div>
             `;
         }
@@ -589,10 +665,23 @@
         renderFood(bundle);
         renderHistory(bundle);
         
-        if (initialView) {
-            showCard(`${initialView}Card`);
-            if ($('#profile-card')) $('#profile-card').style.display = 'none';
-            if ($('#main-menu')) $('#main-menu').style.display = 'none';
+        // ✅ [NEW] Mapping for URL Parameters -> Cards
+        const viewMap = {
+          'note': 'noteCard',
+          'goal': 'goalsCard',
+          'suggestion': 'foodCard',
+          'analysis': 'adviceCard',
+          'history': 'historyCard'
+        };
+
+        const targetCardId = viewMap[initialView] || (initialView ? `${initialView}Card` : null);
+
+        if (targetCardId && $(`#${targetCardId}`)) {
+            showCard(targetCardId);
+        } else {
+             // Default state (Main Menu)
+             if ($('#profile-card')) $('#profile-card').style.display = 'block';
+             if ($('#main-menu')) $('#main-menu').style.display = 'block';
         }
     }
 
@@ -662,7 +751,7 @@
         if (!liff.isLoggedIn()) { liff.login(); return; }
         liffProfile = await liff.getProfile();
         
-        setupHelpModal(); // Setup help modal listeners
+        setupHelpModal();
 
         $('#btn-confirm-cancel').onclick = () => $('#confirm-dialog').style.display = 'none';
         $('#btn-confirm-delete').onclick = () => { $('#confirm-dialog').style.display = 'none'; handleDeleteEvent(); };
@@ -670,7 +759,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const action = urlParams.get('action');
         const ts = urlParams.get('ts');
-        const view = urlParams.get('view');
+        const view = urlParams.get('view'); // note, goal, suggestion, analysis
 
         if (view === 'history' && !action) {
             document.body.classList.add('history-only');
@@ -694,4 +783,3 @@
 </script>
 </body>
 </html>
-
