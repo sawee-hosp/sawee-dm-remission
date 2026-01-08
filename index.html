@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
-  <title>สวีคุมหวาน • DM Remission Dashboard</title>
+  <title>สวีคุมหวาน • DM Remission</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +28,6 @@
     html,body{height:100%; scroll-behavior: smooth;}
     body{ margin:0; padding:0; background:var(--bg); font-family:var(--font-main); color:var(--ink); font-size:16px; -webkit-tap-highlight-color: transparent; }
     
-    /* Typography & Inputs */
     h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
     button, input, select, textarea { font-family: var(--font-main); }
     
@@ -320,7 +319,7 @@
     const LIFF_ID = '2007840605-zKl7p3Aa';
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbwDi08IqlCBBESqXYkQgvA1EdvCjLchwZdBYAtobMr83NEWkvtgwVdTnzts5T9tvbM0/exec';
 
-    // *** STRICT VALIDATION RULES (From Chatbot) ***
+    // *** STRICT VALIDATION RULES (Matched with Chatbot Code) ***
     const METRIC_CONFIG = {
       'SBGM': { 
         title: '🩸 น้ำตาลในเลือด', unit: 'mg/dL', 
@@ -383,9 +382,9 @@
     let currentHistoryFilter = 'ALL';
     let chartInstances = {};
 
-    // Helper Functions
-    const $ = id => document.getElementById(id);
-    const $$ = sel => document.querySelectorAll(sel);
+    // *** FIX: Changed from getElementById to querySelector to handle '#' correctly ***
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => document.querySelectorAll(selector);
     const show = id => $(id).classList.add('active');
     const hide = id => $(id).classList.remove('active');
     const toggleHelpModal = (show) => $('#help-modal').style.display = show ? 'flex' : 'none';
@@ -395,7 +394,10 @@
     // MAIN INITIALIZATION
     // ============================================================
     async function main() {
-      $('#loading').style.display = 'flex';
+      // Safe check for loading element before accessing style
+      const loadingEl = $('#loading');
+      if(loadingEl) loadingEl.style.display = 'flex';
+
       try {
         await liff.init({ liffId: LIFF_ID });
         if (!liff.isLoggedIn()) { liff.login(); return; }
@@ -411,7 +413,7 @@
         if (view === 'note') {
           // FAST PATH: Show Note Grid Immediately
           switchView('note');
-          $('#loading').style.display = 'none';
+          if(loadingEl) loadingEl.style.display = 'none';
         } else {
           // NORMAL PATH: Load Dashboard Data
           await loadDashboardData();
@@ -419,7 +421,7 @@
 
       } catch (err) {
         alert('เกิดข้อผิดพลาด: ' + err.message);
-        $('#loading').style.display = 'none';
+        if(loadingEl) loadingEl.style.display = 'none';
       }
     }
 
@@ -431,7 +433,7 @@
     }
 
     // ============================================================
-    // PART 1: NOTE FORM & VALIDATION (The "New" Feature)
+    // PART 1: NOTE FORM & VALIDATION (Strict Logic)
     // ============================================================
     function openNoteForm(metric) {
       currentMetric = metric;
@@ -521,7 +523,12 @@
 
       const checkRange = (id, min, max) => {
         const el = $(id);
-        const alert = $('#alert-' + id.split('-')[1]);
+        if(!el) return false;
+        
+        // Find alert element by matching ID suffix
+        const suffix = id.split('-').pop(); // e.g. val1
+        const alert = $('#alert-' + suffix);
+        
         const val = parseFloat(el.value);
         if (isNaN(val) || val < min || val > max) {
           el.classList.add('invalid');
@@ -534,11 +541,16 @@
       };
 
       if (metric === 'BP') {
-        const sysValid = checkRange('inp-val1', conf.sys_min, conf.sys_max);
-        const diaValid = checkRange('inp-val2', conf.dia_min, conf.dia_max);
-        // Extra check: Systolic must be > Diastolic
-        if (sysValid && diaValid && parseFloat($('#inp-val1').value) <= parseFloat($('#inp-val2').value)) {
-           isValid = false; // Logic error
+        const sysValid = checkRange('#inp-val1', conf.sys_min, conf.sys_max);
+        const diaValid = checkRange('#inp-val2', conf.dia_min, conf.dia_max);
+        
+        // Logical check: Systolic must be > Diastolic
+        const sysVal = parseFloat($('#inp-val1').value);
+        const diaVal = parseFloat($('#inp-val2').value);
+        
+        if (sysValid && diaValid && sysVal <= diaVal) {
+           // If values are technically in range but logically wrong
+           isValid = false; 
         } else {
            isValid = sysValid && diaValid;
         }
@@ -555,7 +567,7 @@
       } else if (conf.type === 'select') {
         isValid = $('#inp-val1').value !== "";
       } else {
-        isValid = checkRange('inp-val1', conf.min, conf.max);
+        isValid = checkRange('#inp-val1', conf.min, conf.max);
       }
 
       $('#btn-save-form').disabled = !isValid;
@@ -572,25 +584,30 @@
         timestamp: new Date().toISOString()
       };
 
-      if ($('#inp-subtype')) payload.subtype = $('#inp-subtype').value;
-      if ($('#inp-val1')) payload.v1 = $('#inp-val1').value;
-      if ($('#inp-val2')) payload.v2 = $('#inp-val2').value;
+      // Safe Data Collection
+      const elSubtype = $('#inp-subtype');
+      const elVal1 = $('#inp-val1');
+      const elVal2 = $('#inp-val2');
+
+      if (elSubtype) payload.subtype = elSubtype.value;
+      if (elVal1) payload.v1 = elVal1.value;
+      if (elVal2) payload.v2 = elVal2.value;
 
       try {
         await apiPost('logEvent', payload);
         
         closeNoteForm();
         
-        // Show Success Card
+        // Show Success Card with Flex-like details
         let msg = 'บันทึกเรียบร้อย';
-        if (metric === 'BP') msg = `ความดัน ${payload.v1}/${payload.v2}`;
+        if (metric === 'BP') msg = `ความดัน ${payload.v1}/${payload.v2} mmHg`;
         else if (metric === 'FOOD') msg = 'บันทึกรายการอาหารแล้ว';
-        else if (METRIC_CONFIG[metric].unit) msg = `${METRIC_CONFIG[metric].title} ${payload.v1} ${METRIC_CONFIG[metric].unit}`;
+        else if (METRIC_CONFIG[metric].unit) msg = `${METRIC_CONFIG[metric].title}: ${payload.v1} ${METRIC_CONFIG[metric].unit}`;
         
         $('#success-msg').innerText = msg;
         $('#success-modal').style.display = 'flex';
 
-        // Wait then close
+        // Auto close window
         setTimeout(() => {
           liff.closeWindow();
         }, 2500);
@@ -621,7 +638,7 @@
       $('#p_name').innerText = res.profile.NameUse || liffProfile.displayName;
       $('#p_hn').innerText = res.profile.HN;
 
-      // Process Events for History & Charts
+      // Process Events
       allEventsData = [];
       if (res.events) {
         Object.keys(res.events).forEach(type => {
@@ -636,7 +653,7 @@
           });
         });
       }
-      allEventsData.sort((a,b) => new Date(b.ts) - new Date(a.ts)); // Newest first
+      allEventsData.sort((a,b) => new Date(b.ts) - new Date(a.ts));
 
       renderHistoryTable();
       renderCharts(res.events);
@@ -644,7 +661,7 @@
       switchView('dashboard');
       $('#loading').style.display = 'none';
       
-      // Auto-open card if param exists
+      // Auto-open card logic
       const view = new URLSearchParams(window.location.search).get('view');
       if (view === 'history') openContentCard('historyCard');
     }
