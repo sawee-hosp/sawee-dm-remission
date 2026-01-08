@@ -393,34 +393,48 @@
     // ============================================================
     // MAIN INITIALIZATION
     // ============================================================
-    async function main() {
-      // Safe check for loading element before accessing style
+async function main() {
+      // Safe check for loading element
       const loadingEl = $('#loading');
       if(loadingEl) loadingEl.style.display = 'flex';
 
       try {
+        // 1. Initialize LIFF
         await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
-        liffProfile = await liff.getProfile();
+
+        // 2. Check Login Status
+        if (!liff.isLoggedIn()) { 
+            liff.login(); 
+            return; 
+        }
+
+        // 3. Try to get Profile (จุดที่มักจะเกิด Error Token Expire)
+        try {
+            liffProfile = await liff.getProfile();
+        } catch (profileError) {
+            console.warn("Token expired or invalid, forcing re-login...", profileError);
+            // 🚨 ถ้าดึงโปรไฟล์ไม่ได้ แปลว่า Token เน่า -> สั่ง Logout แล้ว Login ใหม่เลย
+            liff.logout();
+            liff.login();
+            return;
+        }
 
         // Router Logic
         const params = new URLSearchParams(window.location.search);
         const view = params.get('view');
         
-        // Setup Event Listeners
         setupGlobalListeners();
 
         if (view === 'note') {
-          // FAST PATH: Show Note Grid Immediately
           switchView('note');
           if(loadingEl) loadingEl.style.display = 'none';
         } else {
-          // NORMAL PATH: Load Dashboard Data
           await loadDashboardData();
         }
 
       } catch (err) {
-        alert('เกิดข้อผิดพลาด: ' + err.message);
+        // Error อื่นๆ ที่ไม่ใช่เรื่อง Token
+        alert('เกิดข้อผิดพลาด: ' + err.message + '\nกรุณาลองรีเฟรชหน้าจอ');
         if(loadingEl) loadingEl.style.display = 'none';
       }
     }
