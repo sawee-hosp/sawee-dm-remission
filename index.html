@@ -83,6 +83,7 @@
     .bg-weight .note-icon { color: #9b59b6; }
     .bg-ex .note-icon { color: #e67e22; }
     .bg-alert .note-icon { color: #f1c40f; }
+    .bg-waist .note-icon { color: #e67e22; }
 
     /* === FORM COMPONENTS (Friendly UI) === */
     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
@@ -191,17 +192,11 @@
         <div class="note-item" onclick="openNoteForm('DEPRESSION')">
           <div class="note-icon" style="color:#34495e">😟</div><div class="note-label">ความ<br>เครียด</div>
         </div>
-        <div class="note-item" onclick="openNoteForm('WEIGHT')">
-          <div class="note-icon bg-weight">⚖️</div><div class="note-label">น้ำหนัก<br>(สำรอง)</div>
-        </div>
         <div class="note-item" onclick="openNoteForm('WAIST')">
           <div class="note-icon bg-waist">📏</div><div class="note-label">รอบ<br>เอว</div>
         </div>
         <div class="note-item" onclick="openNoteForm('HBA1C')">
           <div class="note-icon" style="color:#8e44ad">🧪</div><div class="note-label">HbA1C</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('WAIST')">
-          <div class="note-icon bg-waist">📏</div><div class="note-label">รอบเอว<br>(สำรอง)</div>
         </div>
         <div class="note-item" onclick="openNoteForm('BODY_FAT')">
           <div class="note-icon" style="color:#d35400">🧍‍♀️</div><div class="note-label">% ไขมัน</div>
@@ -222,42 +217,26 @@
         <img src="https://img2.pic.in.th/pic/ChatGPT-Image-10-..-2568-12_48_07.png" alt="Logo">
         <span>สวีคุมหวาน</span>
       </div>
-      <button class="btn-nav-help" onclick="toggleHelpModal(true)">วิธีใช้</button>
+      <button class="btn-close" onclick="switchView('note')">กลับ</button>
     </nav>
 
     <div class="container">
       <div id="profile-card" class="card">
         <div class="form-header" style="margin-bottom:12px;">
           <h2 style="margin:0">ข้อมูลส่วนตัว</h2>
-          <button id="btnEditProfile" class="btn-small btn-close">แก้ไข</button>
         </div>
         <div class="profile-grid">
           <div class="profile-left"><img id="avatar" class="avatar" src="" alt="avatar"></div>
           <div class="profile-right">
-            <div class="row" style="justify-content: flex-start; margin-bottom:8px;"><span class="pill">ชื่อ</span> <span id="p_name" style="font-size:20px; font-weight:700;">-</span></div>
-            <div class="row" style="justify-content: flex-start;"><span class="pill">HN</span> <span id="p_hn">-</span></div>
+            <div class="row" style="justify-content: flex-start; margin-bottom:8px;"><span style="color:#999; margin-right:8px;">ชื่อ</span> <span id="p_name" style="font-size:20px; font-weight:700;">-</span></div>
+            <div class="row" style="justify-content: flex-start;"><span style="color:#999; margin-right:8px;">HN</span> <span id="p_hn">-</span></div>
           </div>
         </div>
       </div>
 
-      <div id="main-menu">
-        <div class="menu-grid">
-          <button class="menu-btn" onclick="switchView('note')"><span class="emoji">📝</span><span>บันทึกผล</span></button>
-          <button class="menu-btn" data-target="historyCard"><span class="emoji">📈</span><span>ประวัติ</span></button>
-          <button class="menu-btn" data-target="goalsCard"><span class="emoji">🎯</span><span>เป้าหมาย</span></button>
-          <button class="menu-btn" data-target="foodCard"><span class="emoji">🥗</span><span>เมนูแนะนำ</span></button>
-          <button class="menu-btn" data-target="adviceCard"><span class="emoji">🤖</span><span>AI วิเคราะห์</span></button>
-        </div>
-      </div>
-
-      <div id="goalsCard" class="content-card card" style="display:none"></div>
-      <div id="adviceCard" class="content-card card" style="display:none"></div>
-      <div id="foodCard" class="content-card card" style="display:none"></div>
-      
-      <div id="historyCard" class="content-card card" style="display:none">
+      <div id="historyCard" class="card">
         <div class="form-header">
           <h2>📈 ประวัติการบันทึก</h2>
-          <button class="btn-close" onclick="closeContentCard()">ปิด</button>
         </div>
         <div class="filter-controls" id="history-filters"></div>
         <div class="table-wrap">
@@ -285,7 +264,7 @@
         </div>
 
       <div style="margin-top: auto; padding-top: 20px;">
-        <button id="btn-save-form" class="btn" disabled>บันทึกข้อมูล</button>
+        <button id="btn-save-form" class="btn" disabled onclick="submitForm()">บันทึกข้อมูล</button>
       </div>
     </div>
   </div>
@@ -302,7 +281,7 @@
   <div id="reg-view" class="view-section" style="padding:20px;">
     <div class="card">
       <h2>ลงทะเบียนผู้ป่วยใหม่</h2>
-      <p class="muted">กรุณากรอกข้อมูลเพื่อเริ่มต้นใช้งาน</p>
+      <p style="color:#999;">กรุณากรอกข้อมูลเพื่อเริ่มต้นใช้งาน</p>
       <div class="form-group"><label class="form-label">HN (เลขประจำตัวผู้ป่วย)</label><input id="hn" type="text" placeholder="9 หลัก"></div>
       <div class="form-group"><label class="form-label">ชื่อเล่น / ชื่อเรียก</label><input id="nameuse" type="text"></div>
       <div class="grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
@@ -314,28 +293,17 @@
     </div>
   </div>
 
-  <div id="help-modal" class="modal-overlay" style="align-items:center;">
-    <div class="modal-sheet" style="max-height:80vh;">
-      <div class="form-header"><h2>คู่มือการใช้งาน</h2><button class="btn-close" onclick="toggleHelpModal(false)">ปิด</button></div>
-      <div style="line-height:1.8; font-size:18px;">
-        <p>1. กด <strong>"บันทึกผล"</strong> เพื่อจดค่าน้ำตาล ความดัน หรืออาหาร</p>
-        <p>2. กด <strong>"ประวัติ"</strong> เพื่อดูกราฟและข้อมูลย้อนหลัง</p>
-        <p>3. หากต้องการลบข้อมูล ให้ไปที่หน้าประวัติ แล้วกดปุ่ม "ลบ" หลังรายการนั้น</p>
-      </div>
-    </div>
-  </div>
-
 <script>
     // ============================================================
     // CONFIGURATION & GLOBAL STATE
     // ============================================================
     const LIFF_ID = '2007840605-zKl7p3Aa';
-    // ✅ Updated URL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzP533st24BckpABeSBxDE9d47-ZfBEApKB3xkcgY0u55SGcHX1l9AX3zZ8ZJfNhiQdZA/exec';
+    // *** เปลี่ยน URL นี้เป็น Web App URL ของคุณ ***
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzvLY5kLKw2sUaSelEZcxka2CsdiRoGdA9jmHMoKs3oB04ypte7yDwStWo6cFwb2-Y8Sw/exec'; 
 
     const METRIC_CONFIG = {
       'SBGM': { 
-        title: '🩸 น้ำตาลในเลือด', uniAt: 'mg/dL', 
+        title: '🩸 น้ำตาลในเลือด', unit: 'mg/dL', 
         min: 20, max: 600, 
         placeholder: 'เช่น 120', 
         subtypes: ['ก่อนอาหาร', 'หลังอาหาร 2 ชม.', 'สุ่มวัด'] 
@@ -397,16 +365,12 @@
     // Helpers
     const $ = selector => document.querySelector(selector);
     const $$ = selector => document.querySelectorAll(selector);
-    const show = id => $(id).classList.add('active');
-    const hide = id => $(id).classList.remove('active');
-    const toggleHelpModal = (show) => $('#help-modal').style.display = show ? 'flex' : 'none';
     const fmtDate = d => new Date(d).toLocaleString('th-TH');
 
     // ============================================================
     // MAIN INITIALIZATION
     // ============================================================
     async function main() {
-      // Check loading element first
       const loadingEl = $('#loading');
       if(loadingEl) loadingEl.style.display = 'flex';
 
@@ -417,7 +381,6 @@
         try {
             liffProfile = await liff.getProfile();
         } catch (profileError) {
-            // Token expired handling
             liff.logout();
             liff.login();
             return;
@@ -466,7 +429,7 @@
         conf.subtypes.forEach(s => {
             html += `<button class="chip-btn" onclick="selectOption('subtype', '${s}', this)">${s}</button>`;
         });
-        html += `</div><input type="hidden" id="inp-subtype"></div>`; // Hidden input to store value
+        html += `</div><input type="hidden" id="inp-subtype"></div>`; 
       }
 
       // 2. Main Input
@@ -481,12 +444,12 @@
           <div class="form-group">
             <label class="form-label">ตัวบน (Systolic)</label>
             <input type="number" id="inp-val1" placeholder="${conf.placeholder_sys}" oninput="validateForm()">
-            <div id="alert-val1" class="soft-alert">⚠️ คุณยายคะ ค่าปกติต้องอยู่ระหว่าง 20-300 นะคะ</div>
+            <div id="alert-val1" class="soft-alert">⚠️ ค่าปกติต้องอยู่ระหว่าง 20-300 นะคะ</div>
           </div>
           <div class="form-group">
             <label class="form-label">ตัวล่าง (Diastolic)</label>
             <input type="number" id="inp-val2" placeholder="${conf.placeholder_dia}" oninput="validateForm()">
-            <div id="alert-val2" class="soft-alert">⚠️ คุณยายคะ ค่าปกติต้องอยู่ระหว่าง 20-130 นะคะ</div>
+            <div id="alert-val2" class="soft-alert">⚠️ ค่าปกติต้องอยู่ระหว่าง 20-130 นะคะ</div>
           </div>
         `;
       } else if (metric === 'FOOD') {
@@ -510,7 +473,6 @@
       modalBody.innerHTML = html;
       $('#form-modal').style.display = 'flex';
       
-      // Auto focus logic
       setTimeout(() => {
         const inp = modalBody.querySelector('input[type="number"], textarea');
         if(inp) inp.focus();
@@ -518,9 +480,7 @@
     }
 
     function selectOption(type, value, btn) {
-        // Update hidden input
         $(`#inp-${type}`).value = value;
-        // Update visual state
         const container = btn.parentElement;
         container.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -534,7 +494,6 @@
       const conf = METRIC_CONFIG[metric];
       let isValid = true;
 
-      // Range Checker Helper
       const checkRange = (id, min, max) => {
         const el = $(id);
         if(!el) return false;
@@ -555,7 +514,6 @@
       if (metric === 'BP') {
         const v1 = checkRange('#inp-val1', conf.sys_min, conf.sys_max);
         const v2 = checkRange('#inp-val2', conf.dia_min, conf.dia_max);
-        // Logical check: Systolic > Diastolic
         if (v1 && v2 && parseFloat($('#inp-val1').value) <= parseFloat($('#inp-val2').value)) isValid = false;
         else isValid = v1 && v2;
       } else if (metric === 'FOOD') {
@@ -568,7 +526,6 @@
           el.classList.remove('invalid');
           $('#alert-val1').style.display = 'none';
         }
-        // Subtype Check
         if (!$('#inp-subtype').value) isValid = false; 
       } else if (conf.type === 'select') {
         isValid = $('#inp-val1').value !== "";
@@ -614,7 +571,10 @@
         $('#loading').style.display = 'none';
         $('#success-modal').style.display = 'flex';
 
-        setTimeout(() => { liff.closeWindow(); }, 2500);
+        setTimeout(() => { 
+            $('#success-modal').style.display = 'none';
+            btn.innerText = 'บันทึกข้อมูล'; // Reset button
+        }, 2000);
 
       } catch (err) {
         $('#loading').style.display = 'none';
@@ -625,13 +585,13 @@
     }
 
     // ============================================================
-    // PART 2: DASHBOARD & LEGACY
+    // PART 2: DASHBOARD
     // ============================================================
     async function loadDashboardData() {
       $('#loading').style.display = 'flex';
-      const res = await apiFetch('getDashboard', { userId: liffProfile.userId });
+      const res = await apiPost('getDashboard', { userId: liffProfile.userId });
       
-      if (!res.profile) {
+      if (!res.ok || !res.profile) {
         switchView('reg');
         $('#loading').style.display = 'none';
         return;
@@ -639,7 +599,7 @@
 
       $('#avatar').src = res.profile.PictureURL || liffProfile.pictureUrl;
       $('#p_name').innerText = res.profile.NameUse || liffProfile.displayName;
-      $('#p_hn').innerText = res.profile.HN;
+      $('#p_hn').innerText = res.profile.HN || '-';
 
       allEventsData = [];
       if (res.events) {
@@ -647,10 +607,10 @@
           res.events[type].forEach(e => {
             allEventsData.push({
               ts: e.ts, type: type,
-              subtype: e.event_subtype || e.subtype,
-              v1: e.value_numeric_1 || e.v1,
-              v2: e.value_numeric_2 || e.v2,
-              text: e.value_text || e.vt
+              subtype: e.subtype,
+              v1: e.v1,
+              v2: e.v2,
+              text: e.vt
             });
           });
         });
@@ -661,24 +621,32 @@
       renderCharts(res.events);
       switchView('dashboard');
       $('#loading').style.display = 'none';
-      
-      const view = new URLSearchParams(window.location.search).get('view');
-      if (view === 'history') openContentCard('historyCard');
     }
 
-    // (Code for renderHistoryTable, renderCharts is same as before, simplified here)
     function renderHistoryTable() {
       const tableBody = $('#history-table tbody');
       const filters = $('#history-filters');
       const types = ['ALL', 'SBGM', 'BP', 'WEIGHT', 'FOOD', 'EXERCISE'];
       filters.innerHTML = types.map(t => `<button class="filter-btn ${t === currentHistoryFilter ? 'active' : ''}" onclick="filterHistory('${t}')">${t === 'ALL' ? 'ทั้งหมด' : METRIC_CONFIG[t]?.title || t}</button>`).join('');
+      
       const data = currentHistoryFilter === 'ALL' ? allEventsData : allEventsData.filter(e => e.type === currentHistoryFilter);
+      
       if (data.length === 0) { tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#999;">ไม่พบข้อมูล</td></tr>`; return; }
+      
       tableBody.innerHTML = data.map(e => {
-        let val = e.v1; if (e.type === 'BP') val = `${e.v1}/${e.v2}`; if (e.type === 'FOOD') val = e.text;
-        return `<tr><td>${fmtDate(e.ts).split(' ')[0]}<br><small style="color:#999">${fmtDate(e.ts).split(' ')[1]}</small></td><td>${METRIC_CONFIG[e.type]?.title || e.type}</td><td>${val || '-'} <small>${e.subtype || ''}</small></td><td style="text-align:right;"><button class="btn-small danger" onclick="deleteEvent('${e.ts}', '${e.type}')">ลบ</button></td></tr>`;
+        let val = e.v1; 
+        if (e.type === 'BP') val = `${e.v1}/${e.v2}`; 
+        if (e.type === 'FOOD') val = e.text;
+        
+        return `<tr>
+            <td>${fmtDate(e.ts).split(' ')[0]}<br><small style="color:#999">${fmtDate(e.ts).split(' ')[1]}</small></td>
+            <td>${METRIC_CONFIG[e.type]?.title || e.type}</td>
+            <td>${val || '-'} <small>${e.subtype || ''}</small></td>
+            <td style="text-align:right;"><button class="btn-small danger" onclick="deleteEvent('${e.ts}', '${e.type}')">ลบ</button></td>
+        </tr>`;
       }).join('');
     }
+
     function filterHistory(type) { currentHistoryFilter = type; renderHistoryTable(); }
     
     function renderCharts(events) {
@@ -686,16 +654,22 @@
       const keys = ['SBGM', 'BP', 'WEIGHT'];
       keys.forEach(k => {
         if (!events[k] || events[k].length < 2) return;
+        
         const div = document.createElement('div'); div.className = 'chart-card';
         div.innerHTML = `<h3>${METRIC_CONFIG[k].title}</h3><div class="chart-box"><canvas id="c-${k}"></canvas></div>`;
         wrap.appendChild(div);
+        
         const ctx = div.querySelector('canvas').getContext('2d');
         const sorted = events[k].sort((a,b) => new Date(a.ts) - new Date(b.ts));
         const datasets = [];
+        
         if (k === 'BP') {
           datasets.push({ label: 'Systolic', data: sorted.map(d=>d.v1), borderColor: '#e74c3c', fill:false });
           datasets.push({ label: 'Diastolic', data: sorted.map(d=>d.v2), borderColor: '#3498db', fill:false });
-        } else { datasets.push({ label: 'Value', data: sorted.map(d=>d.v1), borderColor: '#f39c12', fill:false }); }
+        } else { 
+            datasets.push({ label: 'Value', data: sorted.map(d=>d.v1), borderColor: '#f39c12', fill:false }); 
+        }
+        
         new Chart(ctx, { type: 'line', data: { labels: sorted.map(d => fmtDate(d.ts).split(' ')[0]), datasets: datasets }, options: { responsive: true, maintainAspectRatio: false } });
       });
     }
@@ -703,61 +677,41 @@
     async function deleteEvent(ts, type) {
       if(!confirm(`ต้องการลบรายการ ${type} นี้ใช่หรือไม่?`)) return;
       $('#loading').style.display = 'flex';
-      await apiPost('deleteEvent', { userId: liffProfile.userId, ts: ts });
+      await apiPost('deleteEvent', { userId: liffProfile.userId, ts: ts, type: type });
       await loadDashboardData();
     }
 
     // ============================================================
-    // API HELPERS (CORS FIXED)
+    // API HELPERS
     // ============================================================
- // ====== API Calls (Robust Version) ======
-    async function apiFetch(action, params = {}) {
-        const url = new URL(GAS_WEB_APP_URL);
-        url.searchParams.set('action', action);
-        for(const key in params) { url.searchParams.set(key, params[key]); }
-        const res = await fetch(url);
-        return await res.json();
-    }
-
     async function apiPost(action, payload) {
-        // Log เพื่อตรวจสอบก่อนส่ง
-        console.log("Sending...", action, payload);
-
-        // ใช้ URL ใหม่เสมอ
-        const url = GAS_WEB_APP_URL;
-
-        // เทคนิคแก้ Fail to fetch:
-        // 1. method: POST
-        // 2. headers: content-type เป็น text/plain (ห้าม application/json)
-        // 3. body: stringify JSON
-        const response = await fetch(url, {
+        if (!GAS_URL) { alert('กรุณาตั้งค่า GAS_URL ในโค้ดก่อน'); return; }
+        const response = await fetch(GAS_URL, {
             method: 'POST',
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8" 
-            },
-            body: JSON.stringify({ 
-                action: action, 
-                payload: payload 
-            })
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: action, payload: payload })
         });
-
-        if (!response.ok) {
-            throw new Error(`Server Error: ${response.status}`);
-        }
-
+        if (!response.ok) throw new Error(`Server Error: ${response.status}`);
         return await response.json();
     }
+
     function setupGlobalListeners() {
-      $$('.menu-btn').forEach(btn => { if(btn.dataset.target) btn.onclick = () => openContentCard(btn.dataset.target); });
       $('#btnSaveReg').onclick = async () => {
         if (!$('#consent').checked) return alert('กรุณายอมรับเงื่อนไข');
         $('#loading').style.display = 'flex';
-        await apiPost('registerUser', { userId: liffProfile.userId, displayName: liffProfile.displayName, pictureUrl: liffProfile.pictureUrl, hn: $('#hn').value, name_use: $('#nameuse').value, gender: $('#gender').value, age: $('#age').value, consent: true });
+        await apiPost('registerUser', { 
+            userId: liffProfile.userId, 
+            displayName: liffProfile.displayName, 
+            pictureUrl: liffProfile.pictureUrl, 
+            hn: $('#hn').value, 
+            name_use: $('#nameuse').value, 
+            gender: $('#gender').value, 
+            age: $('#age').value, 
+            consent: true 
+        });
         location.reload();
       };
     }
-    function openContentCard(id) { $$('.content-card').forEach(el => el.style.display = 'none'); $('#main-menu').style.display = 'none'; $(id).style.display = 'block'; }
-    function closeContentCard() { $$('.content-card').forEach(el => el.style.display = 'none'); $('#main-menu').style.display = 'block'; }
 
     window.addEventListener('load', main);
 
