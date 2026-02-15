@@ -155,6 +155,8 @@
     .bg-alert .note-icon { color: #f1c40f; }
     .bg-waist .note-icon { color: #16a085; }
     .bg-hba1c .note-icon { color: #8e44ad; }
+    .bg-goal .note-icon { color: #d81b60; }
+    .bg-med .note-icon { color: #00897b; }
 
     /* Modals (Bottom Sheet) */
     .modal-overlay { 
@@ -277,6 +279,17 @@
         text-align: center; padding: 8px; font-size: 14px; font-weight: bold;
         display: none; position: sticky; top:0; z-index: 101;
     }
+    
+    /* Gamification & Quota Display */
+    .status-card { display: flex; justify-content: space-between; background: #FFF3E0; border-radius: 20px; padding: 15px; margin-bottom: 15px; border: 2px solid #FFE0B2; }
+    .stat-box { text-align: center; flex: 1; }
+    .stat-val { font-size: 24px; font-weight: 800; color: var(--brand-dark); }
+    .stat-lbl { font-size: 14px; color: var(--muted); }
+
+    /* List Item */
+    .list-item { background: #fff8e1; border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .list-text { font-size: 20px; font-weight: 600; color: #4E342E; }
+    .list-sub { font-size: 16px; color: #8D6E63; }
 
   </style>
 </head>
@@ -285,12 +298,12 @@
   <!-- Loading Screen -->
   <div id="loading">
     <div class="spinner"></div>
-    <div style="color:var(--muted); font-weight:700; font-size:24px;">กำลังบันทึก...</div>
+    <div style="color:var(--muted); font-weight:700; font-size:24px;">กำลังโหลด...</div>
   </div>
 
   <div id="offline-bar" class="status-bar">⚠️ เชื่อมต่อ Server ไม่ได้ (โหมดจำลอง)</div>
 
-  <!-- VIEW 1: Note (Main Menu) -->
+  <!-- VIEW 1: Main Menu -->
   <div id="note-view" class="view-section">
     <nav class="navbar">
       <div class="nav-brand">
@@ -300,12 +313,19 @@
     </nav>
 
     <div class="container">
-      <!-- Greeting (Placeholder for Real Name) -->
-      <h2 id="greeting-text" style="text-align:center; color:#5D4037; margin-bottom:20px; font-size: 24px; line-height: 1.4;">
+      <!-- Greeting -->
+      <h2 id="greeting-text" style="text-align:center; color:#5D4037; margin-bottom:15px; font-size: 24px; line-height: 1.4;">
         สวัสดีค่ะ<br>วันนี้จะจดอะไรดีคะ?
       </h2>
       
-      <!-- Grid Buttons (Optimized Layout) -->
+      <!-- Gamification & Quota -->
+      <div class="status-card" id="status-card" style="display:none;">
+        <div class="stat-box"><div class="stat-val" id="user-level">-</div><div class="stat-lbl">ระดับ</div></div>
+        <div class="stat-box" style="border-left:1px solid #ddd; border-right:1px solid #ddd;"><div class="stat-val" id="user-points">-</div><div class="stat-lbl">คะแนน</div></div>
+        <div class="stat-box"><div class="stat-val" id="quota-rice">-</div><div class="stat-lbl">โควตาข้าว</div></div>
+      </div>
+      
+      <!-- Grid Buttons -->
       <div class="note-grid">
         <div class="note-item" onclick="openNoteForm('SBGM')">
           <div class="note-icon bg-sugar">🩸</div><div class="note-label">ค่าน้ำตาล<br>เจาะปลายนิ้ว</div>
@@ -313,9 +333,10 @@
         <div class="note-item" onclick="openNoteForm('BP')">
           <div class="note-icon bg-bp">💓</div><div class="note-label">ความดัน<br>โลหิต</div>
         </div>
-        <div class="note-item" onclick="openNoteForm('FOOD')">
-          <div class="note-icon bg-food">🍽️</div><div class="note-label">บันทึก<br>อาหาร</div>
+        <div class="note-item" onclick="handleCamera()">
+          <div class="note-icon bg-food">📸</div><div class="note-label">ถ่ายรูป<br>อาหาร</div>
         </div>
+        
         <div class="note-item" onclick="openNoteForm('WEIGHT')">
           <div class="note-icon bg-weight">⚖️</div><div class="note-label">ชั่ง<br>น้ำหนัก</div>
         </div>
@@ -325,15 +346,16 @@
         <div class="note-item" onclick="openNoteForm('ADVERSE')">
           <div class="note-icon bg-alert">⚠️</div><div class="note-label">อาการ<br>ผิดปกติ</div>
         </div>
-        <div class="note-item" onclick="openNoteForm('WAIST')">
-          <div class="note-icon bg-waist">📏</div><div class="note-label">วัด<br>รอบเอว</div>
+        
+        <div class="note-item" onclick="switchView('goals')">
+          <div class="note-icon bg-goal">🎯</div><div class="note-label">ตั้ง<br>เป้าหมาย</div>
         </div>
-        <div class="note-item" onclick="openNoteForm('HBA1C')">
-          <div class="note-icon bg-hba1c">🧪</div><div class="note-label">ค่า<br>HbA1C</div>
+        <div class="note-item" onclick="switchView('meds')">
+          <div class="note-icon bg-med">💊</div><div class="note-label">ยา<br>ของฉัน</div>
         </div>
       </div>
 
-      <div style="text-align:center; margin-top:40px;">
+      <div style="text-align:center; margin-top:30px;">
         <button class="btn" style="background:#fff; border:3px solid #eee; color:#666; width:auto; font-weight:700; padding:12px 30px; box-shadow:none; font-size: 20px;" onclick="loadDashboardData()">
           ดูประวัติย้อนหลัง 📈
         </button>
@@ -375,13 +397,80 @@
     </div>
   </div>
 
-  <!-- VIEW 3: Registration -->
-  <div id="reg-view" class="view-section" style="padding:20px;">
-    <div class="card" style="margin-top: 40px; text-align: center;">
+  <!-- VIEW 3: Goals -->
+  <div id="goals-view" class="view-section">
+    <nav class="navbar">
+      <div class="nav-brand">
+        <span>🎯 เป้าหมาย</span>
+      </div>
+      <button class="btn-close" onclick="switchView('note')">กลับ</button>
+    </nav>
+    <div class="container">
+      <div class="card">
+        <h2 style="font-size: 22px;">ตั้งเป้าหมายใหม่</h2>
+        <div class="form-group">
+            <label class="form-label" style="color:#555">เลือกเรื่อง</label>
+            <select id="goal-type">
+                <option value="น้ำตาล">ค่าน้ำตาล (mg/dL)</option>
+                <option value="น้ำหนัก">น้ำหนัก (kg)</option>
+                <option value="HbA1c">HbA1c (%)</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="form-label" style="color:#555">ค่าเป้าหมาย</label>
+            <input type="number" id="goal-target" placeholder="เช่น 120">
+        </div>
+        <div class="form-group">
+            <label class="form-label" style="color:#555">ภายในวันที่</label>
+            <input type="date" id="goal-date">
+        </div>
+        <button class="btn" onclick="saveGoal()">บันทึกเป้าหมาย</button>
+      </div>
+      <div id="goals-list" style="margin-top:20px;"></div>
+    </div>
+  </div>
+
+  <!-- VIEW 4: Meds -->
+  <div id="meds-view" class="view-section">
+    <nav class="navbar">
+      <div class="nav-brand">
+        <span>💊 ยาของฉัน</span>
+      </div>
+      <button class="btn-close" onclick="switchView('note')">กลับ</button>
+    </nav>
+    <div class="container">
+      <div class="card">
+        <h2 style="font-size: 22px;">เพิ่มยาใหม่</h2>
+        <div class="form-group">
+            <label class="form-label" style="color:#555">ชื่อยา</label>
+            <input type="text" id="med-name" placeholder="ชื่อยา">
+        </div>
+        <div class="form-group">
+            <label class="form-label" style="color:#555">วิธีใช้</label>
+            <input type="text" id="med-dose" placeholder="เช่น 1 เม็ด หลังอาหาร">
+        </div>
+        <div class="form-group">
+            <label class="form-label" style="color:#555">เวลา</label>
+            <select id="med-time">
+                <option value="เช้า">เช้า</option>
+                <option value="กลางวัน">กลางวัน</option>
+                <option value="เย็น">เย็น</option>
+                <option value="ก่อนนอน">ก่อนนอน</option>
+            </select>
+        </div>
+        <button class="btn" onclick="saveMed()">บันทึกยา</button>
+      </div>
+      <div id="meds-list" style="margin-top:20px;"></div>
+    </div>
+  </div>
+
+  <!-- VIEW 5: Registration -->
+  <div id="reg-view" class="view-section">
+    <div class="container" style="text-align: center;">
       <h2 style="font-size: 28px; color: var(--brand-dark);">ยินดีต้อนรับค่ะ</h2>
       <p style="font-size: 20px; color: #666;">ขอทราบข้อมูลนิดนึงนะคะ</p>
       
-      <div style="margin-top:20px; text-align: left;">
+      <div class="card" style="text-align: left;">
         <div class="form-group">
           <label class="form-label" style="color:#555; text-align:left;">เลข HN (ดูที่บัตร รพ.)</label>
           <input id="hn" type="text" placeholder="เลข 9 หลัก">
@@ -390,11 +479,13 @@
           <label class="form-label" style="color:#555; text-align:left;">ชื่อเล่น</label>
           <input id="nameuse" type="text" placeholder="เช่น ป้าแมว">
         </div>
+        <button id="btnSaveReg" class="btn">ลงทะเบียน</button>
       </div>
-      
-      <button id="btnSaveReg" class="btn" style="margin-top:20px;">ลงทะเบียน</button>
     </div>
   </div>
+
+  <!-- HIDDEN INPUT FOR CAMERA -->
+  <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="uploadImage(this)">
 
   <!-- MODAL: Input Form (Bottom Sheet Style) -->
   <div id="form-modal" class="modal-overlay">
@@ -424,7 +515,7 @@
         min: 20, max: 600, // Hard Limit
         soft_min: 60, soft_max: 400, // Soft Limit
         placeholder: 'ใส่ตัวเลข (เช่น 120)', 
-        subtypes: ['ก่อนอาหาร', 'หลังอาหาร', 'ก่อนนอน'] // Edited list
+        subtypes: ['ก่อนอาหาร', 'หลังอาหาร', 'ก่อนนอน'] // Updated list
       },
       'BP': { 
         title: 'วัดความดันโลหิต 💓', unit: 'mmHg', 
@@ -486,8 +577,8 @@
         await liff.init({ liffId: LIFF_ID });
         
         if (!liff.isLoggedIn()) {
-            liff.login();
-            return;
+             liff.login(); 
+             return;
         }
 
         liffProfile = await liff.getProfile();
@@ -520,8 +611,16 @@
             if (res && res.profile && res.profile.NameUse) {
                 nameEl.innerHTML = `สวัสดีค่ะ คุณ${res.profile.NameUse}<br>วันนี้จะจดอะไรดีคะ?`;
             } else {
-                // If no name, keep neutral.
                 nameEl.innerHTML = `สวัสดีค่ะ<br>วันนี้จะจดอะไรดีคะ?`;
+            }
+            
+            if(res && res.gamification) {
+                $('#status-card').style.display = 'flex';
+                $('#user-level').innerText = res.gamification.level || 1;
+                $('#user-points').innerText = res.gamification.points || 0;
+            }
+            if(res && res.quota) {
+                $('#quota-rice').innerText = `${res.quota.rice} ทัพพี`;
             }
         } catch (e) { console.log("Profile fetch failed"); }
     }
@@ -531,6 +630,8 @@
       if (viewName === 'note') $('#note-view').classList.add('active');
       else if (viewName === 'dashboard') $('#dashboard-view').classList.add('active');
       else if (viewName === 'reg') $('#reg-view').classList.add('active');
+      else if (viewName === 'goals') { $('#goals-view').classList.add('active'); loadGoals(); }
+      else if (viewName === 'meds') { $('#meds-view').classList.add('active'); loadMeds(); }
       window.scrollTo(0,0);
     }
 
@@ -581,7 +682,6 @@
 
     function closeNoteForm() { $('#form-modal').style.display = 'none'; }
 
-    // Alert Function (Red Text, Compact)
     function alertModal(msg, type = 'warning') {
         Swal.fire({
             icon: type,
@@ -598,7 +698,6 @@
       const elVal1 = $('#inp-val1');
       const elVal2 = $('#inp-val2');
 
-      // 1. Validation: Subtype
       if (conf.subtypes && (!elSubtype.value)) {
          alertModal(metric === 'FOOD' ? "ลืมเลือกมื้ออาหารค่ะ" : "วัดตอนไหนคะ? เลือกด้านบนก่อนนะ");
          return;
@@ -607,7 +706,6 @@
       let v1 = elVal1 ? elVal1.value.trim() : null;
       let v2 = elVal2 ? elVal2.value.trim() : null;
 
-      // 2. Validation: Empty
       if (metric === 'BP') {
           if(!v1 || !v2) { alertModal("ใส่เลขความดันให้ครบ 2 ช่องนะคะ"); return; }
       } else if (metric === 'FOOD') {
@@ -619,7 +717,6 @@
           if(!v1) { alertModal("เลือกอาการก่อนนะคะ"); return; }
       }
 
-      // 3. Validation: Range (Friendly Error)
       if (metric === 'SBGM') {
           const val = parseFloat(v1);
           if (val < 20 || val > 900) { alertModal("ค่าสูงหรือต่ำเกินไปค่ะ ลองเช็คตัวเลขอีกทีนะคะ", 'error'); return; }
@@ -629,7 +726,6 @@
           if (s < 50 || s > 300 || d < 30 || d > 200) { alertModal("ค่าความดันดูแปลกๆ ลองเช็คอีกทีนะคะ", 'error'); return; }
       }
 
-      // 4. Send Data
       const btn = $('#btn-save-form');
       const originalText = btn.innerText;
       btn.innerText = 'กำลังส่ง...';
@@ -645,7 +741,6 @@
 
       try {
         await apiPost('logEvent', payload);
-        
         closeNoteForm(); 
         
         let successTitle = '';
@@ -672,74 +767,97 @@
       }
     }
 
+    function handleCamera() { $('#camera-input').click(); }
+    async function uploadImage(input) {
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+            $('#loading').style.display = 'flex';
+            reader.onload = async function(e) {
+                const base64 = e.target.result.split(',')[1];
+                try {
+                    const res = await apiPost('uploadImage', { userId: liffProfile.userId, imageBase64: base64, type: 'FOOD' });
+                    $('#loading').style.display = 'none';
+                    await Swal.fire({ title: 'เรียบร้อย! ✅', text: res.message || 'บันทึกรูปแล้วค่ะ', icon: 'success' });
+                } catch(err) { $('#loading').style.display = 'none'; alertModal('อัปโหลดไม่สำเร็จ', 'error'); }
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function loadGoals() {
+        $('#loading').style.display = 'flex';
+        try {
+            const res = await apiPost('getGoals', { userId: liffProfile.userId });
+            const list = $('#goals-list'); list.innerHTML = '';
+            res.goals.forEach(g => { list.innerHTML += `<div class="list-item" style="background:#fce4ec;"><span class="list-text">${g.type}: ${g.target}</span><span class="list-sub">ภายใน: ${fmtDate(g.deadline).split(' ')[0]}</span></div>`; });
+        } catch(e) {} finally { $('#loading').style.display = 'none'; }
+    }
+    async function saveGoal() {
+        const type = $('#goal-type').value; const target = $('#goal-target').value; const date = $('#goal-date').value;
+        if(!target || !date) return alertModal('กรอกข้อมูลให้ครบนะคะ');
+        $('#loading').style.display = 'flex';
+        await apiPost('saveGoal', { userId: liffProfile.userId, goalType: type, target: target, deadline: date });
+        $('#goal-target').value = ''; loadGoals();
+    }
+
+    async function loadMeds() {
+        $('#loading').style.display = 'flex';
+        try {
+            const res = await apiPost('getMeds', { userId: liffProfile.userId });
+            const list = $('#meds-list'); list.innerHTML = '';
+            res.meds.forEach(m => { list.innerHTML += `<div class="list-item" style="background:#e0f2f1;"><div style="display:flex;flex-direction:column;"><span class="list-text">${m.name}</span><span class="list-sub">${m.dosage}</span></div><span style="font-weight:bold;color:#00796b;">${m.time}</span></div>`; });
+        } catch(e) {} finally { $('#loading').style.display = 'none'; }
+    }
+    async function saveMed() {
+        const name = $('#med-name').value; const dose = $('#med-dose').value; const time = $('#med-time').value;
+        if(!name) return alertModal('ใส่ชื่อยาก่อนนะคะ');
+        $('#loading').style.display = 'flex';
+        await apiPost('saveMed', { userId: liffProfile.userId, medName: name, dosage: dose, time: time });
+        $('#med-name').value = ''; $('#med-dose').value = ''; loadMeds();
+    }
+
     async function loadDashboardData() {
       $('#loading').style.display = 'flex';
       try {
         const res = await apiPost('getDashboard', { userId: liffProfile.userId });
         if (!res || !res.profile) { switchView('reg'); return; }
-        
         allEventsData = [];
-        if (res.events) {
-            Object.keys(res.events).forEach(key => {
-                res.events[key].forEach(e => { allEventsData.push({ ...e, type: key }); });
-            });
-        }
+        if (res.events) { Object.keys(res.events).forEach(key => { res.events[key].forEach(e => { allEventsData.push({ ...e, type: key }); }); }); }
         allEventsData.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
         renderHistoryTable();
         switchView('dashboard');
       } catch (e) { alertModal('โหลดข้อมูลไม่ได้ ลองเช็คเน็ตนะคะ', 'error'); } 
       finally { $('#loading').style.display = 'none'; }
     }
-
     function renderHistoryTable() {
         const tableBody = $('#history-table tbody');
         const data = allEventsData;
-        if (data.length === 0) { 
-            tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:#888;">ยังไม่มีข้อมูลค่ะ</td></tr>`; return; 
-        }
+        if (data.length === 0) { tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:30px; color:#888;">ยังไม่มีข้อมูลค่ะ</td></tr>`; return; }
         tableBody.innerHTML = data.map(e => {
             let valDisplay = e.value_numeric_1;
             if (e.type === 'BP') valDisplay = `${e.value_numeric_1}/${e.value_numeric_2}`;
             if (e.type === 'FOOD') valDisplay = e.value_text;
             const title = METRIC_CONFIG[e.type]?.title.split(' ')[0] || e.type;
-            return `<tr>
-                    <td style="font-size:16px;">${fmtDate(e.timestamp).split(' ')[0]}<br>${fmtDate(e.timestamp).split(' ')[1]}</td>
-                    <td><strong>${title}</strong><br><span style="font-size:14px; color:#666;">${e.event_subtype || ''}</span></td>
-                    <td style="font-size:22px; color:#d35400; font-weight:700;">${valDisplay}</td>
-                    <td><button class="btn-small danger" onclick="deleteEvent('${e.timestamp}', '${e.type}')">ลบ</button></td>
-                </tr>`;
+            return `<tr><td style="font-size:16px;">${fmtDate(e.timestamp).split(' ')[0]}<br>${fmtDate(e.timestamp).split(' ')[1]}</td><td><strong>${title}</strong><br><span style="font-size:14px; color:#666;">${e.event_subtype || ''}</span></td><td style="font-size:22px; color:#d35400; font-weight:700;">${valDisplay}</td><td><button class="btn-small danger" onclick="deleteEvent('${e.timestamp}', '${e.type}')">ลบ</button></td></tr>`;
         }).join('');
     }
-
     async function deleteEvent(ts, type) {
-        const result = await Swal.fire({
-            title: 'ลบรายการนี้?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            confirmButtonText: 'ลบเลย',
-            cancelButtonText: 'ไม่ลบ'
-        });
+        const result = await Swal.fire({ title: 'ลบรายการนี้?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'ลบเลย', cancelButtonText: 'ไม่ลบ' });
         if (result.isConfirmed) {
             $('#loading').style.display = 'flex';
             try { await apiPost('deleteEvent', { userId: liffProfile.userId, timestamp: ts }); await loadDashboardData(); } 
             catch(e) { alertModal('ลบไม่ได้ค่ะ', 'error'); }
         }
     }
-
     async function apiPost(action, payload) {
         const body = JSON.stringify({ action, payload });
-        const response = await fetch(GAS_URL, {
-            method: 'POST', body: body,
-            mode: 'cors', credentials: 'omit', redirect: 'follow',
-            headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-        });
+        const response = await fetch(GAS_URL, { method: 'POST', body: body, mode: 'cors', credentials: 'omit', redirect: 'follow', headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
         if (!response.ok) throw new Error('Server Error');
         const data = await response.json();
         if (data.status === 'error') throw new Error(data.message);
         return data;
     }
-
     function setupGlobalListeners() {
         $('#btnSaveReg').onclick = async () => {
             const hn = $('#hn').value;
@@ -749,9 +867,7 @@
             location.reload();
         };
     }
-
     window.addEventListener('load', main);
-
 </script>
 </body>
 </html>
