@@ -5,762 +5,1429 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
   <title>สวีคุมหวาน • บันทึกผล</title>
 
+  <!-- Fonts & Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Mali:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300&display=swap" rel="stylesheet">
-
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Libraries -->
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script> 
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    /* --- CORE VARIABLES --- */
+    /* --- MASTER THEME: Cream, Brown, Yellow, Orange --- */
     :root{
-      --bg: #fffbf0; --card: #ffffff; --ink: #2c3e50; --muted: #7f8c8d; 
-      --brand: #f39c12; --brand-light: #fef5e7; --brand-dark: #d35400;
-      --ok: #27ae60; --warn: #e67e22; --danger: #e74c3c;
-      --shadow: 0 8px 20px rgba(0,0,0,0.08);
-      --radius: 20px;
-      --font-main: 'Mali', sans-serif;
+      --bg: #FFFFFF;           
+      --card: #FFF8E1;         
+      --ink: #3E2723;          
+      
+      --modal-bg: #5D4037;     
+      --modal-title: #FFD600;  
+      
+      --shadow: 0 8px 25px rgba(0,0,0,0.1);
+      --font-main: 'Mali', cursive; 
     }
-
-    /* --- GLOBAL STYLES --- */
-    *{box-sizing:border-box}
-    html,body{height:100%; scroll-behavior: smooth;}
-    body{ margin:0; padding:0; background:var(--bg); font-family:var(--font-main); color:var(--ink); font-size:16px; -webkit-tap-highlight-color: transparent; }
     
-    h1, h2, h3, h4 { margin: 0 0 10px 0; font-weight: 700; }
-    button, input, select, textarea { font-family: var(--font-main); }
-    
-    /* Inputs */
-    input, select, textarea { 
-      width: 100%; padding: 14px; font-size: 22px; 
-      border: 2px solid #eee; border-radius: 16px; background: #fff; 
-      transition: 0.3s; color: var(--ink); text-align: center;
+    * { box-sizing: border-box; font-family: var(--font-main) !important; }
+    html, body { 
+      height: 100%; margin: 0; padding: 0; 
+      background: var(--bg); color: var(--ink); 
+      font-size: 20px; -webkit-tap-highlight-color: transparent; 
     }
-    input::placeholder { color: #ccc; font-size: 18px; }
-    input:focus, textarea:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 4px rgba(243, 156, 18, 0.1); }
-    input.invalid, textarea.invalid { border-color: #ffcccb; background: #fffbfb; animation: shake 0.4s; }
-    @keyframes shake { 0%, 100% {transform: translateX(0);} 25% {transform: translateX(-5px);} 75% {transform: translateX(5px);} }
-
-    /* Buttons (General) */
+    
+    /* Enforce Font globally */
+    input, button, select, textarea, .swal2-popup, .swal2-title, .swal2-content, .swal2-html-container, .swal2-confirm, .swal2-cancel, .swal2-deny {
+       font-family: var(--font-main) !important;
+    }
+    
+    h1, h2, h3 { margin: 0 0 15px 0; font-weight: 700; }
+    
+    /* --- BUTTONS --- */
     .btn { 
-      border: none; outline: none; background: linear-gradient(135deg, #f1c40f, #f39c12); 
-      color: #fff; padding: 16px 20px; border-radius: 50px; font-size: 20px; font-weight: 700; 
-      width: 100%; cursor: pointer; transition: 0.2s; box-shadow: 0 6px 14px rgba(243, 156, 18, 0.3); 
-      display: flex; align-items: center; justify-content: center; gap: 8px;
+      border: 3px solid #FFFFFF; outline: none; 
+      background: linear-gradient(135deg, #FFEA00 0%, #FF9100 100%);
+      color: #3E2723; padding: 18px 30px; 
+      border-radius: 50px; font-size: 26px; font-weight: 800; 
+      width: 100%; cursor: pointer; 
+      box-shadow: 0 8px 20px rgba(255, 145, 0, 0.4); 
+      display: flex; align-items: center; justify-content: center; gap: 10px; 
+      transition: transform 0.1s; 
     }
-    .btn:active { transform: scale(0.96); box-shadow: none; }
-    .btn:disabled { background: #e0e0e0; cursor: not-allowed; box-shadow: none; color: #a0a0a0; }
-    .btn-close { background: #f0f2f5; color: #666; box-shadow: none; width: auto; font-size: 16px; padding: 8px 16px; border-radius: 12px; }
-    .btn.danger { background: linear-gradient(135deg, #ff7675, #d63031); box-shadow: 0 4px 10px rgba(214, 48, 49, 0.3); }
-    .btn-small { padding: 4px 12px; font-size: 14px; border-radius: 20px; width: auto; margin: 2px; }
+    .btn:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(255, 145, 0, 0.4); }
 
-    /* Navbar */
-    .navbar{ background: #fff; padding: 12px 16px; box-shadow: 0 2px 15px rgba(0,0,0,0.04); display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
-    .nav-brand{ display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 20px; color: var(--brand-dark); }
-    .nav-brand img { width: 40px; height: 40px; object-fit: contain; }
-
-    /* Containers */
-    .container{ max-width: 800px; margin: 0 auto; padding: 16px; padding-bottom: 90px; }
-    .card { background: var(--card); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; box-shadow: var(--shadow); border: 1px solid #fff; }
+    .btn-add { 
+      background: #FFF9C4; color: #5D4037; border: 3px solid #FBC02D;
+      font-size: 22px; padding: 12px; margin-top: 15px; border-radius: 50px;
+      width: 100%; font-weight: 700; cursor: pointer;
+    }
     
-    /* === NOTE GRID UI (4x3) === */
-    .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 20px; }
+    .btn-close { 
+      background: #FFCDD2; color: #C62828; 
+      width: auto; font-size: 20px; padding: 8px 24px; 
+      border-radius: 50px; border:none; font-weight:700; cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* --- ADD SHINE ANIMATION --- */
+    @keyframes shineSweep {
+        0% { left: -100%; }
+        20% { left: 100%; }
+        100% { left: 100%; }
+    }
+    .btn, div:where(button.swal2-confirm), div:where(button.swal2-cancel), div:where(button.swal2-deny) {
+        position: relative;
+        overflow: hidden;
+    }
+    .btn::after, div:where(button.swal2-confirm)::after, div:where(button.swal2-cancel)::after, div:where(button.swal2-deny)::after {
+        content: ''; position: absolute; top: 0; left: -100%;
+        width: 50px; height: 100%;
+        background: rgba(255, 255, 255, 0.6);
+        transform: skewX(-20deg);
+        animation: shineSweep 3s infinite ease-in-out;
+        pointer-events: none;
+    }
+
+    /* --- INPUTS --- */
+    input, select, textarea { 
+      width: 100%; padding: 20px; font-size: 28px; 
+      border: 3px solid #D7CCC8; border-radius: 30px; 
+      background: #fff; color: #333; text-align: center; 
+      margin-bottom: 20px; font-weight: 700; 
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    }
+    input:focus { border-color: #FF9100; outline: none; box-shadow: 0 0 10px rgba(255, 145, 0, 0.4); }
+    input::placeholder { color: #CFD8DC; font-weight: 400; font-size: 24px; }
+    
+    /* --- LAYOUT --- */
+    .navbar { 
+      background: #fff; padding: 15px 20px; 
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+      display: flex; align-items: center; justify-content: space-between; 
+      position: sticky; top: 0; z-index: 100; border-bottom: 1px solid #eee;
+    }
+    .nav-brand { font-weight: 800; font-size: 26px; color: var(--ink); }
+    .container { max-width: 600px; margin: 0 auto; padding: 20px; padding-bottom: 120px; }
+    
+    /* --- NEW HEADER PROFILE --- */
+    .profile-header {
+        background: linear-gradient(145deg, #FFD600, #FF9100);
+        border-radius: 30px; padding: 20px; margin-bottom: 25px;
+        display: flex; align-items: center; gap: 15px;
+        box-shadow: 0 10px 25px rgba(255, 145, 0, 0.3);
+        border: 4px solid #FFF;
+        flex-wrap: wrap;
+    }
+    .profile-header img {
+        width: 80px; height: 80px; border-radius: 50%; object-fit: cover;
+        border: 4px solid #FFF; background: #EEE; flex-shrink: 0;
+    }
+    .profile-info { flex: 1; color: #3E2723; min-width: 60%; }
+    .profile-name { font-size: 28px; font-weight: 800; line-height: 1.1; margin-bottom: 5px; }
+    .profile-stats { font-size: 16px; font-weight: 600; background: rgba(255,255,255,0.4); padding: 5px 12px; border-radius: 15px; display: inline-block; line-height: 1.3;}
+    .profile-target { display: block; font-size: 20px; color: #D84315; font-weight: 800; margin-top: 5px;}
+
+    /* --- GRID MENU --- */
+    .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
     .note-item { 
-      background: #fff; border-radius: var(--radius); padding: 18px 6px; 
-      display: flex; flex-direction: column; align-items: center; text-align: center; gap: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.06); border: 2px solid transparent; 
-      cursor: pointer; transition: 0.2s; position: relative; overflow: hidden;
+      background: linear-gradient(145deg, #EFEBE9, #FFF3E0);
+      border-radius: 30px; padding: 15px 5px; aspect-ratio: 1 / 1.15; 
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.1); border: 2px solid #D7CCC8; 
+      cursor: pointer; transition: 0.1s; 
     }
-    .note-item:active { transform: scale(0.95); border-color: var(--brand); background: var(--brand-light); }
-    .note-icon { font-size: 44px; line-height: 1; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.1)); transition: 0.2s; }
-    .note-label { font-size: 15px; font-weight: 600; line-height: 1.2; color: var(--ink); }
+    .note-item:active { transform: scale(0.95); background: #D7CCC8; }
+    .note-icon { font-size: 48px; line-height: 1; margin-bottom: 8px; }
+    .note-label { font-size: 22px; font-weight: 700; line-height: 1.2; color: var(--ink); text-align: center; }
     
-    /* Colors */
-    .bg-sugar .note-icon { color: #e74c3c; } 
-    .bg-bp .note-icon { color: #3498db; } 
-    .bg-food .note-icon { color: #27ae60; }
-    .bg-weight .note-icon { color: #9b59b6; }
-    .bg-ex .note-icon { color: #e67e22; }
-    .bg-alert .note-icon { color: #f1c40f; }
+    .bg-sugar .note-icon { color: #C62828; } 
+    .bg-bp .note-icon { color: #1565C0; } 
+    .bg-food .note-icon { color: #2E7D32; }
+    .bg-weight .note-icon { color: #455A64; } 
+    .bg-ex .note-icon { color: #EF6C00; } 
+    .bg-alert .note-icon { color: #F9A825; }
 
-    /* === FORM COMPONENTS (Friendly UI) === */
-    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
-    .modal-sheet { background: #fff; width: 100%; max-width: 600px; border-radius: 30px 30px 0 0; padding: 24px; box-shadow: 0 -10px 40px rgba(0,0,0,0.15); animation: slideUp 0.3s ease-out; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; }
+    /* --- MODALS --- */
+    .modal-overlay { 
+      position: fixed; inset: 0; background: #FFFFFF !important; 
+      z-index: 2000; display: none; align-items: flex-end; justify-content: center; 
+    }
+    .modal-overlay.centered { align-items: center; background: rgba(255,255,255,0.95) !important; }
+
+    .modal-sheet { 
+      background: var(--modal-bg); color: var(--modal-text); 
+      width: 100%; max-width: 600px; 
+      border-radius: 40px 40px 0 0; padding: 40px 25px 60px 25px; 
+      box-shadow: 0 -10px 50px rgba(0,0,0,0.5); 
+      animation: slideUp 0.3s; display: flex; flex-direction: column; 
+      max-height: 95vh; overflow-y: auto;
+    }
+    
+    .modal-card-center {
+        background: var(--modal-bg); color: var(--modal-text);
+        width: 95%; max-width: 500px; border-radius: 40px; padding: 40px 30px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        animation: popIn 0.3s; display: flex; flex-direction: column; max-height: 90vh; overflow-y: auto;
+    }
+
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
     
-    .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .form-title { font-size: 26px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 10px; }
-    .form-group { margin-bottom: 24px; }
-    .form-label { display: block; font-size: 18px; font-weight: 600; margin-bottom: 12px; color: var(--muted); text-align: center; }
+    .form-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    .form-title { font-size: 36px; font-weight: 800; color: #FFD600; text-shadow: 2px 2px 0px rgba(0,0,0,0.2); }
+    .form-label { display: block; font-size: 26px; font-weight: 600; margin-bottom: 20px; color: #FFF59D; text-align: center; }
     
-    /* Gentle Alert */
-    .soft-alert { 
-      background: #fff8e1; color: #d35400; border: 1px solid #ffe0b2;
-      font-size: 16px; margin-top: 8px; display: none; 
-      align-items: center; justify-content: center; gap: 8px; 
-      font-weight: 500; padding: 10px; border-radius: 12px;
-      animation: fadeIn 0.3s;
+    /* --- DASHBOARD CARD --- */
+    .hist-card {
+        background: #FFF8E1; border-radius: 20px; margin-bottom: 30px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #FFE0B2;
+        overflow: visible; position: relative; display: flex; flex-direction: column;
+        padding-top: 35px;
     }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    .hist-header-badge {
+        position: absolute; top: -12px; left: 20px;
+        background: #5D4037; color: #FFF;
+        padding: 6px 20px; border-radius: 20px;
+        font-size: 18px; font-weight: 700;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 10;
+    }
+    .hist-body {
+        display: flex; flex-direction: row; padding: 15px 20px; gap: 15px;
+        align-items: flex-start;
+    }
+    .hist-img-container {
+        width: 110px; height: 110px; flex-shrink: 0;
+        border-radius: 15px; overflow: hidden; border: 3px solid #D7CCC8;
+        background: #EEE; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .hist-img-container img { width: 100%; height: 100%; object-fit: cover; }
+    .hist-data { flex: 1; display: flex; flex-direction: column; gap: 10px; width: 100%; }
+    
+    .data-row { margin-bottom: 5px; display: flex; align-items: baseline; flex-wrap: wrap; }
+    .data-label { font-size: 18px; color: #8D6E63; font-weight: 600; margin-right: 8px; }
+    .data-value-big { font-size: 34px; color: #3E2723; font-weight: 800; line-height: 1; }
+    .unit { font-size: 16px; color: #8D6E63; font-weight: 500; margin-left: 2px; }
+    .food-list-item { font-size: 20px; color: #3E2723; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed #E0E0E0; width: 100%; display: block; }
+    .food-flag { font-size: 14px; font-weight: bold; background: #E8F5E9; color: #2E7D32; padding: 4px 8px; border-radius: 10px; margin-top: 5px; display: inline-block; line-height: 1.2; border: 1px solid #C8E6C9;}
+    
+    /* แก้ไขป้าย High/Low ให้แดงเข้มสะใจ */
+    .alert-badge.high { 
+        background: #D32F2F !important; color: white !important; border: 2px solid #B71C1C;
+        padding: 4px 12px; border-radius: 20px; font-size: 16px; font-weight: 800; margin-left: 8px;
+        box-shadow: 0 2px 5px rgba(211, 47, 47, 0.4);
+    }
+    .alert-badge.low { 
+        background: #E65100 !important; color: white !important; border: 2px solid #BF360C;
+        padding: 4px 12px; border-radius: 20px; font-size: 16px; font-weight: 800; margin-left: 8px;
+        box-shadow: 0 2px 5px rgba(230, 81, 0, 0.4);
+    }
+    .divider { height: 2px; background: #D7CCC8; margin: 10px 0; width: 100%; border-radius: 2px; opacity: 0.5; }
 
-    /* === NEW: BUTTON CHIPS (Replacement for Select) === */
-    .chip-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-    .chip-btn {
-      padding: 10px 18px; font-size: 16px; border-radius: 25px; border: 2px solid #eee;
-      background: #fff; color: #555; font-weight: 600; cursor: pointer; transition: 0.2s;
-      flex-grow: 1; text-align: center; max-width: 48%;
+    /* --- LOADING --- */
+    #loading { 
+      position: fixed; inset: 0; background: rgba(255,255,255,1); 
+      display: none; flex-direction: column; justify-content: center; align-items: center; 
+      z-index: 9999; 
     }
-    .chip-btn.active {
-      border-color: var(--brand); background: var(--brand-light); color: var(--brand-dark);
-      box-shadow: 0 4px 10px rgba(243, 156, 18, 0.2); transform: translateY(-2px);
-    }
-
-    /* Success Card */
-    .success-card { background: #fff; color: var(--ink); border-radius: 30px; padding: 40px 30px; text-align: center; display: none; animation: popIn 0.4s; margin: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); width: 85%; max-width: 350px; position: relative; }
-    @keyframes popIn { from { transform: scale(0.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-    .success-icon { font-size: 80px; margin-bottom: 10px; display: block; }
-    .success-title { font-size: 28px; font-weight: 700; color: var(--ok); margin-bottom: 8px; }
-    
-    /* Loading Spinner */
-    #loading { position: fixed; inset: 0; background: rgba(255,255,255,0.95); display: none; place-items: center; z-index: 9999; flex-direction: column; justify-content: center; gap: 16px;}
-    .spinner { width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid var(--brand); border-radius: 50%; animation: spin 1s linear infinite; }
+    .spinner { width: 80px; height: 80px; border: 10px solid #f3f3f3; border-top: 10px solid #FF9100; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Utility to Toggle Views */
+    /* --- VIEWS --- */
     .view-section { display: none; }
-    .view-section.active { display: block; animation: fadeIn 0.3s; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .view-section.active { display: block; }
 
-    /* Legacy Styles (Profile, Menu) */
-    .profile-grid { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center; }
-    .profile-left .avatar { width: 100px; height: 100px; border-radius: 50%; object-fit: cover; border: 3px solid #f6e3a6; }
-    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
-    .menu-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 16px; background: #fff; border: 1px solid #eee; border-radius: var(--radius); box-shadow: var(--shadow); cursor: pointer; font-weight: 600; font-size: 16px; color: var(--ink); }
-    .menu-btn .emoji { font-size: 32px; }
-    .table-wrap { overflow-x: auto; border: 1px solid #eee; border-radius: 12px; margin-top: 12px; }
-    table { width: 100%; border-collapse: collapse; min-width: 400px; }
-    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
-    th { background: #f9f9f9; font-weight: 600; color: var(--muted); }
-    .filter-controls { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
-    .filter-btn { padding: 6px 12px; border-radius: 20px; border: 1px solid #ddd; background: #fff; color: #777; cursor: pointer; }
-    .filter-btn.active { background: var(--brand); color: #fff; border-color: var(--brand); }
-    .charts-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-    .chart-card { background: #fff; padding: 16px; border-radius: var(--radius); box-shadow: var(--shadow); }
+    /* --- SWEETALERT OVERRIDES --- */
+    div:where(.swal2-container) { z-index: 10000 !important; }
+    div:where(.swal2-popup) { 
+        border-radius: 40px !important; background: #FFF9C4 !important; 
+        color: #3E2723 !important; border: 4px solid #FBC02D !important;
+    }
+    div:where(.swal2-title) { color: #5D4037 !important; font-size: 30px !important; font-weight: 800 !important; }
+    div:where(.swal2-html-container) { color: #5D4037 !important; font-size: 22px !important; }
+    
+    div:where(button.swal2-confirm), div:where(button.swal2-cancel), div:where(button.swal2-deny) { 
+        background: linear-gradient(135deg, #FFEA00 0%, #FF9100 100%) !important; 
+        color: #3E2723 !important; border: 3px solid #FFF !important; border-radius: 50px !important; 
+        font-size: 24px !important; padding: 15px 30px !important;
+        box-shadow: 0 5px 15px rgba(255,145,0,0.4) !important; outline: none !important; margin: 8px !important;
+        font-weight: 800 !important;
+    }
+    
+    div:where(.swal2-popup.swal2-show) input, div:where(.swal2-popup.swal2-show) select, div:where(.swal2-popup.swal2-show) textarea { 
+        background: #FFFFFF !important; border-radius: 20px !important; color: #3E2723 !important; 
+        border: 3px solid #D7CCC8 !important; outline: none !important; padding: 15px !important;
+    }
+    
+    /* Options, Meal Selector, Chips */
+    .chip-container, .custom-selector-container { 
+        display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; width: 100%; margin: 20px 0; 
+    }
+    .chip-btn, .custom-selector-btn, .symptom-btn, .score-btn {
+        background: #FFFFFF; border: 3px solid #D7CCC8; border-radius: 50px; 
+        padding: 16px 20px; font-size: 24px; color: #5D4037; font-weight: 700; 
+        cursor: pointer; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        text-align: center; flex: 1 1 auto; min-width: 120px; white-space: nowrap;
+    }
+    .chip-btn.active, .custom-selector-btn.active, .symptom-btn.active, .score-btn.active {
+        background: #FFD600; color: #3E2723; border-color: #FFB300;
+        transform: scale(1.05); box-shadow: 0 8px 20px rgba(255, 214, 0, 0.5);
+    }
+
+    /* Body Comp Mini Inputs */
+    .bodycomp-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; background: #FFF; border-radius: 20px; padding: 10px 15px; }
+    .bodycomp-row label { font-size: 22px; font-weight: 700; color: #5D4037; width: 50%; text-align: left;}
+    .bodycomp-row input { width: 30%; padding: 10px; font-size: 24px; margin-bottom: 0; border-radius: 15px; }
+    .bodycomp-row span { font-size: 18px; color: #8D6E63; width: 20%; text-align: left; padding-left: 10px;}
+
+    /* =========================================================
+       REGISTRATION UI STYLES
+       ========================================================= */
+    #register-view { background-color: var(--card); min-height: 100vh; padding-bottom: 40px; }
+    
+    .anim-slide-up {
+        opacity: 0; transform: translateY(40px);
+        animation: slideUpFade 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+    @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+    .d-100 { animation-delay: 0.1s; } .d-200 { animation-delay: 0.2s; } 
+    .d-300 { animation-delay: 0.3s; } .d-400 { animation-delay: 0.4s; }
+
+    .reg-step { display: none; padding: 20px; max-width: 600px; margin: 0 auto; }
+    .reg-step.active { display: block; }
+
+    .reg-title { font-size: 32px; color: var(--ink); text-align: center; font-weight: 800; margin-bottom: 10px; line-height: 1.3; }
+    .reg-desc { font-size: 22px; color: #5D4037; text-align: center; line-height: 1.4; margin-bottom: 30px; }
+    
+    .reg-card-btn {
+        background: #FFFFFF; border: 3px solid #D7CCC8; border-radius: 30px; 
+        padding: 20px; margin-bottom: 15px; display: flex; align-items: center; gap: 15px; 
+        cursor: pointer; transition: 0.2s; box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+    .reg-card-btn:active { transform: scale(0.96); background: #FFF3E0; border-color: #FFB300; }
+    .reg-card-btn .r-icon { font-size: 36px; line-height: 1; flex-shrink: 0; }
+    .reg-card-btn .r-text { font-size: 24px; font-weight: 700; color: var(--ink); line-height: 1.2; text-align: left; }
+
+    .reg-cond-box { 
+        background: #FFFFFF; border: 4px solid #FFE0B2; border-radius: 30px; 
+        padding: 25px 20px; margin-bottom: 30px; box-shadow: 0 8px 20px rgba(0,0,0,0.05); 
+    }
+    .reg-cond-item { display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px; font-size: 22px; color: var(--ink); font-weight: 600; line-height: 1.3; }
+    .reg-cond-item:last-child { margin-bottom: 0; }
+    .reg-cond-num { 
+        background: #FF9100; color: white; width: 36px; height: 36px; 
+        border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+        font-size: 20px; font-weight: 800; flex-shrink: 0; box-shadow: 0 4px 8px rgba(255, 145, 0, 0.3);
+    }
+
+    .reg-form-group { margin-bottom: 25px; }
+    .reg-label { font-size: 24px; font-weight: 700; color: #5D4037; margin-bottom: 10px; display: block; text-align: left; }
+    
+    .reg-radio-container { display: flex; gap: 15px; }
+    .reg-radio-label { 
+      flex: 1; border: 3px solid #D7CCC8; border-radius: 50px; padding: 15px; 
+      text-align: center; font-size: 26px; font-weight: 700; color: #5D4037; 
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; background: #FFFFFF;
+      transition: all 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .reg-radio-label.active { background: #FFD600; border-color: #FFB300; color: #3E2723; transform: scale(1.05); box-shadow: 0 8px 20px rgba(255, 214, 0, 0.4); }
+    .reg-radio-label input { display: none; }
+
+    .reg-consent-box { 
+        background: #FFFFFF; border: 3px solid #FFE0B2; padding: 20px; border-radius: 25px; 
+        margin-top: 30px; display: flex; gap: 15px; align-items: flex-start; cursor: pointer;
+    }
+    .reg-consent-box input { width: 30px; height: 30px; margin-top: 5px !important; flex-shrink: 0; accent-color: #FF9100; cursor: pointer; }
+    .reg-consent-box p { margin: 0; font-size: 20px; color: #5D4037; line-height: 1.4; font-weight: 500; }
+
+    .reg-btn-row { display: flex; gap: 15px; margin-top: 35px; }
+    .reg-btn-secondary { 
+        background: #FFFFFF; color: #5D4037; border: 3px solid #D7CCC8; 
+        padding: 16px; border-radius: 50px; font-size: 24px; font-weight: 700; 
+        width: 100%; cursor: pointer; flex: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transition: 0.1s;
+    }
+    .reg-btn-secondary:active { transform: scale(0.96); background: #EFEBE9; }
+
+    .reg-profile-pic { width: 120px; height: 120px; border-radius: 50%; border: 5px solid #FFD600; object-fit: cover; margin: 0 auto 15px; display: block; box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+    .reg-profile-name { font-size: 28px; font-weight: 800; text-align: center; color: var(--ink); margin-bottom: 5px; }
+    .reg-profile-group { display: inline-block; background: #5D4037; color: #FFF; padding: 6px 20px; border-radius: 50px; font-size: 20px; font-weight: 600; margin-bottom: 25px; }
 
   </style>
 </head>
 <body>
 
-  <div id="loading">
-    <div class="spinner"></div>
-    <div style="color:var(--muted); font-weight:600; font-size:18px;">กำลังบันทึกข้อมูล...</div>
-  </div>
+  <div id="loading" style="display: flex;"><div class="spinner"></div><div style="margin-top:20px; font-size:24px; color:#5D4037; font-weight:700;">รอสักครู่...</div></div>
 
-  <div id="notification"></div>
-
+  <!-- VIEW: Main Menu -->
   <div id="note-view" class="view-section">
-    <nav class="navbar">
-      <div class="nav-brand">
-        <img src="https://img2.pic.in.th/pic/ChatGPT-Image-10-..-2568-12_48_07.png" alt="Logo">
-        <span>บันทึกผลสุขภาพ</span>
-      </div>
-      <button class="btn-close" onclick="liff.closeWindow()">ปิด</button>
-    </nav>
-
-    <div class="container">
-      <div class="note-grid">
-        <div class="note-item" onclick="openNoteForm('SBGM')">
-          <div class="note-icon bg-sugar">🩸</div><div class="note-label">น้ำตาล<br>ในเลือด</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('BP')">
-          <div class="note-icon bg-bp">💓</div><div class="note-label">ความดัน<br>โลหิต</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('FOOD')">
-          <div class="note-icon bg-food">🍽️</div><div class="note-label">บันทึก<br>อาหาร</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('WEIGHT')">
-          <div class="note-icon bg-weight">⚖️</div><div class="note-label">น้ำหนัก<br>ตัว</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('EXERCISE')">
-          <div class="note-icon bg-ex">🏃‍♀️</div><div class="note-label">ออกกำลัง<br>กาย</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('ADVERSE')">
-          <div class="note-icon bg-alert">⚠️</div><div class="note-label">อาการ<br>ผิดปกติ</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('DEPRESSION')">
-          <div class="note-icon" style="color:#34495e">😟</div><div class="note-label">ความ<br>เครียด</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('WEIGHT')">
-          <div class="note-icon bg-weight">⚖️</div><div class="note-label">น้ำหนัก<br>(สำรอง)</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('WAIST')">
-          <div class="note-icon bg-waist">📏</div><div class="note-label">รอบ<br>เอว</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('HBA1C')">
-          <div class="note-icon" style="color:#8e44ad">🧪</div><div class="note-label">HbA1C</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('WAIST')">
-          <div class="note-icon bg-waist">📏</div><div class="note-label">รอบเอว<br>(สำรอง)</div>
-        </div>
-        <div class="note-item" onclick="openNoteForm('BODY_FAT')">
-          <div class="note-icon" style="color:#d35400">🧍‍♀️</div><div class="note-label">% ไขมัน</div>
-        </div>
-      </div>
-
-      <div style="text-align:center; margin-top:30px;">
-        <button class="btn" style="background:#fff; border:2px solid #eee; color:#777; width:auto; font-weight:600; padding:12px 24px; box-shadow:none;" onclick="switchView('dashboard')">
-          ดูกราฟและประวัติย้อนหลัง 📈
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <div id="dashboard-view" class="view-section">
-    <nav class="navbar">
-      <div class="nav-brand">
-        <img src="https://img2.pic.in.th/pic/ChatGPT-Image-10-..-2568-12_48_07.png" alt="Logo">
-        <span>สวีคุมหวาน</span>
-      </div>
-      <button class="btn-nav-help" onclick="toggleHelpModal(true)">วิธีใช้</button>
-    </nav>
-
-    <div class="container">
-      <div id="profile-card" class="card">
-        <div class="form-header" style="margin-bottom:12px;">
-          <h2 style="margin:0">ข้อมูลส่วนตัว</h2>
-          <button id="btnEditProfile" class="btn-small btn-close">แก้ไข</button>
-        </div>
-        <div class="profile-grid">
-          <div class="profile-left"><img id="avatar" class="avatar" src="" alt="avatar"></div>
-          <div class="profile-right">
-            <div class="row" style="justify-content: flex-start; margin-bottom:8px;"><span class="pill">ชื่อ</span> <span id="p_name" style="font-size:20px; font-weight:700;">-</span></div>
-            <div class="row" style="justify-content: flex-start;"><span class="pill">HN</span> <span id="p_hn">-</span></div>
-          </div>
-        </div>
-      </div>
-
-      <div id="main-menu">
-        <div class="menu-grid">
-          <button class="menu-btn" onclick="switchView('note')"><span class="emoji">📝</span><span>บันทึกผล</span></button>
-          <button class="menu-btn" data-target="historyCard"><span class="emoji">📈</span><span>ประวัติ</span></button>
-          <button class="menu-btn" data-target="goalsCard"><span class="emoji">🎯</span><span>เป้าหมาย</span></button>
-          <button class="menu-btn" data-target="foodCard"><span class="emoji">🥗</span><span>เมนูแนะนำ</span></button>
-          <button class="menu-btn" data-target="adviceCard"><span class="emoji">🤖</span><span>AI วิเคราะห์</span></button>
-        </div>
-      </div>
-
-      <div id="goalsCard" class="content-card card" style="display:none"></div>
-      <div id="adviceCard" class="content-card card" style="display:none"></div>
-      <div id="foodCard" class="content-card card" style="display:none"></div>
+    <nav class="navbar"><div class="nav-brand">🏡 สวีคุมหวาน</div></nav>
+    <div class="container" style="padding-top: 15px;">
       
-      <div id="historyCard" class="content-card card" style="display:none">
-        <div class="form-header">
-          <h2>📈 ประวัติการบันทึก</h2>
-          <button class="btn-close" onclick="closeContentCard()">ปิด</button>
-        </div>
-        <div class="filter-controls" id="history-filters"></div>
-        <div class="table-wrap">
-          <table id="history-table">
-            <thead><tr><th>เวลา</th><th>รายการ</th><th>ค่า</th><th></th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div style="margin-top:20px;">
-          <h3>📊 กราฟสุขภาพ</h3>
-          <div id="chartsWrap" class="charts-grid"></div>
-        </div>
+      <!-- Profile Header Block -->
+      <div class="profile-header" id="main-profile-header" style="display: none;">
+          <img id="head-avatar" src="" alt="Avatar">
+          <div class="profile-info">
+              <div class="profile-name" id="head-name">คุณ...</div>
+              <div class="profile-stats">เริ่ม: <span id="head-start">-</span></div>
+              <div class="profile-target" id="head-target">เป้าหมายเหลือ: - วัน</div>
+              <!-- เป้าหมายน้ำหนักจะถูกต่อท้ายใน JS -->
+          </div>
+      </div>
+
+      <div class="note-grid">
+        <div class="note-item" onclick="openNoteForm('SBGM')"><div class="note-icon bg-sugar">🩸</div><div class="note-label">น้ำตาล<br>ปลายนิ้ว</div></div>
+        <div class="note-item" onclick="openNoteForm('BP')"><div class="note-icon bg-bp">💓</div><div class="note-label">ความดัน<br>โลหิต</div></div>
+        <div class="note-item" onclick="openFoodModal()"><div class="note-icon bg-food">🍲</div><div class="note-label">บันทึก<br>อาหาร</div></div>
+        <div class="note-item" onclick="openNoteForm('WEIGHT')"><div class="note-icon bg-weight">⚖️</div><div class="note-label">ชั่ง<br>น้ำหนัก</div></div>
+        <div class="note-item" onclick="openBodyCompModal()"><div class="note-icon" style="color: #6D4C41;">👤</div><div class="note-label">ดัชนี<br>มวลกาย</div></div>
+        <div class="note-item" onclick="openNoteForm('EXERCISE')"><div class="note-icon bg-ex">🏃‍♀️</div><div class="note-label">ออก<br>กำลังกาย</div></div>
+        <div class="note-item" onclick="openSleepStressModal()"><div class="note-icon" style="color: #7E57C2;">😴</div><div class="note-label">การนอน/<br>ความเครียด</div></div>
+        <div class="note-item" onclick="openMedicationModal()"><div class="note-icon" style="color: #00838F;">💊</div><div class="note-label">รายการยา</div></div>
+        <div class="note-item" onclick="loadDashboardData()"><div class="note-icon" style="color:#333;">📈</div><div class="note-label">ดูประวัติ</div></div>
       </div>
     </div>
   </div>
 
-  <div id="form-modal" class="modal-overlay">
+  <!-- VIEW: Dashboard -->
+  <div id="dashboard-view" class="view-section">
+    <nav class="navbar"><div class="nav-brand">📈 ประวัติสุขภาพ</div><button class="btn-close" onclick="switchView('note')">กลับ</button></nav>
+    <div class="container">
+      <div id="history-container"></div> 
+    </div>
+  </div>
+
+  <!-- VIEW: Register -->
+  <div id="register-view" class="view-section">
+    <nav class="navbar"><div class="nav-brand" style="margin: 0 auto;">📝 ลงทะเบียนสวีคุมหวาน</div></nav>
+
+    <!-- Step 1: เลือกกลุ่ม -->
+    <div id="reg-step-1" class="reg-step active">
+        <div class="anim-slide-up" style="font-size: 60px; text-align: center; margin-bottom: 10px;">👋</div>
+        <h2 class="reg-title anim-slide-up d-100">ยินดีต้อนรับเข้าสู่<br>โปรแกรมสวีคุมหวาน</h2>
+        <p class="reg-desc anim-slide-up d-200">สำหรับปรับเปลี่ยนพฤติกรรมการกิน และออกกำลังกายเพื่อควบคุมน้ำหนัก และลดระดับน้ำตาลในเลือด</p>
+        
+        <div class="anim-slide-up d-300">
+            <p style="text-align: center; font-weight: 800; color: #5D4037; font-size: 24px; margin: 30px 0 15px 0;">คุณต้องการเข้าโปรแกรมใด?</p>
+            
+            <div class="reg-card-btn" onclick="selectRegGroup('DM')">
+                <div class="r-icon">🥗</div>
+                <div class="r-text">ผู้ป่วยเบาหวาน<br><span style="font-size:20px; color:#5D4037; font-weight:500;">ปรับพฤติกรรมสุขภาพ</span></div>
+            </div>
+
+            <div class="reg-card-btn" onclick="selectRegGroup('DM Remission')">
+                <div class="r-icon">📉</div>
+                <div class="r-text">เข้าคลินิกเบาหวานระยะสงบ<br><span style="font-size:20px; color:#5D4037; font-weight:500;">เพื่อลดยาเบาหวาน</span></div>
+            </div>
+
+            <div class="reg-card-btn" onclick="selectRegGroup('Not DM')">
+                <div class="r-icon">🛡️</div>
+                <div class="r-text">ควบคุมพฤติกรรม<br><span style="font-size:20px; color:#5D4037; font-weight:500;">ป้องกันเบาหวาน (ยังไม่เป็น)</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 2: เงื่อนไข DM Remission -->
+    <div id="reg-step-2" class="reg-step">
+        <div class="anim-slide-up" style="font-size: 60px; text-align: center; margin-bottom: 10px;">📋</div>
+        <h2 class="reg-title anim-slide-up d-100">คุณสมบัติผู้ที่จะหยุดยาเบาหวาน</h2>
+        <p class="reg-desc anim-slide-up d-200">กรุณาตรวจสอบเงื่อนไขดังต่อไปนี้</p>
+
+        <div class="reg-cond-box anim-slide-up d-300">
+            <div class="reg-cond-item">
+                <div class="reg-cond-num">1</div>
+                <div>มีน้ำตาลสะสม HbA1c <strong style="color:#D84315;">ไม่เกิน 6.5%</strong></div>
+            </div>
+            <div class="reg-cond-item">
+                <div class="reg-cond-num">2</div>
+                <div>เป็นเบาหวานมา <strong style="color:#D84315;">ไม่เกิน 5 ปี</strong></div>
+            </div>
+            <div class="reg-cond-item">
+                <div class="reg-cond-num">3</div>
+                <div>น้ำหนักเริ่มต้น <strong style="color:#D84315;">100 กก. ขึ้นไป</strong></div>
+            </div>
+            <div class="reg-cond-item">
+                <div class="reg-cond-num">4</div>
+                <div>มีความตั้งใจในการควบคุมอาหาร เพื่อลดน้ำหนักให้ <strong style="color:#D84315;">มากกว่า 10%</strong></div>
+            </div>
+        </div>
+
+        <div class="reg-btn-row anim-slide-up d-400">
+            <button class="reg-btn-secondary" onclick="goToRegStep(1)">ย้อนกลับ</button>
+            <button class="btn" style="flex:2;" onclick="setupRegForm(); goToRegStep(3);">พร้อมแล้ว !</button>
+        </div>
+    </div>
+
+    <!-- Step 3: ฟอร์มข้อมูลส่วนตัว -->
+    <div id="reg-step-3" class="reg-step">
+        <div class="anim-slide-up" style="text-align: center; margin-bottom: 20px;">
+            <img id="reg-prof-img" src="" class="reg-profile-pic" alt="Profile">
+            <div id="reg-prof-name" class="reg-profile-name">ผู้ใช้งาน</div>
+            <div id="reg-prof-group" class="reg-profile-group">กลุ่ม: -</div>
+            <p class="reg-desc" style="font-weight:700;">กรุณาใส่ข้อมูลส่วนตัวข้างล่าง</p>
+        </div>
+
+        <form id="reg-form" onsubmit="submitRegistration(event)" class="anim-slide-up d-100">
+            
+            <div class="reg-form-group">
+                <label class="reg-label">ชื่อที่ใช้เรียก (Name)</label>
+                <input required type="text" id="reg-name" placeholder="เช่น ลุงแดง ป้าส้ม พี่เขียว">
+            </div>
+
+            <div class="reg-form-group">
+                <label class="reg-label">เลขผู้ป่วย รพ.สวี (HN)</label>
+                <input required type="tel" id="reg-hn" pattern="\d{9}" maxlength="9" title="กรุณาใส่ตัวเลข 9 หลัก" placeholder="ระบุเลข 9 หลัก" oninput="validateNumber(this)">
+            </div>
+
+            <div class="reg-form-group">
+                <label class="reg-label">เพศ (Gender)</label>
+                <div class="reg-radio-container">
+                    <label class="reg-radio-label" onclick="selectGender(this, 'Male')">
+                        <input required type="radio" name="reg-gender" value="Male"> 👨 ชาย
+                    </label>
+                    <label class="reg-radio-label" onclick="selectGender(this, 'Female')">
+                        <input required type="radio" name="reg-gender" value="Female"> 👩 หญิง
+                    </label>
+                </div>
+            </div>
+
+            <div class="reg-form-group">
+                <label class="reg-label">อายุ (ปี)</label>
+                <input required type="tel" id="reg-age" placeholder="อายุของคุณ" oninput="validateNumber(this)" maxlength="3">
+            </div>
+
+            <div class="reg-form-group">
+                <label class="reg-label">น้ำหนักเริ่มต้น (กก.)</label>
+                <input required type="tel" id="reg-weight" placeholder="เช่น 65.5" inputmode="decimal" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+                <div id="reg-weight-target-msg" class="reg-consent-box" style="display:none; background:#FFF3E0; border-color:#FFB300; text-align:center; flex-direction:column; padding:15px; margin-top:10px;"></div>
+            </div>
+
+            <label class="reg-consent-box">
+                <input required type="checkbox" id="reg-consent">
+                <p>ยินยอมให้ คลินิกเบาหวานระยะสงบ รพ.สวี ใช้ข้อมูลของท่านในการประมวลผลเพื่อใช้ในการรักษา และอนุญาตแชร์ข้อมูลของท่าน (ยกเว้นชื่อที่ระบุตัวตน) กับคนอื่นในคลินิกเพื่อประสบการณ์การเรียนรู้พฤติกรรมสุขภาพ</p>
+            </label>
+
+            <div class="reg-btn-row">
+                <button type="button" class="reg-btn-secondary" onclick="goToRegStep(1)">ย้อนกลับ</button>
+                <button type="submit" class="btn" style="flex:2;">บันทึกข้อมูล ✅</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Step 4: สำเร็จ -->
+    <div id="reg-step-4" class="reg-step">
+        <div style="text-align: center; padding: 60px 0;">
+            <div class="anim-slide-up" style="background: #4CAF50; color: white; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 70px; margin: 0 auto 30px; box-shadow: 0 10px 30px rgba(76, 175, 80, 0.4);">✓</div>
+            <h2 class="reg-title anim-slide-up d-100">ลงทะเบียนสำเร็จ</h2>
+            <p class="reg-desc anim-slide-up d-200">ระบบได้บันทึกข้อมูลของคุณเรียบร้อยแล้ว<br>กำลังพาท่านเข้าสู่หน้าหลัก...</p>
+        </div>
+    </div>
+  </div>
+
+
+  <!-- MODAL: Body Comp (ดัชนีมวลกาย) -->
+  <div id="bodycomp-modal" class="modal-overlay">
     <div class="modal-sheet">
       <div class="form-header">
-        <div class="form-title" id="modal-title">📝 บันทึกข้อมูล</div>
-        <button class="btn-close" onclick="closeNoteForm()">ยกเลิก</button>
+        <div class="form-title">ดัชนีมวลกาย</div><button class="btn-close" onclick="closeAllModals()">ปิด</button>
+      </div>
+      <div style="background:#FFF9C4; padding: 15px; border-radius: 20px; margin-bottom: 20px;">
+        <p style="text-align:center; color:#5D4037; font-weight:700; margin:0;">ใส่เฉพาะช่องที่มีข้อมูลนะคะ</p>
+      </div>
+      <div id="bc-container">
+          <div class="bodycomp-row"><label>% ไขมันร่างกาย</label><input type="tel" id="bc-fat" inputmode="decimal" oninput="validateNumber(this)"><span>%</span></div>
+          <div class="bodycomp-row"><label>ไขมันช่องท้อง</label><input type="tel" id="bc-visceral" inputmode="numeric" oninput="validateNumber(this)"><span>ระดับ</span></div>
+          <div class="bodycomp-row"><label>% กล้ามเนื้อ</label><input type="tel" id="bc-muscle" inputmode="decimal" oninput="validateNumber(this)"><span>%</span></div>
+          <div class="bodycomp-row"><label>BMI</label><input type="tel" id="bc-bmi" inputmode="decimal" oninput="validateNumber(this)"><span>kg/m²</span></div>
+          <div class="bodycomp-row"><label>อัตราการเผาผลาญ</label><input type="tel" id="bc-rm" inputmode="numeric" oninput="validateNumber(this)"><span>kcal</span></div>
+          <div class="bodycomp-row"><label>อายุร่างกาย</label><input type="tel" id="bc-age" inputmode="numeric" oninput="validateNumber(this)"><span>ปี</span></div>
+      </div>
+      <div style="margin-top:25px;"><button class="btn" onclick="saveBodyComp()">บันทึกข้อมูล ✅</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Medications (รายการยา) -->
+  <div id="med-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="form-header">
+        <div class="form-title">รายการยา</div><button class="btn-close" onclick="closeAllModals()">ปิด</button>
+      </div>
+      
+      <div style="margin-bottom:20px;">
+          <label class="form-label">เลือกยาเบาหวานที่ต้องการบันทึก</label>
+          <select id="med-name" style="width:100%; border-radius:20px; padding:15px; font-size:24px; font-weight:700; color:#3E2723; border:3px solid #D7CCC8;">
+              <option value="" disabled selected>-- เลือกยาเบาหวาน --</option>
+              <option value="Metformin">Metformin</option>
+              <option value="Glipizide">Glipizide</option>
+              <option value="Pioglitazone">Pioglitazone</option>
+              <option value="Insulin">Insulin</option>
+          </select>
       </div>
 
-      <div id="modal-body">
-        </div>
+      <div style="margin-bottom:20px;">
+          <label class="form-label">การเปลี่ยนแปลง</label>
+          <div class="chip-container">
+              <button class="chip-btn" onclick="selectMedChange('REDUCED', this)">ลดยา</button>
+              <button class="chip-btn" onclick="selectMedChange('STOPPED', this)">หยุดยา</button>
+          </div>
+          <input type="hidden" id="inp-medChange">
+      </div>
 
-      <div style="margin-top: auto; padding-top: 20px;">
-        <button id="btn-save-form" class="btn" disabled>บันทึกข้อมูล</button>
+      <div style="margin-bottom:20px;">
+          <label class="form-label">วันที่เปลี่ยนยา</label>
+          <input type="date" id="med-date" style="width:100%; border-radius:20px; padding:15px; font-size:24px; font-weight:700; color:#3E2723; border:3px solid #D7CCC8;">
+      </div>
+
+      <div style="margin-bottom:20px;">
+          <label class="form-label">วิธีใช้เดิม (ถ้าจำได้)</label>
+          <input type="text" id="med-prev" placeholder="เช่น 1 เม็ด 2 ครั้ง หลังอาหาร" style="font-size:20px;">
+      </div>
+      
+      <div id="med-curr-container" style="display:none; background:#FFF3E0; padding:15px; border-radius:20px; margin-bottom:20px;">
+          <label class="form-label" style="color:#D84315;">วิธีใช้ใหม่ (เฉพาะลดยา)</label>
+          <div style="display:flex; gap:10px;">
+              <input type="tel" id="med-pill" placeholder="เม็ด" inputmode="decimal" style="flex:1; font-size:20px;" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+              <input type="tel" id="med-time" placeholder="ครั้ง/วัน" inputmode="numeric" style="flex:1; font-size:20px;" oninput="validateNumber(this)">
+          </div>
+          <select id="med-meal" style="width:100%; border-radius:20px; padding:15px; font-size:20px; font-weight:700; color:#3E2723; margin-top:10px; border:3px solid #D7CCC8;">
+              <option value="ก่อนอาหาร">ก่อนอาหาร</option>
+              <option value="หลังอาหาร">หลังอาหาร</option>
+          </select>
+      </div>
+
+      <div style="margin-top:25px;"><button class="btn" onclick="saveMedication()">บันทึกรายการยา ✅</button></div>
+    </div>
+  </div>
+
+  <!-- MODAL: Food (Bottom Sheet) -->
+  <div id="food-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="form-header">
+        <div class="form-title">บันทึกอาหาร</div><button class="btn-close" onclick="closeAllModals()">ปิด</button>
+      </div>
+      
+      <div id="food-upload-zone" style="text-align:center;">
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+             <button class="btn" style="flex: 1; padding: 15px 10px; font-size: 22px;" onclick="$('#camera-input').click()">📸 ถ่ายรูป</button>
+             <button class="btn" style="flex: 1; padding: 15px 10px; font-size: 22px; background: #FFF9C4; color: #5D4037; border-color: #FBC02D;" onclick="$('#gallery-input').click()">🖼️ อัปโหลด</button>
+          </div>
+          <div style="text-align:center; color:#FFF59D; font-size:22px;">--- หรือพิมพ์เอง ---</div>
+      </div>
+
+      <img id="food-preview" style="width:100%; border-radius:20px; margin-bottom:20px; display:none; border:4px solid #FFF;">
+
+      <div id="food-loader" style="display:none; text-align:center; padding:20px; color:#FFF;">
+          <div class="spinner" style="margin:0 auto; border-color: rgba(255,255,255,0.3); border-top-color: #FFF;"></div>
+          <div style="margin-top:10px; font-size:20px;">AI กำลังประมวลผล...</div>
+      </div>
+      
+      <div id="food-rows-container"></div>
+      
+      <button id="btn-add-food" class="btn btn-add" onclick="addFoodRow(true)">+ เพิ่มรายการ</button>
+      
+      <div style="margin-top:30px;">
+        <button class="btn" onclick="saveFoodManual()">บันทึกข้อมูล ✅</button>
       </div>
     </div>
   </div>
 
-  <div id="success-modal" class="modal-overlay" style="align-items: center;">
-    <div class="success-card">
-      <span class="success-icon">✅</span>
-      <div class="success-title">เรียบร้อยจ้า!</div>
-      <div class="success-detail" id="success-msg">บันทึกข้อมูลลงสมุดแล้วค่ะ</div>
-      <div style="margin-top:24px; font-size:16px; color:#888;">กำลังปิดหน้าต่าง...</div>
+  <!-- MODAL: General Form (Bottom Sheet) -->
+  <div id="form-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="form-header"><div class="form-title" id="modal-title">...</div><button class="btn-close" onclick="closeAllModals()">ปิด</button></div>
+      <div id="modal-body"></div>
+      <div style="margin-top:auto; padding-top:20px;"><button id="btn-save-form" class="btn" onclick="submitForm()">บันทึกข้อมูล ✅</button></div>
     </div>
   </div>
 
-  <div id="reg-view" class="view-section" style="padding:20px;">
-    <div class="card">
-      <h2>ลงทะเบียนผู้ป่วยใหม่</h2>
-      <p class="muted">กรุณากรอกข้อมูลเพื่อเริ่มต้นใช้งาน</p>
-      <div class="form-group"><label class="form-label">HN (เลขประจำตัวผู้ป่วย)</label><input id="hn" type="text" placeholder="9 หลัก"></div>
-      <div class="form-group"><label class="form-label">ชื่อเล่น / ชื่อเรียก</label><input id="nameuse" type="text"></div>
-      <div class="grid" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
-        <div class="form-group"><label class="form-label">เพศ</label><select id="gender"><option value="Male">ชาย</option><option value="Female">หญิง</option></select></div>
-        <div class="form-group"><label class="form-label">อายุ</label><input id="age" type="number"></div>
-      </div>
-      <div style="margin:20px 0;"><input type="checkbox" id="consent" style="width:20px;height:20px;vertical-align:middle;"> <span style="vertical-align:middle;">ฉันยินยอมให้ใช้ข้อมูลเพื่อการรักษา</span></div>
-      <button id="btnSaveReg" class="btn">ลงทะเบียน</button>
+  <!-- MODAL: Adverse (Centered) -->
+  <div id="center-modal" class="modal-overlay centered">
+    <div class="modal-card-center">
+        <div class="form-header"><div class="form-title">อาการผิดปกติ</div><button class="btn-close" onclick="closeAllModals()">ไม่มีอาการ</button></div>
+        <div class="symptom-grid" id="symptom-options" style="display:grid; grid-template-columns:1fr 1fr; gap:15px;"></div>
+        <textarea id="symptom-text" rows="3" placeholder="พิมพ์อาการเพิ่มเติม..."></textarea>
+        <button class="btn" onclick="submitSymptoms()" style="margin-top:25px;">บันทึก 📨</button>
     </div>
   </div>
 
-  <div id="help-modal" class="modal-overlay" style="align-items:center;">
-    <div class="modal-sheet" style="max-height:80vh;">
-      <div class="form-header"><h2>คู่มือการใช้งาน</h2><button class="btn-close" onclick="toggleHelpModal(false)">ปิด</button></div>
-      <div style="line-height:1.8; font-size:18px;">
-        <p>1. กด <strong>"บันทึกผล"</strong> เพื่อจดค่าน้ำตาล ความดัน หรืออาหาร</p>
-        <p>2. กด <strong>"ประวัติ"</strong> เพื่อดูกราฟและข้อมูลย้อนหลัง</p>
-        <p>3. หากต้องการลบข้อมูล ให้ไปที่หน้าประวัติ แล้วกดปุ่ม "ลบ" หลังรายการนั้น</p>
-      </div>
-    </div>
-  </div>
+  <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" onchange="uploadFoodImage(this)">
+  <input type="file" id="gallery-input" accept="image/*" style="display:none" onchange="uploadFoodImage(this)">
 
 <script>
-    // ============================================================
-    // CONFIGURATION & GLOBAL STATE
-    // ============================================================
-    const LIFF_ID = '2007840605-zKl7p3Aa';
-    // ✅ Updated URL
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbyWaYMApmNc9opDQJM0ZuBmDTz5Oediunw512uelvs4vk_cxn5EBlcVVZoRy5bL6cwp/exec';
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbzvLY5kLKw2sUaSelEZcxka2CsdiRoGdA9jmHMoKs3oB04ypte7yDwStWo6cFwb2-Y8Sw/exec'; 
+    // ตัวแปร LIFF_ID จะถูกดึงมาจาก Script Properties อัตโนมัติ
+    let LIFF_ID = ''; 
+    const TEST_USER_ID = 'U4b2462c3ea87936a546558354070ef4d'; 
 
     const METRIC_CONFIG = {
-      'SBGM': { 
-        title: '🩸 น้ำตาลในเลือด', unit: 'mg/dL', 
-        min: 20, max: 600, 
-        placeholder: 'เช่น 120', 
-        subtypes: ['ก่อนอาหาร', 'หลังอาหาร 2 ชม.', 'สุ่มวัด'] 
-      },
-      'BP': { 
-        title: '💓 ความดันโลหิต', unit: 'mmHg', 
-        sys_min: 20, sys_max: 300, 
-        dia_min: 20, dia_max: 130, 
-        placeholder_sys: '120', placeholder_dia: '80'
-      },
-      'WEIGHT': { 
-        title: '⚖️ น้ำหนัก', unit: 'กก.', 
-        min: 30, max: 250, 
-        placeholder: 'เช่น 65.5' 
-      },
-      'WAIST': { 
-        title: '📏 รอบเอว', unit: 'ซม.', 
-        min: 50, max: 200, 
-        placeholder: 'เช่น 85' 
-      },
-      'EXERCISE': { 
-        title: '🏃‍♀️ ออกกำลังกาย', unit: 'นาที', 
-        min: 5, max: 300, 
-        placeholder: 'เช่น 30',
-        subtypes: ['เดินเร็ว', 'วิ่ง', 'ปั่นจักรยาน', 'แกว่งแขน', 'ทำงานบ้าน', 'อื่นๆ']
-      },
-      'FOOD': { 
-        title: '🍽️ บันทึกอาหาร', unit: '', 
-        placeholder: 'เช่น ข้าวกะเพรา 1 จาน, นมจืด 1 กล่อง',
-        subtypes: ['มื้อเช้า', 'มื้อกลางวัน', 'มื้อเย็น', 'มื้อว่าง']
-      },
-      'HBA1C': { 
-        title: '🧪 HbA1c (น้ำตาลสะสม)', unit: '%', 
-        min: 3, max: 20, 
-        placeholder: 'เช่น 6.5' 
-      },
-      'BODY_FAT': { 
-        title: '🧍‍♀️ % ไขมัน', unit: '%', 
-        min: 5, max: 60, 
-        placeholder: 'เช่น 25' 
-      },
-      'ADVERSE': { 
-        title: '⚠️ อาการผิดปกติ', 
-        type: 'select', 
-        options: ['เวียนหัว', 'ใจสั่น', 'คลื่นไส้', 'มือสั่น', 'หน้ามืด', 'อื่นๆ'] 
-      },
-      'DEPRESSION': { 
-        title: '😟 ความเครียด', 
-        type: 'select', 
-        options: ['ไม่เครียด', 'เครียดเล็กน้อย', 'เครียดปานกลาง', 'เครียดมาก'] 
-      }
+      'SBGM': { title: 'ค่าน้ำตาล', unit: 'mg/dL', subtypes: ['ก่อนอาหาร', 'หลังอาหาร', 'ก่อนนอน'], placeholder: 'ระบุค่าน้ำตาล...' },
+      'BP': { title: 'ความดันโลหิต', unit: 'mmHg', placeholder_sys: 'ตัวบน (130)', placeholder_dia: 'ตัวล่าง (80)' },
+      'WEIGHT': { title: 'น้ำหนัก', unit: 'กก.', placeholder: 'กี่กิโลฯ คะ' },
+      'EXERCISE': { title: 'ออกกำลังกาย', activityList: ['เดินเร็ว', 'วิ่ง', 'แกว่งแขน', 'แอโรบิก', 'ทำงานบ้าน', 'ปั่นจักรยาน'] }
     };
 
-    let liffProfile = {};
-    let allEventsData = [];
+    let liffProfile = { userId: TEST_USER_ID, displayName: "ผู้ใช้งาน" }; 
+    let userDisplayName = "คุณ";
     let currentMetric = '';
-    let currentHistoryFilter = 'ALL';
-    
-    // Helpers
     const $ = selector => document.querySelector(selector);
-    const $$ = selector => document.querySelectorAll(selector);
-    const show = id => $(id).classList.add('active');
-    const hide = id => $(id).classList.remove('active');
-    const toggleHelpModal = (show) => $('#help-modal').style.display = show ? 'flex' : 'none';
-    const fmtDate = d => new Date(d).toLocaleString('th-TH');
-
-    // ============================================================
-    // MAIN INITIALIZATION
-    // ============================================================
+    
+    // --- MAIN ---
     async function main() {
-      // Check loading element first
-      const loadingEl = $('#loading');
-      if(loadingEl) loadingEl.style.display = 'flex';
-
+      $('#loading').style.display = 'flex';
       try {
-        await liff.init({ liffId: LIFF_ID });
-        if (!liff.isLoggedIn()) { liff.login(); return; }
-        
-        try {
-            liffProfile = await liff.getProfile();
-        } catch (profileError) {
-            // Token expired handling
-            liff.logout();
-            liff.login();
-            return;
-        }
-
-        setupGlobalListeners();
-
-        const params = new URLSearchParams(window.location.search);
-        const view = params.get('view');
-
-        if (view === 'note') {
-          switchView('note');
-          if(loadingEl) loadingEl.style.display = 'none';
+        // 1. ดึงค่า LIFF ID จาก Backend Script Properties
+        const configRes = await apiPost('getConfig', {});
+        if (configRes && configRes.liffId) {
+            LIFF_ID = configRes.liffId;
         } else {
-          await loadDashboardData();
+            console.warn("ไม่พบ LIFF ID จาก Backend ระบบจะรันในโหมดทดสอบ");
         }
 
-      } catch (err) {
-        alert('เกิดข้อผิดพลาด: ' + err.message);
-        if(loadingEl) loadingEl.style.display = 'none';
+        // 2. ถ้ามี LIFF ID ให้ทำการเชื่อมต่อกับ LINE
+        if (LIFF_ID) {
+            await liff.init({ liffId: LIFF_ID });
+            if (liff.isLoggedIn()) {
+                liffProfile = await liff.getProfile();
+            } else {
+                liff.login();
+                return; 
+            }
+        } else {
+            // โหมดทดสอบเมื่อไม่มี LIFF ID
+            liffProfile.userId = TEST_USER_ID; 
+        }
+      } catch (err) { 
+          console.error("LIFF Init Error:", err);
+          liffProfile.userId = TEST_USER_ID; 
       }
+      
+      const params = new URLSearchParams(window.location.search);
+      if(params.get('action') === 'food') openFoodModal();
+
+      fetchUserProfile().then(() => $('#loading').style.display = 'none');
     }
 
     function switchView(viewName) {
-      $$('.view-section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
       if (viewName === 'note') $('#note-view').classList.add('active');
       else if (viewName === 'dashboard') $('#dashboard-view').classList.add('active');
-      else if (viewName === 'reg') $('#reg-view').classList.add('active');
+      else if (viewName === 'register') {
+          $('#register-view').classList.add('active');
+          goToRegStep(1); 
+      }
+      window.scrollTo(0,0);
     }
 
-    // ============================================================
-    // PART 1: NOTE FORM (FRIENDLY UI)
-    // ============================================================
+    window.validateNumber = function(input) { input.value = input.value.replace(/[^0-9.]/g, ''); }
+
+    // =========================================================
+    // REGISTRATION LOGIC
+    // =========================================================
+    let regData = { group: '', nameUse: '', hn: '', gender: '', age: '', weight: '', consent: false };
+
+    // คำนวณเป้าหมายน้ำหนักสดๆ หน้าลงทะเบียน
+    const regWeightInput = document.getElementById('reg-weight');
+    if(regWeightInput) {
+        regWeightInput.addEventListener('input', function() {
+            const w = parseFloat(this.value);
+            const msgBox = document.getElementById('reg-weight-target-msg');
+            if(w && w > 0) {
+                const target = (w * 0.1).toFixed(1);
+                msgBox.innerHTML = `โอกาสประสบความสำเร็จในการหยุดยา ต้องลดน้ำหนักลง <b style="font-size:24px;">${target}</b> กิโลกรัม<br>ภายใน 6 เดือน 🔥 สู้ไหม เราต้องทำได้!`;
+                msgBox.style.display = 'flex';
+            } else {
+                msgBox.style.display = 'none';
+            }
+        });
+    }
+
+    function goToRegStep(step) {
+        document.querySelectorAll('.reg-step').forEach(el => el.classList.remove('active'));
+        const stepEl = $('#reg-step-' + step);
+        stepEl.classList.remove('active');
+        void stepEl.offsetWidth; 
+        stepEl.classList.add('active');
+        window.scrollTo(0,0);
+    }
+
+    function selectRegGroup(group) {
+        regData.group = group;
+        if (group === 'DM Remission') {
+            goToRegStep(2);
+        } else {
+            setupRegForm();
+            goToRegStep(3);
+        }
+    }
+
+    function selectGender(labelEl, value) {
+        document.querySelectorAll('.reg-radio-label').forEach(el => el.classList.remove('active'));
+        labelEl.classList.add('active');
+        labelEl.querySelector('input').checked = true;
+        regData.gender = value;
+    }
+
+    function setupRegForm() {
+        $('#reg-prof-img').src = liffProfile.pictureUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+        $('#reg-prof-name').innerText = liffProfile.displayName;
+        $('#reg-prof-group').innerText = 'กลุ่ม: ' + regData.group;
+        // set default date field to today if exist
+    }
+
+    async function submitRegistration(e) {
+        e.preventDefault();
+        regData.nameUse = $('#reg-name').value.trim();
+        regData.hn = $('#reg-hn').value.trim();
+        regData.gender = document.querySelector('input[name="reg-gender"]:checked')?.value;
+        regData.age = $('#reg-age').value.trim();
+        regData.weight = $('#reg-weight').value.trim();
+        regData.consent = $('#reg-consent').checked;
+
+        if(!regData.gender) return Swal.fire({ title: 'แจ้งเตือน', text: 'กรุณาระบุเพศด้วยนะคะ', icon: 'warning' });
+        if(regData.hn.length !== 9) return Swal.fire({ title: 'แจ้งเตือน', text: 'กรุณาระบุ HN ให้ครบ 9 หลัก', icon: 'warning' });
+
+        $('#loading').style.display = 'flex';
+        const payload = { userId: liffProfile.userId, displayName: liffProfile.displayName, pictureUrl: liffProfile.pictureUrl || '', ...regData };
+        const res = await apiPost('registerUser', payload);
+        
+        if(res && res.ok) {
+            goToRegStep(4);
+            setTimeout(() => { fetchUserProfile(); }, 2500); 
+        } else {
+            $('#loading').style.display = 'none';
+            Swal.fire('ข้อผิดพลาด', 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่', 'error');
+        }
+    }
+
+    // --- HELPER ---
+    function getSelectorHTML(options) {
+        let html = `<div class="custom-selector-container">`;
+        options.forEach(opt => { html += `<button class="custom-selector-btn" onclick="selectCustom(this)">${opt}</button>`; });
+        html += `</div>`; return html;
+    }
+    window.selectCustom = function(btn) {
+        const container = btn.parentElement;
+        container.querySelectorAll('.custom-selector-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+    }
+
+    function closeAllModals() {
+        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
+    }
+
+    // --- NEW: BODY COMPOSITION ---
+    function openBodyCompModal() {
+        ['bc-fat', 'bc-visceral', 'bc-muscle', 'bc-bmi', 'bc-rm', 'bc-age'].forEach(id => $('#'+id).value = '');
+        $('#bodycomp-modal').style.display = 'flex';
+    }
+    async function saveBodyComp() {
+        const d = {
+            '%FAT': { v: $('#bc-fat').value, u: '%' },
+            'VISCERALFAT': { v: $('#bc-visceral').value, u: 'ระดับ' },
+            'MUSCLE': { v: $('#bc-muscle').value, u: '%' },
+            'BMI': { v: $('#bc-bmi').value, u: 'kg/m²' },
+            'RESTINGMET': { v: $('#bc-rm').value, u: 'kcal' },
+            'BODYAGE': { v: $('#bc-age').value, u: 'ปี' }
+        };
+        let tasks = [];
+        for (const [type, data] of Object.entries(d)) {
+            if (data.v) {
+                tasks.push(apiPost('logEvent', { userId: liffProfile.userId, type: type, v1: parseFloat(data.v), unit: data.u }));
+            }
+        }
+        if (tasks.length === 0) return Swal.fire('ข้อมูลว่าง', 'ระบุข้อมูลอย่างน้อย 1 ช่องนะคะ', 'warning');
+        
+        $('#loading').style.display = 'flex';
+        await Promise.all(tasks);
+        $('#loading').style.display = 'none';
+        closeAllModals();
+        Swal.fire({ title:'บันทึกแล้ว', icon:'success', timer:1500, showConfirmButton:false });
+    }
+
+    // --- NEW: MEDICATIONS ---
+    function openMedicationModal() {
+        $('#med-name').value = '';
+        $('#inp-medChange').value = '';
+        $('#med-date').value = new Date().toISOString().split('T')[0];
+        $('#med-prev').value = '';
+        $('#med-pill').value = '';
+        $('#med-time').value = '';
+        document.querySelectorAll('#med-modal .chip-btn').forEach(b => b.classList.remove('active'));
+        $('#med-curr-container').style.display = 'none';
+        $('#med-modal').style.display = 'flex';
+    }
+    
+    function selectMedChange(value, btn) {
+        $('#inp-medChange').value = value;
+        btn.parentElement.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        if (value === 'REDUCED') {
+            $('#med-curr-container').style.display = 'block';
+        } else {
+            $('#med-curr-container').style.display = 'none';
+        }
+    }
+
+    async function saveMedication() {
+        const medName = $('#med-name').value;
+        const changeType = $('#inp-medChange').value;
+        const actionDate = $('#med-date').value;
+        const prev = $('#med-prev').value.trim();
+        
+        if(!medName || !changeType || !actionDate) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาเลือกยา, รูปแบบการเปลี่ยน และวันที่ค่ะ', 'warning');
+        
+        let curr = '';
+        if(changeType === 'REDUCED') {
+            const p = $('#med-pill').value;
+            const t = $('#med-time').value;
+            const m = $('#med-meal').value;
+            if(!p || !t) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณาระบุจำนวนเม็ดและครั้งสำหรับวิธีใช้ใหม่ค่ะ', 'warning');
+            curr = `${p} เม็ด วันละ ${t} ครั้ง ${m}`;
+        } else {
+            curr = 'หยุดยา';
+        }
+
+        $('#loading').style.display = 'flex';
+        await apiPost('logMedication', {
+            userId: liffProfile.userId,
+            medName: medName,
+            changeType: changeType,
+            actionDate: actionDate,
+            previousRegimen: prev,
+            currentRegimen: curr
+        });
+        $('#loading').style.display = 'none';
+        closeAllModals();
+        Swal.fire({ title:'บันทึกรายการยาเรียบร้อย', icon:'success', timer:2000, showConfirmButton:false });
+    }
+
+    // --- NEW: SLEEP / STRESS ---
+    function openSleepStressModal() {
+        const opts = ['นอนหลับดี', 'นอนไม่หลับ', 'มีสมาธิน้อย', 'หงุดหงิด', 'เบื่อเซ็ง', 'ไม่อยากพบคน', 'อื่นๆ (ระบุเอง)'];
+        let html = `<div class="chip-container">`;
+        opts.forEach(o => html += `<button class="chip-btn" style="min-width:45%;" onclick="processSleepChoice('${o}')">${o}</button>`);
+        html += `</div>`;
+
+        Swal.fire({
+            title: 'การนอนหลับและจิตใจ',
+            html: html,
+            showConfirmButton: false, showCloseButton: true
+        });
+    }
+
+    window.processSleepChoice = async function(choice) {
+        Swal.close();
+        if (choice === 'นอนหลับดี') {
+            const { value: hrs } = await Swal.fire({ 
+                title: 'เยี่ยมเลยค่ะ!', text: 'เมื่อคืนนอนหลับไปกี่ชั่วโมงคะ?', input: 'tel',
+                confirmButtonText: 'บันทึก', showCancelButton: true, cancelButtonText: 'ยกเลิก',
+                inputAttributes: { oninput: "this.value = this.value.replace(/[^0-9.]/g, '')" }
+            });
+            if (hrs) {
+                $('#loading').style.display = 'flex';
+                await apiPost('logEvent', { userId: liffProfile.userId, type: 'SLEEP', vt: 'นอนหลับดี', v1: hrs, unit: 'ชม.' });
+                $('#loading').style.display = 'none';
+                Swal.fire({ title:'บันทึกแล้ว', text:'ขอให้คืนนี้นอนหลับฝันดีอีกนะคะ 💖', icon:'success', timer:2000, showConfirmButton:false });
+            }
+        } else {
+            let actualChoice = choice;
+            if (choice === 'อื่นๆ (ระบุเอง)') {
+                const { value: customText } = await Swal.fire({ title: 'รู้สึกอย่างไรคะ?', input: 'text', confirmButtonText: 'ถัดไป', showCancelButton: true });
+                if (!customText) return;
+                actualChoice = customText;
+            }
+
+            const scaleHTML = `
+                <p style="margin-bottom:15px;">อาการ "${actualChoice}" มีมากแค่ไหน?</p>
+                <div style="display:grid; grid-template-columns:1fr; gap:10px;">
+                    <button class="score-btn" onclick="saveStress('${actualChoice}', 0)">0 - ไม่มีเลย</button>
+                    <button class="score-btn" onclick="saveStress('${actualChoice}', 1)">1 - เป็นส่วนน้อย</button>
+                    <button class="score-btn" onclick="saveStress('${actualChoice}', 2)">2 - ปานกลาง</button>
+                    <button class="score-btn" onclick="saveStress('${actualChoice}', 3)">3 - เป็นมาก</button>
+                    <button class="score-btn" onclick="saveStress('${actualChoice}', 4)">4 - เป็นประจำ (กระทบชีวิต)</button>
+                </div>
+            `;
+            Swal.fire({ title: 'ประเมินอาการ', html: scaleHTML, showConfirmButton: false, showCancelButton: true, cancelButtonText: 'ยกเลิก' });
+        }
+    }
+
+    window.saveStress = async function(symptom, score) {
+        Swal.close();
+        $('#loading').style.display = 'flex';
+        await apiPost('logEvent', { userId: liffProfile.userId, type: 'STRESS', vt: symptom, v1: score, unit: 'ระดับ' });
+        $('#loading').style.display = 'none';
+        Swal.fire({ title: 'เก่งมากที่สังเกตตัวเอง', text: 'พักผ่อนและดูแลใจตัวเองด้วยนะคะ 💖', icon: 'info', confirmButtonText: 'รับทราบ' });
+    }
+
+    // --- FOOD SYSTEM ---
+    function openFoodModal() {
+        $('#food-modal').style.display = 'flex';
+        $('#food-rows-container').innerHTML = ''; 
+        $('#food-preview').style.display = 'none';
+        $('#food-upload-zone').style.display = 'block';
+        addFoodRow(true);
+    }
+
+    function addFoodRow(isInput = false, name='', qty='', unit='') {
+        const div = document.createElement('div');
+        div.className = 'food-row-wrapper'; 
+        if (isInput) div.innerHTML = `
+            <div class="food-row" style="grid-template-columns: 2fr 1fr 1fr; display:grid; gap:10px; margin-bottom:15px;">
+                <input type="text" placeholder="ชื่ออาหาร" value="${name}" class="food-name">
+                <input type="tel" placeholder="จำนวน" value="${qty}" class="food-qty" inputmode="decimal" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+                <input type="text" placeholder="หน่วย" value="${unit}" class="food-unit">
+            </div>`;
+        else div.innerHTML = `
+            <div class="food-card" style="background:#FFF; border-radius:25px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="text-align:left;">
+                    <div style="font-size:24px; font-weight:800; color:#5D4037;">${name}</div><div style="font-size:20px; color:#8D6E63;">${qty} ${unit}</div>
+                </div>
+                <button onclick="switchToEdit(this, '${name}', '${qty}', '${unit}')" style="background:#FFF59D; color:#5D4037; border:none; border-radius:50%; width:40px; height:40px; font-size:20px;">✏️</button>
+            </div>
+            <div class="food-row hidden-inputs" style="display:none;"><input type="text" value="${name}" class="food-name"><input type="tel" value="${qty}" class="food-qty"><input type="text" value="${unit}" class="food-unit"></div>`;
+        $('#food-rows-container').appendChild(div);
+    }
+
+    window.switchToEdit = function(btn, name, qty, unit) {
+        btn.closest('.food-row-wrapper').innerHTML = `
+            <div class="food-row" style="grid-template-columns: 2fr 1fr 1fr; display:grid; gap:10px; margin-bottom:15px;">
+                <input type="text" placeholder="ชื่ออาหาร" value="${name}" class="food-name">
+                <input type="tel" placeholder="จำนวน" value="${qty}" class="food-qty" inputmode="decimal" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+                <input type="text" placeholder="หน่วย" value="${unit}" class="food-unit">
+            </div>`;
+    }
+
+    async function uploadFoodImage(input) {
+      if (!input.files || !input.files[0]) return;
+      $('#food-upload-zone').style.display = 'none';
+      $('#food-loader').style.display = 'block';
+      try {
+        const reader = new FileReader();
+        reader.readAsDataURL(input.files[0]);
+        reader.onload = async (e) => {
+            const img = new Image(); img.src = e.target.result;
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                let w = img.width, h = img.height, max = 512;
+                if (w > h) { if (w > max) { h *= max / w; w = max; } } else { if (h > max) { w *= max / h; h = max; } }
+                canvas.width = w; canvas.height = h;
+                canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                const base64 = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
+                
+                $('#food-preview').src = img.src; $('#food-preview').style.display = 'block';
+                const res = await apiPost('uploadFoodImage', { userId: liffProfile.userId, imageBase64: base64 });
+                $('#food-loader').style.display = 'none'; 
+                
+                console.log("AI Debug:", res.debug); // แสดงผลตรวจสอบใน Console
+                
+                if (res.notFood) {
+                    let debugMsg = (res.debug && res.debug.length > 0) ? res.debug.join('<br>') : '';
+                    let htmlMsg = res.message;
+                    if (debugMsg) htmlMsg += `<br><br><div style="font-size:12px; color:#D32F2F; text-align:left; background:#FFEBEE; padding:10px; border-radius:10px; max-height:150px; overflow-y:auto; border: 1px solid #EF9A9A;"><b>Debug Info:</b><br>${debugMsg}</div>`;
+                    
+                    Swal.fire({ title: 'ไม่ใช่ของกินแน่เลย', html: htmlMsg, icon: 'warning', confirmButtonText: 'ถ่ายใหม่' });
+                    $('#food-upload-zone').style.display = 'block'; $('#food-preview').style.display = 'none';
+                } else if(res.ok && res.items) {
+                    $('#food-rows-container').innerHTML = ''; 
+                    const isFallback = res.items.length === 1 && res.items[0].name.includes("ระบุเอง");
+                    if (isFallback) {
+                        let debugMsg = (res.debug && res.debug.length > 0) ? res.debug.join('<br>') : 'ไม่ทราบสาเหตุ';
+                        Swal.fire({ 
+                            title: 'AI ขัดข้อง 😅', 
+                            html: `ระบบไม่สามารถวิเคราะห์รูปได้ กรุณาพิมพ์ชื่ออาหารเองนะคะ<br><br><div style="font-size:12px; color:#D32F2F; text-align:left; background:#FFEBEE; padding:10px; border-radius:10px; max-height:150px; overflow-y:auto; border: 1px solid #EF9A9A;"><b>Debug Info:</b><br>${debugMsg}</div>`, 
+                            icon: 'warning', 
+                            confirmButtonText: 'พิมพ์เอง' 
+                        });
+                    } else {
+                        Swal.fire({ title: 'AI ประมวลผลเสร็จแล้ว!', text: 'ตรวจสอบความถูกต้องเลยค่ะ', icon: 'success', confirmButtonText: 'ตกลง' });
+                    }
+                    res.items.forEach(item => addFoodRow(false, item.name, item.qty, item.unit));
+                } else {
+                    let debugMsg = (res.debug && res.debug.length > 0) ? res.debug.join('<br>') : '';
+                    let htmlMsg = res.message || 'เกิดข้อผิดพลาดในการอัปโหลด';
+                    if (debugMsg) htmlMsg += `<br><br><div style="font-size:12px; color:#D32F2F; text-align:left; background:#FFEBEE; padding:10px; border-radius:10px; max-height:150px; overflow-y:auto; border: 1px solid #EF9A9A;"><b>Debug Info:</b><br>${debugMsg}</div>`;
+                    
+                    $('#food-upload-zone').style.display = 'block'; 
+                    Swal.fire({title: 'ขออภัย', html: htmlMsg, icon: 'error'});
+                }
+            };
+        };
+      } catch(err) { 
+        $('#food-loader').style.display='none'; 
+        $('#food-upload-zone').style.display='block'; 
+        Swal.fire({title: 'ข้อผิดพลาด', text: err.message, icon: 'error'}); 
+      }
+      input.value = ''; 
+    }
+
+    async function saveFoodManual() {
+        const rows = document.querySelectorAll('.food-row-wrapper'); 
+        let items = [];
+        for (let wrapper of rows) {
+            let n, q, u;
+            if(wrapper.querySelector('input.food-name')) {
+                n = wrapper.querySelector('.food-name').value.trim();
+                q = wrapper.querySelector('.food-qty').value.trim();
+                u = wrapper.querySelector('.food-unit').value.trim();
+            }
+            if (n) {
+                if (!q || !u) {
+                    const { value: v } = await Swal.fire({
+                        title: `${n} ทานเท่าไหร่คะ?`,
+                        html: `<div style="margin-bottom:10px;">ระบุจำนวนและหน่วย</div><input id="swal-qty" class="swal2-input" type="tel"><input id="swal-unit" class="swal2-input">`,
+                        preConfirm: () => [$('#swal-qty').value, $('#swal-unit').value]
+                    });
+                    if (v && v[0] && v[1]) { q = v[0]; u = v[1]; } else return;
+                }
+                items.push({ name: n, qty: q, unit: u });
+            }
+        }
+
+        if (items.length === 0) return Swal.fire('ว่างเปล่า', 'ระบุชื่ออาหารอย่างน้อย 1 อย่างนะคะ', 'warning');
+        const hr = new Date().getHours();
+        let def = 'ว่าง'; if(hr>=6 && hr<11) def='เช้า'; else if(hr>=11 && hr<14) def='เที่ยง'; else if(hr>=14 && hr<24) def='เย็น';
+        const { value: mealVal } = await Swal.fire({
+            title: 'ทานมื้อไหนคะ?', html: getSelectorHTML(['เช้า', 'เที่ยง', 'เย็น', 'ว่าง']), showCancelButton: true,
+            preConfirm: () => { const s = document.querySelector('.custom-selector-btn.active'); return s ? s.innerText : null; }
+        });
+        if (!mealVal) return;
+
+        $('#loading').style.display = 'flex';
+        const evalRes = await apiPost('evaluateFoodText', { items: items });
+        if (evalRes && evalRes.isValid === false) {
+            $('#loading').style.display = 'none'; return Swal.fire('ตรวจสอบข้อมูล', evalRes.reason, 'warning');
+        }
+
+        const adviceFlag = (evalRes && evalRes.advice) ? evalRes.advice : '-';
+        const img = window.lastUploadedImageUrl || ''; 
+        for (let i of items) await apiPost('logEvent', { userId: liffProfile.userId, type: 'FOOD', subtype: `มื้อ${mealVal}`, vt: i.name, v1: i.qty, unit: i.unit, img: img, predefinedFlag: adviceFlag });
+        
+        $('#loading').style.display = 'none'; closeAllModals();
+        Swal.fire({ title: 'บันทึกแล้ว', text: adviceFlag !== '-' ? adviceFlag : 'ทานให้อร่อยนะคะ', icon: 'success', timer: 3000 });
+    }
+
+    // --- FORM LOGIC (SBGM & OTHERS) ---
     function openNoteForm(metric) {
       currentMetric = metric;
       const conf = METRIC_CONFIG[metric];
-      const modalBody = $('#modal-body');
-      $('#modal-title').innerText = conf.title;
-      $('#btn-save-form').disabled = true;
-
-      let html = '';
-
-      // 1. Subtype as Chips (Button Group)
-      if (conf.subtypes) {
-        html += `<div class="form-group"><label class="form-label">${metric === 'FOOD' ? 'มื้ออาหาร' : 'ประเภท/ช่วงเวลา'}</label><div class="chip-container" id="chip-subtype">`;
-        conf.subtypes.forEach(s => {
-            html += `<button class="chip-btn" onclick="selectOption('subtype', '${s}', this)">${s}</button>`;
-        });
-        html += `</div><input type="hidden" id="inp-subtype"></div>`; // Hidden input to store value
-      }
-
-      // 2. Main Input
-      if (conf.type === 'select') {
-        html += `<div class="form-group"><label class="form-label">ระบุข้อมูล</label><div class="chip-container" id="chip-val1">`;
-        conf.options.forEach(o => {
-            html += `<button class="chip-btn" onclick="selectOption('val1', '${o}', this)">${o}</button>`;
-        });
-        html += `</div><input type="hidden" id="inp-val1"></div>`;
-      } else if (metric === 'BP') {
-        html += `
-          <div class="form-group">
-            <label class="form-label">ตัวบน (Systolic)</label>
-            <input type="number" id="inp-val1" placeholder="${conf.placeholder_sys}" oninput="validateForm()">
-            <div id="alert-val1" class="soft-alert">⚠️ คุณยายคะ ค่าปกติต้องอยู่ระหว่าง 20-300 นะคะ</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">ตัวล่าง (Diastolic)</label>
-            <input type="number" id="inp-val2" placeholder="${conf.placeholder_dia}" oninput="validateForm()">
-            <div id="alert-val2" class="soft-alert">⚠️ คุณยายคะ ค่าปกติต้องอยู่ระหว่าง 20-130 นะคะ</div>
-          </div>
-        `;
-      } else if (metric === 'FOOD') {
-        html += `
-          <div class="form-group">
-            <label class="form-label">รายการอาหารและปริมาณ</label>
-            <textarea id="inp-val1" rows="3" placeholder="${conf.placeholder}" oninput="validateForm()"></textarea>
-            <div id="alert-val1" class="soft-alert">⚠️ รบกวนพิมพ์ชื่ออาหารอย่างน้อย 3 ตัวอักษรนะคะ</div>
-          </div>
-        `;
-      } else {
-        html += `
-          <div class="form-group">
-            <label class="form-label">ค่าที่วัดได้ (${conf.unit})</label>
-            <input type="number" id="inp-val1" placeholder="${conf.placeholder}" step="any" inputmode="decimal" oninput="validateForm()">
-            <div id="alert-val1" class="soft-alert">⚠️ ค่าดูแปลกๆ ลองตรวจสอบอีกทีนะคะ</div>
-          </div>
-        `;
-      }
-
-      modalBody.innerHTML = html;
-      $('#form-modal').style.display = 'flex';
+      $('#modal-title').innerText = metric === 'EXERCISE' ? `วันนี้คุณ ${userDisplayName} ออกกำลังกายอะไรคะ` : conf.title;
       
-      // Auto focus logic
-      setTimeout(() => {
-        const inp = modalBody.querySelector('input[type="number"], textarea');
-        if(inp) inp.focus();
-      }, 300);
-    }
-
-    function selectOption(type, value, btn) {
-        // Update hidden input
-        $(`#inp-${type}`).value = value;
-        // Update visual state
-        const container = btn.parentElement;
-        container.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        validateForm();
-    }
-
-    function closeNoteForm() { $('#form-modal').style.display = 'none'; }
-
-    function validateForm() {
-      const metric = currentMetric;
-      const conf = METRIC_CONFIG[metric];
-      let isValid = true;
-
-      // Range Checker Helper
-      const checkRange = (id, min, max) => {
-        const el = $(id);
-        if(!el) return false;
-        const suffix = id.split('-').pop();
-        const alert = $('#alert-' + suffix);
-        const val = parseFloat(el.value);
-        
-        if (isNaN(val) || val < min || val > max) {
-          el.classList.add('invalid');
-          if(alert) alert.style.display = 'flex';
-          return false;
-        }
-        el.classList.remove('invalid');
-        if(alert) alert.style.display = 'none';
-        return true;
-      };
-
-      if (metric === 'BP') {
-        const v1 = checkRange('#inp-val1', conf.sys_min, conf.sys_max);
-        const v2 = checkRange('#inp-val2', conf.dia_min, conf.dia_max);
-        // Logical check: Systolic > Diastolic
-        if (v1 && v2 && parseFloat($('#inp-val1').value) <= parseFloat($('#inp-val2').value)) isValid = false;
-        else isValid = v1 && v2;
-      } else if (metric === 'FOOD') {
-        const el = $('#inp-val1');
-        if (el.value.trim().length < 3) {
-          el.classList.add('invalid');
-          $('#alert-val1').style.display = 'flex';
-          isValid = false;
-        } else {
-          el.classList.remove('invalid');
-          $('#alert-val1').style.display = 'none';
-        }
-        // Subtype Check
-        if (!$('#inp-subtype').value) isValid = false; 
-      } else if (conf.type === 'select') {
-        isValid = $('#inp-val1').value !== "";
+      let html = '';
+      if (metric === 'EXERCISE') {
+          html += `<div class="chip-container" id="chip-activity">`;
+          conf.activityList.forEach(s => html += `<button class="chip-btn" onclick="selectOption('subtype', '${s}', this)">${s}</button>`);
+          html += `</div><div class="form-label" style="margin-top:10px;">หรือบันทึกอื่นๆ</div>
+                   <input type="text" id="inp-val1" placeholder="ระบุกิจกรรม..." style="margin-bottom:0;"><input type="hidden" id="inp-subtype">`;
       } else {
-        isValid = checkRange('#inp-val1', conf.min, conf.max);
-        if(conf.subtypes && !$('#inp-subtype').value) isValid = false;
+          if (conf.subtypes) {
+             html += `<div class="form-label">วัดตอนไหนคะ?</div><div class="chip-container" id="chip-subtype">`;
+             conf.subtypes.forEach(s => html += `<button class="chip-btn" onclick="selectOption('subtype', '${s}', this)">${s}</button>`);
+             html += `</div><input type="hidden" id="inp-subtype">`;
+          }
+          if (metric === 'BP') {
+             html += `<input type="tel" id="inp-val1" placeholder="ตัวบน" inputmode="numeric" oninput="validateNumber(this)"><input type="tel" id="inp-val2" placeholder="ตัวล่าง" inputmode="numeric" oninput="validateNumber(this)">`;
+          } else {
+             html += `<input type="tel" id="inp-val1" placeholder="${conf.placeholder}" inputmode="decimal" oninput="validateNumber(this)">`;
+          }
       }
+      $('#modal-body').innerHTML = html;
+      $('#form-modal').style.display = 'flex'; 
+    }
 
-      $('#btn-save-form').disabled = !isValid;
+    window.selectOption = function(type, value, btn) {
+      if(type === 'subtype') $('#inp-subtype').value = value;
+      if(currentMetric === 'EXERCISE') $('#inp-val1').value = value;
+      btn.parentElement.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
     }
 
     async function submitForm() {
-      const btn = $('#btn-save-form');
-      btn.innerText = 'กำลังบันทึก...';
-      btn.disabled = true;
-      $('#loading').style.display = 'flex';
-      
       const metric = currentMetric;
-      const payload = {
-        userId: liffProfile.userId,
-        type: metric,
-        timestamp: new Date().toISOString()
-      };
-
       const elSubtype = $('#inp-subtype');
-      const elVal1 = $('#inp-val1');
-      const elVal2 = $('#inp-val2');
+      const v1 = $('#inp-val1') ? $('#inp-val1').value : null;
+      const v2 = $('#inp-val2') ? $('#inp-val2').value : null;
+      let subtype = elSubtype ? elSubtype.value : null;
 
-      if (elSubtype) payload.subtype = elSubtype.value;
-      if (elVal1) payload.v1 = elVal1.value;
-      if (elVal2) payload.v2 = elVal2.value;
-
-      try {
-        await apiPost('logEvent', payload);
-        closeNoteForm();
-        
-        let msg = 'เรียบร้อยจ้า!';
-        if (metric === 'BP') msg = `ความดัน ${payload.v1}/${payload.v2}`;
-        else if (metric === 'FOOD') msg = 'บันทึกมื้ออาหารแล้ว';
-        else if (METRIC_CONFIG[metric].unit) msg = `ค่า ${payload.v1} ${METRIC_CONFIG[metric].unit}`;
-        
-        $('#success-msg').innerText = msg;
-        $('#loading').style.display = 'none';
-        $('#success-modal').style.display = 'flex';
-
-        setTimeout(() => { liff.closeWindow(); }, 2500);
-
-      } catch (err) {
-        $('#loading').style.display = 'none';
-        alert('ขออภัยค่ะ บันทึกไม่สำเร็จ: ' + err.message);
-        btn.innerText = 'บันทึกข้อมูล';
-        btn.disabled = false;
+      if (metric === 'BP') {
+          if (!v1 || !v2) return Swal.fire('ข้อมูลไม่ครบ', 'กรุณากรอกทั้งค่าตัวบน และตัวล่างนะคะ', 'warning');
+          const sys = parseFloat(v1); const dia = parseFloat(v2);
+          if (sys > 300 || dia > 200) return Swal.fire('ค่าผิดปกติ', 'ความดันไม่น่าจะสูงขนาดนี้ พิมพ์ผิดหรือเปล่าคะ', 'error');
+          if (sys > 130 || dia > 80) {
+              const cf = await Swal.fire({ title: 'ความดันสูง', html: 'เกณฑ์ปกติคือ 130/80<br>นั่งพักแล้ววัดใหม่นะ', icon: 'warning', showCancelButton: true, confirmButtonText: 'ยืนยัน', cancelButtonText: 'วัดใหม่' });
+              if (!cf.isConfirmed) return;
+          }
+      } else if (metric !== 'EXERCISE' && !v1) {
+          return Swal.fire('ข้อมูลว่างเปล่า', 'ระบุค่าก่อนบันทึกนะคะ', 'warning');
       }
-    }
 
-    // ============================================================
-    // PART 2: DASHBOARD & LEGACY
-    // ============================================================
-    async function loadDashboardData() {
+      if (metric === 'EXERCISE') {
+          if (!v1) return Swal.fire('ข้อมูลไม่ครบ', 'เลือกกิจกรรมก่อนนะคะ', 'warning');
+          const { value: mins } = await Swal.fire({ title: `${v1} ไปกี่นาทีคะ?`, input: 'tel', showCancelButton: true, inputAttributes: { oninput: "validateNumber(this)" } });
+          if (!mins) return;
+          $('#loading').style.display = 'flex';
+          await apiPost('logEvent', { userId: liffProfile.userId, type: metric, vt: v1, v1: parseInt(mins) });
+          $('#loading').style.display = 'none'; closeAllModals();
+          return Swal.fire({ title:'เก่งมากค่ะ', icon:'success', timer:1500, showConfirmButton:false });
+      }
+
+      if (metric === 'SBGM') {
+          if (!subtype) {
+             const { value: tVal } = await Swal.fire({ title: 'วัดตอนไหนคะ?', html: getSelectorHTML(['ก่อนอาหาร', 'หลังอาหาร', 'ก่อนนอน']), showCancelButton: true, preConfirm: () => { const s = document.querySelector('.custom-selector-btn.active'); return s ? s.innerText : null; } });
+             if (tVal) subtype = tVal; else return;
+          }
+          const val = parseFloat(v1);
+          
+          if (val < 20 || val > 600) return Swal.fire('ข้อมูลแปลกๆ', 'ตัวเลขที่ใส่มาดูไม่น่าจะใช่ค่าน้ำตาลในเลือด กรุณาตรวจสอบแล้วพิมพ์ใหม่นะคะ', 'error');
+
+          const highLimit = (subtype === 'หลังอาหาร') ? 140 : 110;
+          
+          if (val < 70 || val > highLimit) {
+               const msg = val < 70 ? 'น้ำตาลต่ำผิดปกติ' : 'น้ำตาลสูงเกินเกณฑ์';
+               const confirm = await Swal.fire({ title: msg, html: `ค่าที่วัดได้คือ <b>${val}</b> มก./ดล.<br>ยืนยันหรือไม่?`, icon: 'warning', confirmButtonText: 'ยืนยัน (ถูกต้อง)', showCancelButton: true, cancelButtonText: 'พิมพ์ใหม่' });
+               if (!confirm.isConfirmed) return;
+               
+               let advice = val < 70 ? 'คำแนะนำ: รีบจิบน้ำหวาน 3 ช้อนชา แล้วนั่งพัก 15 นาทีนะคะ ถ้ารู้สึกหน้ามืดรีบตามคนมาช่วยค่ะ' : 'คำแนะนำ: คุมอาหารแป้ง/น้ำตาล และดื่มน้ำเปล่าเยอะๆ นะคะ';
+               await Swal.fire({ title: 'การปฐมพยาบาล', text: advice, icon: 'info', confirmButtonText: 'รับทราบ' });
+               
+               $('#loading').style.display = 'flex';
+               await apiPost('logEvent', { userId: liffProfile.userId, type: metric, subtype, v1, v2 });
+               $('#loading').style.display = 'none'; closeAllModals();
+               openAdverseModal(); 
+               return;
+          }
+      }
+
       $('#loading').style.display = 'flex';
-      const res = await apiFetch('getDashboard', { userId: liffProfile.userId });
-      
-      if (!res.profile) {
-        switchView('reg');
-        $('#loading').style.display = 'none';
-        return;
-      }
+      await apiPost('logEvent', { userId: liffProfile.userId, type: metric, subtype, v1, v2 });
+      $('#loading').style.display = 'none'; closeAllModals();
 
-      $('#avatar').src = res.profile.PictureURL || liffProfile.pictureUrl;
-      $('#p_name').innerText = res.profile.NameUse || liffProfile.displayName;
-      $('#p_hn').innerText = res.profile.HN;
-
-      allEventsData = [];
-      if (res.events) {
-        Object.keys(res.events).forEach(type => {
-          res.events[type].forEach(e => {
-            allEventsData.push({
-              ts: e.ts, type: type,
-              subtype: e.event_subtype || e.subtype,
-              v1: e.value_numeric_1 || e.v1,
-              v2: e.value_numeric_2 || e.v2,
-              text: e.value_text || e.vt
-            });
-          });
-        });
-      }
-      allEventsData.sort((a,b) => new Date(b.ts) - new Date(a.ts));
-
-      renderHistoryTable();
-      renderCharts(res.events);
-      switchView('dashboard');
-      $('#loading').style.display = 'none';
-      
-      const view = new URLSearchParams(window.location.search).get('view');
-      if (view === 'history') openContentCard('historyCard');
-    }
-
-    // (Code for renderHistoryTable, renderCharts is same as before, simplified here)
-    function renderHistoryTable() {
-      const tableBody = $('#history-table tbody');
-      const filters = $('#history-filters');
-      const types = ['ALL', 'SBGM', 'BP', 'WEIGHT', 'FOOD', 'EXERCISE'];
-      filters.innerHTML = types.map(t => `<button class="filter-btn ${t === currentHistoryFilter ? 'active' : ''}" onclick="filterHistory('${t}')">${t === 'ALL' ? 'ทั้งหมด' : METRIC_CONFIG[t]?.title || t}</button>`).join('');
-      const data = currentHistoryFilter === 'ALL' ? allEventsData : allEventsData.filter(e => e.type === currentHistoryFilter);
-      if (data.length === 0) { tableBody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#999;">ไม่พบข้อมูล</td></tr>`; return; }
-      tableBody.innerHTML = data.map(e => {
-        let val = e.v1; if (e.type === 'BP') val = `${e.v1}/${e.v2}`; if (e.type === 'FOOD') val = e.text;
-        return `<tr><td>${fmtDate(e.ts).split(' ')[0]}<br><small style="color:#999">${fmtDate(e.ts).split(' ')[1]}</small></td><td>${METRIC_CONFIG[e.type]?.title || e.type}</td><td>${val || '-'} <small>${e.subtype || ''}</small></td><td style="text-align:right;"><button class="btn-small danger" onclick="deleteEvent('${e.ts}', '${e.type}')">ลบ</button></td></tr>`;
-      }).join('');
-    }
-    function filterHistory(type) { currentHistoryFilter = type; renderHistoryTable(); }
-    
-    function renderCharts(events) {
-      const wrap = $('#chartsWrap'); wrap.innerHTML = '';
-      const keys = ['SBGM', 'BP', 'WEIGHT'];
-      keys.forEach(k => {
-        if (!events[k] || events[k].length < 2) return;
-        const div = document.createElement('div'); div.className = 'chart-card';
-        div.innerHTML = `<h3>${METRIC_CONFIG[k].title}</h3><div class="chart-box"><canvas id="c-${k}"></canvas></div>`;
-        wrap.appendChild(div);
-        const ctx = div.querySelector('canvas').getContext('2d');
-        const sorted = events[k].sort((a,b) => new Date(a.ts) - new Date(b.ts));
-        const datasets = [];
-        if (k === 'BP') {
-          datasets.push({ label: 'Systolic', data: sorted.map(d=>d.v1), borderColor: '#e74c3c', fill:false });
-          datasets.push({ label: 'Diastolic', data: sorted.map(d=>d.v2), borderColor: '#3498db', fill:false });
-        } else { datasets.push({ label: 'Value', data: sorted.map(d=>d.v1), borderColor: '#f39c12', fill:false }); }
-        new Chart(ctx, { type: 'line', data: { labels: sorted.map(d => fmtDate(d.ts).split(' ')[0]), datasets: datasets }, options: { responsive: true, maintainAspectRatio: false } });
+      const afterSave = await Swal.fire({
+          title: 'บันทึกเรียบร้อย', icon: 'success',
+          showCancelButton: true,
+          confirmButtonText: 'เสร็จเรียบร้อย',
+          cancelButtonText: 'บันทึกอาการข้างเคียง', cancelButtonColor: '#FF9100'
       });
+      if (afterSave.dismiss === Swal.DismissReason.cancel) {
+          openAdverseModal();
+      }
     }
 
-    async function deleteEvent(ts, type) {
-      if(!confirm(`ต้องการลบรายการ ${type} นี้ใช่หรือไม่?`)) return;
-      $('#loading').style.display = 'flex';
-      await apiPost('deleteEvent', { userId: liffProfile.userId, ts: ts });
-      await loadDashboardData();
+    // --- ADVERSE ---
+    function openAdverseModal() {
+        const opts = ['ตัวสั่น', 'ใจสั่น', 'เหงื่อแตก', 'หิว', 'หงุดหงิด', 'สับสน', 'ซึม', 'หมดสติ'];
+        $('#symptom-options').innerHTML = opts.map(o => `<button class="symptom-btn chip-btn" onclick="this.classList.toggle('active')">${o}</button>`).join('');
+        $('#center-modal').style.display = 'flex';
+    }
+    async function submitSymptoms() {
+        const sel = Array.from(document.querySelectorAll('.symptom-btn.active')).map(b => b.innerText);
+        const txt = $('#symptom-text').value;
+        const final = sel.join(', ') + (sel.length && txt ? ', ' : '') + txt;
+        if(!final.trim()) return;
+        $('#loading').style.display = 'flex';
+        await apiPost('logEvent', { userId: liffProfile.userId, type: 'ADVERSE', vt: final }); 
+        $('#loading').style.display = 'none'; closeAllModals();
+        Swal.fire({ title:'ส่งข้อมูลแล้ว', text:'ดูแลสุขภาพด้วยนะคะ', icon:'success', timer:1500, showConfirmButton:false });
     }
 
-    // ============================================================
-    // API HELPERS (CORS FIXED)
-    // ============================================================
- // ====== API Calls (Robust Version) ======
-    async function apiFetch(action, params = {}) {
-        const url = new URL(GAS_WEB_APP_URL);
-        url.searchParams.set('action', action);
-        for(const key in params) { url.searchParams.set(key, params[key]); }
-        const res = await fetch(url);
-        return await res.json();
-    }
-
+    // --- API ---
     async function apiPost(action, payload) {
-        // Log เพื่อตรวจสอบก่อนส่ง
-        console.log("Sending...", action, payload);
+       try {
+         const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action, payload }) });
+         const data = await res.json();
+         if(data.imageUrl) window.lastUploadedImageUrl = data.imageUrl; 
+         if (action === 'getDashboard') renderDashboard(data.events);
+         return data;
+       } catch(e) { console.error(e); return { ok: false }; }
+    }
 
-        // ใช้ URL ใหม่เสมอ
-        const url = GAS_WEB_APP_URL;
+    // --- DASHBOARD RENDER LOGIC ---
+    const LABELS = {
+        'SBGM': '🩸 ค่าน้ำตาลในเลือด', 'BP': '💓 ความดันโลหิต',
+        '%FAT': '👤 % ไขมันร่างกาย', 'VISCERALFAT': '👤 ไขมันช่องท้อง', 'MUSCLE': '👤 % กล้ามเนื้อ',
+        'BMI': '👤 ดัชนีมวลกาย', 'RESTINGMET': '👤 เผาผลาญ', 'BODYAGE': '👤 อายุร่างกาย',
+        'SLEEP': '😴 การนอนหลับ', 'STRESS': '🤯 อาการ/ความเครียด'
+    };
 
-        // เทคนิคแก้ Fail to fetch:
-        // 1. method: POST
-        // 2. headers: content-type เป็น text/plain (ห้าม application/json)
-        // 3. body: stringify JSON
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8" 
-            },
-            body: JSON.stringify({ 
-                action: action, 
-                payload: payload 
-            })
+    function renderDashboard(eventsData) {
+        const container = $('#history-container'); container.innerHTML = '';
+        let allEvents = [];
+        if(eventsData) Object.values(eventsData).flat().forEach(e => { if(e && e.event_type) allEvents.push(e); });
+        if (allEvents.length === 0) { container.innerHTML = '<div style="text-align:center; color:#AAA; margin-top:50px;">ยังไม่มีข้อมูลค่ะ</div>'; return; }
+        allEvents.sort((a,b) => new Date(b.ts) - new Date(a.ts)); 
+
+        const groups = {};
+        allEvents.forEach(e => {
+            const d = new Date(e.ts);
+            const dateStr = d.toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'});
+            const hour = d.getHours();
+            let period = 'อื่นๆ'; if(hour>=6 && hour<11) period='เช้า'; else if(hour>=11 && hour<16) period='เที่ยง/บ่าย'; else if(hour>=16 && hour<24) period='เย็น/ค่ำ';
+            
+            const key = `${dateStr}_${period}`;
+            if(!groups[key]) groups[key] = { date: dateStr, period: period, sugar: [], bp: [], food: [], other: [], img: null };
+            if(e.img && !groups[key].img) groups[key].img = e.img;
+
+            const t = String(e.event_type).trim().toUpperCase();
+            if(t === 'SBGM') groups[key].sugar.push(e);
+            else if(t === 'BP') groups[key].bp.push(e);
+            else if(t === 'FOOD') groups[key].food.push(e);
+            else groups[key].other.push(e); 
         });
 
-        if (!response.ok) {
-            throw new Error(`Server Error: ${response.status}`);
-        }
+        const orderedKeys = [];
+        allEvents.forEach(e => {
+            const k = `${new Date(e.ts).toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'})}_${(new Date(e.ts).getHours()>=6 && new Date(e.ts).getHours()<11)?'เช้า':(new Date(e.ts).getHours()>=11 && new Date(e.ts).getHours()<16)?'เที่ยง/บ่าย':(new Date(e.ts).getHours()>=16)?'เย็น/ค่ำ':'อื่นๆ'}`;
+            if(!orderedKeys.includes(k)) orderedKeys.push(k);
+        });
 
-        return await response.json();
+        orderedKeys.forEach(k => {
+            const g = groups[k]; let sections = [];
+
+            if (g.sugar.length > 0) {
+                let html = '';
+                g.sugar.forEach(s => {
+                    if (s.v1 && !isNaN(parseFloat(s.v1))) {
+                        let alert = ''; if(s.flag === 'LOW') alert = `<span class="alert-badge low">⚠️ ต่ำเกินไป</span>`; else if(s.flag === 'HIGH') alert = `<span class="alert-badge high">⚠️ สูงเกินไป</span>`;
+                        html += `<div class="data-row"><span class="data-label">${LABELS['SBGM']} (${s.subtype||''}):</span><span class="data-value-big">${s.v1}</span> <span class="unit">มก./ดล.</span> ${alert}</div>`;
+                    }
+                });
+                if(html) sections.push(html);
+            }
+
+            if (g.bp.length > 0) {
+                let html = '';
+                g.bp.forEach(b => {
+                    if (b.v1 && b.v2 && !isNaN(parseFloat(b.v1))) {
+                        let alert = ''; if(b.flag === 'HIGH') alert = `<span class="alert-badge high">⚠️ สูงเกินไป</span>`;
+                        html += `<div class="data-row"><span class="data-label">${LABELS['BP']}:</span><span class="data-value-big">${b.v1} / ${b.v2}</span> <span class="unit">มม.ปรอท</span> ${alert}</div>`;
+                    }
+                });
+                if(html) sections.push(html);
+            }
+
+            if (g.food.length > 0) {
+                let html = `<div class="data-section"><div class="data-label">🍲 อาหารที่ทาน</div>`;
+                let hasFood = false;
+                g.food.forEach(f => {
+                    if (f.vt && String(f.vt) !== '#NUM!' && isNaN(f.vt)) { 
+                        let qtyUnit = (f.v1 && !isNaN(parseFloat(f.v1)) && f.unit) ? `<span class="highlight">${f.v1} ${f.unit}</span>` : '';
+                        let flagDisplay = ''; if(f.flag && String(f.flag).trim() !== '-' && String(f.flag).trim() !== 'NORMAL') flagDisplay = `<div class="food-flag">🤖 ${f.flag}</div>`;
+                        html += `<div class="food-list-item">- ${f.vt} ${qtyUnit} ${flagDisplay}</div>`; hasFood = true;
+                    }
+                });
+                html += `</div>`; if(hasFood) sections.push(html);
+            }
+            
+            if (g.other.length > 0) {
+                 let html = `<div class="data-section"><div class="data-label">📝 อื่นๆ</div>`;
+                 let hasOther = false;
+                 g.other.forEach(o => {
+                     let t = o.event_type;
+                     let valText = '';
+                     let alert = ''; 
+                     if(o.flag === 'LOW') alert = `<span class="alert-badge low">⚠️ ต่ำเกินไป</span>`;
+                     else if(o.flag === 'HIGH') alert = `<span class="alert-badge high">⚠️ สูงเกินไป</span>`;
+
+                     if(LABELS[t]) {
+                         valText = `${LABELS[t]}: ${o.v1||''} ${o.vt||''} ${o.unit||''}`.trim();
+                     } else if (t === 'EXERCISE') {
+                         valText = `🏃‍♀️ ออกกำลังกาย: ${o.vt || ''} (${o.v1} นาที)`;
+                     } else if (t === 'WEIGHT') {
+                         valText = `⚖️ น้ำหนัก: ${o.v1} กก.`;
+                     } else if (t === 'ADVERSE') {
+                         valText = `⚠️ อาการ: ${o.vt}`; alert = `<span class="alert-badge high">⚠️ มีอาการผิดปกติ</span>`;
+                     } else {
+                         valText = `${t}: ${o.vt||o.v1||''}`;
+                     }
+
+                     if (valText && String(valText) !== '#NUM!') {
+                         html += `<div class="food-list-item">${valText} ${alert}</div>`; hasOther = true;
+                     }
+                 });
+                 html += `</div>`; if(hasOther) sections.push(html);
+            }
+
+            if (sections.length > 0) {
+                let imgHtml = '';
+                if (g.img) {
+                    let displayUrl = g.img;
+                    if(displayUrl.includes('drive.google.com') && displayUrl.includes('id=')) {
+                        try { const id = new URLSearchParams(new URL(displayUrl).search).get('id'); if(id) displayUrl = `https://lh3.googleusercontent.com/d/${id}`; } catch(e){}
+                    }
+                    imgHtml = `<div class="hist-img-container" onclick="window.open('${g.img}')"><img src="${displayUrl}" onerror="this.style.display='none'"></div>`;
+                }
+
+                let cardAlertStyle = '';
+                const combinedSections = sections.join('');
+                if (combinedSections.includes('alert-badge high') || combinedSections.includes('alert-badge low') || combinedSections.includes('food-flag')) {
+                    cardAlertStyle = 'background: #FFEBEE; border-color: #EF9A9A;';
+                }
+
+                container.innerHTML += `<div class="hist-card" style="${cardAlertStyle}"><div class="hist-header-badge">${g.date} • ${g.period}</div><div class="hist-body">${imgHtml}<div class="hist-data">${sections.join('<div class="divider"></div>')}</div></div></div>`;
+            }
+        });
     }
-    function setupGlobalListeners() {
-      $$('.menu-btn').forEach(btn => { if(btn.dataset.target) btn.onclick = () => openContentCard(btn.dataset.target); });
-      $('#btnSaveReg').onclick = async () => {
-        if (!$('#consent').checked) return alert('กรุณายอมรับเงื่อนไข');
-        $('#loading').style.display = 'flex';
-        await apiPost('registerUser', { userId: liffProfile.userId, displayName: liffProfile.displayName, pictureUrl: liffProfile.pictureUrl, hn: $('#hn').value, name_use: $('#nameuse').value, gender: $('#gender').value, age: $('#age').value, consent: true });
-        location.reload();
-      };
+
+    async function fetchUserProfile() {
+        const res = await apiPost('getDashboard', { userId: liffProfile.userId });
+        if (res.isRegistered === false) {
+            switchView('register');
+        } else {
+            if (res.profile) {
+                userDisplayName = res.profile.NameUse || liffProfile.displayName;
+                const greetingText = $('#greeting-text');
+                if (greetingText) greetingText.style.display = 'none'; 
+                
+                // Show new profile header
+                $('#main-profile-header').style.display = 'flex';
+                $('#head-avatar').src = res.profile.PicUrl || liffProfile.pictureUrl || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+                $('#head-name').innerText = `คุณ${userDisplayName}`;
+                
+                // Clear old target element to prevent duplicates
+                const oldWeightTarget = document.getElementById('head-weight-target');
+                if(oldWeightTarget) oldWeightTarget.remove();
+
+                if(res.profile.StartDate && res.profile.EndDate) {
+                    const start = new Date(res.profile.StartDate);
+                    const end = new Date(res.profile.EndDate);
+                    const today = new Date();
+                    const diffTime = Math.abs(end - today);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    $('#head-start').innerText = start.toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'});
+                    if(today <= end) $('#head-target').innerText = `เป้าหมายเหลือ: ${diffDays} วัน`;
+                    else $('#head-target').innerText = `สำเร็จเป้าหมายด้านเวลาแล้ว! 🎉`;
+                }
+
+                // คำนวณน้ำหนักที่ต้องลด 10%
+                let initW = res.profile.Weight ? parseFloat(res.profile.Weight) : 0;
+                if(initW > 0) {
+                    let latestW = initW;
+                    // หาน้ำหนักล่าสุดจาก events
+                    let wEvents = res.events ? res.events.filter(e => e.event_type === 'WEIGHT') : [];
+                    if(wEvents.length > 0) {
+                        latestW = parseFloat(wEvents[0].v1);
+                    }
+                    
+                    let targetLoss = initW * 0.10;
+                    let currentLoss = initW - latestW;
+                    let remainingLoss = targetLoss - currentLoss;
+                    
+                    let wHtml = '';
+                    if(remainingLoss > 0) {
+                        wHtml = `<div id="head-weight-target" style="margin-top:8px; font-size:16px; color:#D84315; background:#FFE0B2; padding:6px 12px; border-radius:15px; display:inline-block; font-weight:700;">🎯 ต้องลดอีก ${remainingLoss.toFixed(1)} กก. เพื่อพิชิตเป้าหมาย!</div>`;
+                    } else {
+                        wHtml = `<div id="head-weight-target" style="margin-top:8px; font-size:16px; color:#2E7D32; background:#C8E6C9; padding:6px 12px; border-radius:15px; display:inline-block; font-weight:700;">🎉 ยินดีด้วย! ลดน้ำหนักได้ 10% ตามเป้าหมายแล้ว</div>`;
+                    }
+                    $('#main-profile-header .profile-info').insertAdjacentHTML('beforeend', wHtml);
+                }
+            }
+            switchView('note'); 
+        }
     }
-    function openContentCard(id) { $$('.content-card').forEach(el => el.style.display = 'none'); $('#main-menu').style.display = 'none'; $(id).style.display = 'block'; }
-    function closeContentCard() { $$('.content-card').forEach(el => el.style.display = 'none'); $('#main-menu').style.display = 'block'; }
+    
+    function loadDashboardData() { switchView('dashboard'); apiPost('getDashboard', { userId: liffProfile.userId }); }
 
     window.addEventListener('load', main);
-
 </script>
 </body>
 </html>
