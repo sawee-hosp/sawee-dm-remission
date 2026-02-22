@@ -76,7 +76,6 @@
         -webkit-background-clip: text; background-clip: text;
         animation: metallicShine 3s infinite linear; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.8));
     }
-    .nav-subtitle { font-size: 14px; font-weight: 400; color: #FFF; animation: none; text-shadow: none; -webkit-background-clip: initial; background-clip: initial;}
 
     .nav-community-btn {
         background: linear-gradient(135deg, #4FC3F7, #0288D1); color: #FFF; border: 2px solid #E1F5FE; border-radius: 20px;
@@ -89,9 +88,9 @@
         margin-left: auto; margin-right: 5px; white-space: nowrap;
     }
 
-    .container { max-width: 600px; margin: 0 auto; padding: 15px; padding-bottom: 120px; }
+    .container { max-width: 600px; margin: 0 auto; padding: 15px; padding-bottom: 30px; }
     
-    /* --- COMPACT PROFILE CARD (FONT SIZES INCREASED BY +4px) --- */
+    /* --- COMPACT PROFILE CARD --- */
     .compact-profile { background: linear-gradient(135deg, #A08963, #C9B194); border-radius: 20px; padding: 12px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid #FFF; display: flex; gap: 12px; align-items: flex-start; position: relative; }
     .pic-wrapper { position: relative; cursor: pointer; flex-shrink: 0; margin-top: 5px; }
     .pic-wrapper img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #FFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2); background: #EEE; }
@@ -109,8 +108,8 @@
     .compact-target { color: #D84315; font-size: 18px; font-weight: 800; margin-top: 4px; line-height: 1.2;}
     
     .profile-row-4 { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
-    .med-badge-small { position: absolute; top: 12px; right: 12px; background: rgba(0, 131, 143, 0.8); color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 16px; font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 5; }
-    .stat-mini-badge { background: #5D4037; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .med-badge-inline { background: rgba(0, 131, 143, 0.2); color: #00838F; padding: 2px 8px; border-radius: 15px; font-size: 10px; font-weight: 700; display: inline-block; margin-bottom: 4px; }
+    .stat-mini-badge { background: #5D4037; color: #FFF; padding: 2px 8px; border-radius: 15px; font-size: 8px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
     /* --- GRID MENU (HUGE & SQUARE) --- */
     .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -196,7 +195,7 @@
     .swee-spinner-ring { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 6px solid rgba(255,255,255,0.2); border-top: 6px solid #FF9100; border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
     
     /* COMMUNITY UI */
-    .comm-card { min-width: 260px; max-width: 260px; background: #FFF; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #81D4FA; flex-shrink: 0; overflow: hidden; display: flex; flex-direction: column; position: relative; }
+    .comm-card { min-width: 260px; max-width: 260px; background: #FFF; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #81D4FA; flex-shrink: 0; overflow: hidden; display: flex; flex-direction: column; position: relative; scroll-snap-align: start; cursor: pointer; }
     .comm-img { width: 100%; height: 160px; object-fit: cover; }
     .comm-body { padding: 12px; }
     .comm-user { font-size: 14px; color: #FFF; background: #0288D1; padding: 4px 10px; border-radius: 10px; display: inline-block; margin-bottom: 5px; font-weight:700;}
@@ -210,9 +209,10 @@
     /* Scrollable Carousel Wrapper */
     .comm-carousel-wrapper { 
         overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding-bottom: 15px; 
-        scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch; cursor: grab;
-        display: flex; gap: 15px;
+        scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch;
+        display: flex; gap: 15px; cursor: grab;
     }
+    .comm-carousel-wrapper:active { cursor: grabbing; }
     .comm-carousel-wrapper::-webkit-scrollbar { display: none; }
     
     .medal-card { border-radius: 15px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
@@ -243,27 +243,30 @@
       <div class="nav-brand-container">
           <img class="nav-icon" src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt="Logo">
           <div class="nav-title-box">
-              <div class="nav-title">สวีคุมหวาน<span class="nav-subtitle"> โดย รพ.สวี</span></div>
+              <div class="nav-title">สวีคุมหวาน</div>
           </div>
       </div>
       <div style="display:flex; align-items:center;">
           <button id="nav-mode-btn" class="nav-community-btn" onclick="toggleCommunityMode()">ชุมชนคนคุมหวาน</button>
-          <button class="btn-nav-close" onclick="liff.closeWindow()">✖</button>
+          <button class="btn-nav-close" onclick="liff.closeWindow()">ปิด</button>
       </div>
   </nav>
 
   <!-- SHARED PROFILE CONTAINER -->
   <div id="shared-profile-container" class="container" style="padding-top: 15px; padding-bottom: 0;">
       <div class="profile-header compact-profile" id="main-profile-header" style="display: none;">
-          <div id="head-med-stat" class="med-badge-small" style="display:none;"></div>
           <div class="pic-wrapper" onclick="$('#profile-pic-input').click()">
               <img id="head-avatar" src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt="Avatar">
               <div class="change-pic-badge">เปลี่ยนรูป</div>
           </div>
           <div class="compact-info">
-              <div class="profile-row-1"><div class="compact-name" id="head-name">กำลังเตรียมข้อมูล...</div><div class="edit-badge" onclick="openEditProfile()">✏️ แก้ไข</div></div>
+              <div class="profile-row-1">
+                  <div class="compact-name" id="head-name">...</div>
+                  <div class="edit-badge" onclick="openEditProfile()">✏️ แก้ไข</div>
+              </div>
               <div class="profile-row-2"><div class="compact-badge" id="head-start">เริ่มต้นเมื่อ : ...</div><div class="compact-text" id="head-target">เหลืออีก ... วันจะถึงเป้าหมาย</div></div>
               <div class="compact-target" id="head-weight-target" style="display:none;">ต้องลดน้ำหนักอีก ... กิโลกรัม เพื่อพิชิตเป้าหมาย</div>
+              <div id="head-med-stat" class="med-badge-inline" style="display:none;"></div>
               <div class="profile-row-4">
                   <div class="stat-mini-badge">เจาะเลือด <span id="stat-sbgm">0</span> ครั้ง</div>
                   <div class="stat-mini-badge">บันทึกอาหาร <span id="stat-food">0</span> ครั้ง</div>
@@ -274,7 +277,7 @@
   </div>
 
   <!-- MAIN CONTENT CONTAINER (Grid Menu) -->
-  <div id="main-content" class="container" style="padding-top: 0; padding-bottom: 120px;">
+  <div id="main-content" class="container" style="padding-top: 0; padding-bottom: 60px;">
       <!-- MENU GRID -->
       <div class="note-grid" id="main-grid">
         <div class="note-item bg-sbgm" onclick="openNoteForm('SBGM')"><div class="note-icon">🩸</div><div class="note-label">น้ำตาล<br>ปลายนิ้ว</div></div>
@@ -287,12 +290,14 @@
         <div class="note-item bg-sleep" onclick="openNoteForm('SLEEP')"><div class="note-icon">😴</div><div class="note-label">การนอน/<br>ความเครียด</div></div>
         <div class="note-item bg-adverse" onclick="openNoteForm('ADVERSE')"><div class="note-icon">⚠️</div><div class="note-label">อาการ<br>ผิดปกติ</div></div>
         <div class="note-item bg-hba1c" onclick="openNoteForm('HBA1C')"><div class="note-icon">🧪</div><div class="note-label">น้ำตาล<br>สะสม</div></div>
-        <div class="note-item bg-checkup" onclick="openNoteForm('CHECKUP')"><div class="note-icon">🏥</div><div class="note-label">ตรวจไต<br>ตา/เท้า</div></div>
+        <div class="note-item bg-checkup" onclick="openNoteForm('CHECKUP')"><div class="note-icon">👣</div><div class="note-label">ตรวจไต<br>ตา/เท้า</div></div>
         <div class="note-item bg-med" onclick="openNoteForm('MED')"><div class="note-icon">💊</div><div class="note-label">รายการยา</div></div>
         <div class="note-item bg-nutri" onclick="openNoteForm('NUTRITION')"><div class="note-icon">🥗</div><div class="note-label">คำนวณ<br>พลังงานอาหาร</div></div>
         <div class="note-item bg-hist" onclick="openHistory()"><div class="note-icon">📅</div><div class="note-label">ดูประวัติ</div></div>
         <div class="note-item bg-doc" onclick="openReport()"><div class="note-icon">🩺</div><div class="note-label">รายงาน<br>แพทย์</div></div>
       </div>
+      
+      <div style="text-align:center; font-size:12px; color:#5D4037; margin-top:30px; margin-bottom:20px;">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
   </div>
 
   <!-- VIEW: Community Dashboard -->
@@ -300,8 +305,8 @@
       
       <div style="background:#FFF; padding:15px; border-radius:15px; border:2px dashed #FF9100; margin-bottom:20px; font-size:14px; color:#5D4037; line-height:1.4; text-align:center;">
           ❤️ <b>การควบคุมเบาหวานต้องใช้กำลังใจอย่างมาก</b><br>
-          เราจึงสร้างชุมชนคนคุมหวาน ที่รวมผู้ที่มีพลังใจในการปรับเปลี่ยนพฤติกรรม เป้าหมายเพื่อควบคุมน้ำตาลได้โดยไม่ต้องใช้ยา เพื่อนช่วยเพื่อน จึงทำให้คุณไม่รู้สึกโดดเดี่ยว ยังมีอีกหลายคนที่กำลังทำเหมือนคุณค่ะ
-          <br><i style="font-size:11px; color:#9E9E9E;">*ข้อมูลถูกปกปิดตัวตนและดึงมาจากผู้ใช้งานจริง</i>
+          เราจึงสร้างชุมชนคนคุมหวาน ที่รวมผู้ที่มีพลังใจในการปรับเปลี่ยนพฤติกรรม เป้าหมายเพื่อควบคุมน้ำตาลได้โดยไม่ต้องใช้ยาและมีสุขภาพที่ดี เพื่อนช่วยเพื่อน จึงทำให้คุณไม่รู้สึกโดดเดี่ยว ยังมีอีกหลายคนที่กำลังทำเหมือนคุณเพื่อเป้าหมายเดียวกันค่ะ
+          <br><i style="font-size:11px; color:#9E9E9E;">*ข้อมูลผู้ใช้งานจริง ไม่มีการระบุชื่อเต็ม</i>
       </div>
 
       <div style="display:flex; gap:10px; margin-bottom:15px;">
@@ -311,7 +316,7 @@
           </div>
           <div style="flex:1; background:#FFF9C4; padding:15px; border-radius:15px; text-align:center; border:2px solid #FBC02D;">
               <div style="font-size:12px; color:#F57F17; font-weight:800;">หยุดยาสำเร็จ</div>
-              <div id="comm-rem-users" style="font-size:28px; color:#E65100; font-weight:800; line-height:1;">-</div>
+              <div id="comm-rem-users" style="font-size:28px; color:#E65100; font-weight:800; line-height:1;">0</div>
           </div>
       </div>
 
@@ -319,12 +324,9 @@
       <div class="comm-carousel-wrapper" id="comm-role-models" style="margin-bottom:20px;"></div>
 
       <h3 style="color:#5D4037; font-size:18px;">🍽️ ไอเดียอาหารเพื่อนๆ ในรอบ 7 วัน</h3>
-      <p style="font-size:11px; color:#888; margin-top:-10px;">*อาหารกับค่าน้ำตาลในเลือด ผลลัพธ์ขึ้นอยู่กับแต่ละบุคคล (คลิกที่การ์ดเพื่อหยุดเลื่อน)</p>
+      <p style="font-size:11px; color:#888; margin-top:-10px;">*อาหารกับค่าน้ำตาลในเลือด ผลลัพธ์ขึ้นอยู่กับแต่ละบุคคล (คลิกการ์ดเพื่ออ่านคำแนะนำ)</p>
       
       <div class="comm-carousel-wrapper" id="comm-carousel"></div>
-
-      <h3 style="color:#5D4037; font-size:18px; margin-top:20px;">🍛 7 มื้อล่าสุดของคุณ</h3>
-      <div id="comm-my-foods" style="display:flex; flex-direction:column; gap:10px;"></div>
   </div>
 
   <!-- VIEW: History -->
@@ -371,40 +373,97 @@
   <div id="register-view" style="display:none; background:#FFF8E1; min-height:100vh;">
      <nav class="navbar"><div class="nav-brand" style="margin: 0 auto;">📝 ลงทะเบียนสวีคุมหวาน</div></nav>
      <div style="padding: 20px; max-width: 500px; margin: 0 auto;">
-         <form id="reg-form" onsubmit="submitRegistration(event)">
-            <div class="reg-form-group" style="margin-bottom: 20px;">
-                <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">ชื่อที่ใช้เรียก</label>
-                <input required type="text" id="reg-name" placeholder="เช่น ลุงแดง ป้าส้ม พี่เขียว">
-            </div>
-            <div class="reg-form-group" style="margin-bottom: 20px;">
-                <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">เลขผู้ป่วย รพ.สวี (HN)</label>
-                <input required type="tel" id="reg-hn" pattern="\d{9}" maxlength="9" placeholder="ระบุเลข 9 หลัก" oninput="validateNumber(this)">
-            </div>
-            <div class="reg-form-group" style="margin-bottom: 20px;">
-                <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">อาชีพ</label>
-                <input required type="text" id="reg-job" placeholder="อาชีพของคุณ">
-            </div>
-            <div class="reg-form-group" style="margin-bottom: 20px;">
-                <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">เพศ</label>
-                <div style="display:flex; gap:10px;">
-                    <label style="flex:1; background:#FFF; border:2px solid #D7CCC8; padding:10px; border-radius:15px; text-align:center;"><input required type="radio" name="reg-gender" value="Male"> 👨 ชาย</label>
-                    <label style="flex:1; background:#FFF; border:2px solid #D7CCC8; padding:10px; border-radius:15px; text-align:center;"><input required type="radio" name="reg-gender" value="Female"> 👩 หญิง</label>
+         
+         <!-- Step 1: Welcome & Group Selection -->
+         <div id="reg-step-1" class="reg-step" style="text-align:center; display:block;">
+             <div style="font-size: 60px; margin-bottom: 10px; animation: pulse-jiggle 2s infinite;">👋</div>
+             <h2 style="color: #3E2723; font-weight: 800; font-size: 24px;">ยินดีต้อนรับเข้าสู่โปรแกรมสวีคุมหวาน</h2>
+             <p style="color: #5D4037; font-size: 16px; margin-bottom: 15px; line-height:1.4;">สำหรับปรับเปลี่ยนพฤติกรรมการกิน และออกกำลังกายเพื่อควบคุมน้ำหนัก และลดระดับน้ำตาลในเลือด</p>
+             <p style="color: #D84315; font-size: 18px; font-weight: bold; margin-bottom: 20px;">กรุณาใส่ข้อมูลส่วนตัวข้างล่าง<br>คุณต้องการเข้าโปรแกรมใด?</p>
+
+             <div>
+                 <div onclick="selectRegGroup('DM')" style="background:#FFF; border:2px solid #D7CCC8; border-radius:15px; padding:15px; margin-bottom:10px; cursor:pointer; display:flex; align-items:center; gap:15px; box-shadow:0 4px 8px rgba(0,0,0,0.05);">
+                     <div style="font-size:35px;">🥗</div>
+                     <div style="text-align:left; color:#3E2723; font-weight:800; font-size:18px;">ผู้ป่วยเบาหวาน<br><span style="font-size:14px; font-weight:500;">ปรับพฤติกรรมสุขภาพ</span></div>
+                 </div>
+                 <div onclick="selectRegGroup('DM Remission')" style="background:#FFF; border:2px solid #D7CCC8; border-radius:15px; padding:15px; margin-bottom:10px; cursor:pointer; display:flex; align-items:center; gap:15px; box-shadow:0 4px 8px rgba(0,0,0,0.05);">
+                     <div style="font-size:35px;">📉</div>
+                     <div style="text-align:left; color:#3E2723; font-weight:800; font-size:18px;">เข้าคลินิกเบาหวานระยะสงบ<br><span style="font-size:14px; font-weight:500;">เพื่อลดยาเบาหวาน</span></div>
+                 </div>
+                 <div onclick="selectRegGroup('Not DM')" style="background:#FFF; border:2px solid #D7CCC8; border-radius:15px; padding:15px; margin-bottom:10px; cursor:pointer; display:flex; align-items:center; gap:15px; box-shadow:0 4px 8px rgba(0,0,0,0.05);">
+                     <div style="font-size:35px;">🛡️</div>
+                     <div style="text-align:left; color:#3E2723; font-weight:800; font-size:18px;">ควบคุมพฤติกรรม<br><span style="font-size:14px; font-weight:500;">ป้องกันเบาหวาน (ยังไม่เป็น)</span></div>
+                 </div>
+             </div>
+         </div>
+
+         <!-- Step 2: DM Remission Criteria -->
+         <div id="reg-step-2" class="reg-step" style="display:none;">
+             <div style="font-size: 60px; text-align: center; margin-bottom: 10px;">📋</div>
+             <h2 style="color: #3E2723; font-weight: 800; font-size: 22px; text-align:center;">คุณสมบัติของผู้ที่จะหยุดยาเบาหวาน</h2>
+             <div style="background:#FFF; border:2px solid #FFE0B2; border-radius:15px; padding:20px; margin:20px 0;">
+                 <div style="margin-bottom:15px; display:flex; gap:10px;"><div style="background:#FF9100; color:#FFF; width:25px; height:25px; border-radius:50%; text-align:center; font-weight:bold; flex-shrink:0; line-height:25px;">1</div><div style="color:#5D4037; font-weight:700; font-size:16px;">มีน้ำตาลสะสม hba1c <span style="color:#D32F2F;">ไม่เกิน 6.5%</span></div></div>
+                 <div style="margin-bottom:15px; display:flex; gap:10px;"><div style="background:#FF9100; color:#FFF; width:25px; height:25px; border-radius:50%; text-align:center; font-weight:bold; flex-shrink:0; line-height:25px;">2</div><div style="color:#5D4037; font-weight:700; font-size:16px;">เป็นเบาหวาน<span style="color:#D32F2F;">ไม่เกิน 5 ปี</span></div></div>
+                 <div style="margin-bottom:15px; display:flex; gap:10px;"><div style="background:#FF9100; color:#FFF; width:25px; height:25px; border-radius:50%; text-align:center; font-weight:bold; flex-shrink:0; line-height:25px;">3</div><div style="color:#5D4037; font-weight:700; font-size:16px;">มีน้ำหนักมาก <span style="color:#D32F2F;">สามารถลดน้ำหนักได้</span></div></div>
+                 <div style="margin-bottom:0; display:flex; gap:10px;"><div style="background:#FF9100; color:#FFF; width:25px; height:25px; border-radius:50%; text-align:center; font-weight:bold; flex-shrink:0; line-height:25px;">4</div><div style="color:#5D4037; font-weight:700; font-size:16px;">มีความตั้งใจในการควบคุมอาหาร เพื่อลดน้ำหนักให้<span style="color:#D32F2F;">มากกว่า 10%</span></div></div>
+             </div>
+             <div style="display:flex; gap:10px;">
+                 <button class="btn-white-round" style="flex:1; margin:0;" onclick="goToRegStep(1)">ย้อนกลับ</button>
+                 <button class="btn" style="flex:2; margin:0;" onclick="setupRegForm(); goToRegStep(3);">พร้อมแล้ว</button>
+             </div>
+         </div>
+
+         <!-- Step 3: Registration Form -->
+         <div id="reg-step-3" class="reg-step" style="display:none;">
+             <div style="text-align:center; margin-bottom:20px;">
+                 <img id="reg-prof-img" src="" style="width:80px; height:80px; border-radius:50%; border:3px solid #FF9100; object-fit:cover; box-shadow:0 4px 8px rgba(0,0,0,0.1);">
+             </div>
+             <form id="reg-form" onsubmit="submitRegistration(event)">
+                <div class="reg-form-group" style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">ชื่อที่ใช้เรียก</label>
+                    <input required type="text" id="reg-name" placeholder="เช่น ลุงแดง ป้าส้ม พี่เขียว">
                 </div>
-            </div>
-            <div class="reg-form-group" style="margin-bottom: 20px;">
-                <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">อายุ (ปี)</label>
-                <input required type="tel" id="reg-age" placeholder="อายุ" oninput="validateNumber(this)" maxlength="3">
-            </div>
-            <div class="reg-form-group" style="margin-bottom: 20px;">
-                <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">น้ำหนักเริ่มต้น (กก.)</label>
-                <input required type="tel" id="reg-weight" placeholder="เช่น 65.5" inputmode="decimal" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
-            </div>
-            <label style="background: #FFF; border: 2px solid #FFE0B2; padding: 15px; border-radius: 15px; display: flex; gap: 10px; align-items: flex-start; cursor: pointer; margin-top: 20px;">
-                <input required type="checkbox" id="reg-consent" style="width: 25px; height: 25px; margin-top: 5px;">
-                <p style="margin: 0; font-size: 16px; color: #5D4037; line-height: 1.4;">ยินยอมให้ คลินิกเบาหวานระยะสงบ รพ.สวี ใช้ข้อมูลเพื่อประมวลผลการรักษา และอนุญาตแชร์ข้อมูล (ปิดบังตัวตน) เพื่อการเรียนรู้</p>
-            </label>
-            <button type="submit" class="btn" style="margin-top: 30px;">บันทึกข้อมูล ✅</button>
-        </form>
+                <div class="reg-form-group" style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">เลขผู้ป่วย รพ.สวี (HN)</label>
+                    <input required type="tel" id="reg-hn" pattern="\d{9}" maxlength="9" placeholder="ระบุเลข 9 หลัก" oninput="validateNumber(this)">
+                </div>
+                <div class="reg-form-group" style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">อาชีพ</label>
+                    <input required type="text" id="reg-job" placeholder="อาชีพของคุณ">
+                </div>
+                <div class="reg-form-group" style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">เพศ</label>
+                    <div style="display:flex; gap:10px;">
+                        <label style="flex:1; background:#FFF; border:2px solid #D7CCC8; padding:10px; border-radius:15px; text-align:center; cursor:pointer;"><input required type="radio" name="reg-gender" value="Male"> 👨 ชาย</label>
+                        <label style="flex:1; background:#FFF; border:2px solid #D7CCC8; padding:10px; border-radius:15px; text-align:center; cursor:pointer;"><input required type="radio" name="reg-gender" value="Female"> 👩 หญิง</label>
+                    </div>
+                </div>
+                <div class="reg-form-group" style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">อายุ (ปี)</label>
+                    <input required type="tel" id="reg-age" placeholder="อายุ" oninput="validateNumber(this)" maxlength="3">
+                </div>
+                <div class="reg-form-group" style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">น้ำหนักเริ่มต้น (กก.)</label>
+                    <input required type="tel" id="reg-weight" placeholder="เช่น 65.5" inputmode="decimal" oninput="this.value = this.value.replace(/[^0-9.]/g, '')">
+                </div>
+                <div class="reg-form-group" style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">วันที่เริ่มเข้าโปรแกรม</label>
+                    <input required type="date" id="reg-startdate" onchange="calculateEndDate()">
+                </div>
+                <div class="reg-form-group" style="margin-bottom: 15px;">
+                    <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">วันสิ้นสุดเป้าหมาย (ค่าเริ่มต้น 6 เดือน)</label>
+                    <input required type="date" id="reg-enddate">
+                </div>
+                <label style="background: #FFF; border: 2px solid #FFE0B2; padding: 15px; border-radius: 15px; display: flex; gap: 10px; align-items: flex-start; cursor: pointer; margin-top: 20px;">
+                    <input required type="checkbox" id="reg-consent" style="width: 25px; height: 25px; margin-top: 5px;">
+                    <p style="margin: 0; font-size: 14px; color: #5D4037; line-height: 1.4;">ยินยอมให้ คลินิกเบาหวานระยะสงบ รพ.สวี ใช้ข้อมูลของท่านในการประมวลผลเพื่อใช้ในการรักษา และอนุญาตแชร์ข้อมูลของท่าน(ยกเว้นชื่อที่ระบุตัวตน) กับคนอื่นในคลินิกเพื่อประสบการณ์การเรียนรู้พฤติกรรมสุขภาพ</p>
+                </label>
+                <div style="display:flex; gap:10px; margin-top: 25px;">
+                    <button type="button" class="btn-white-round" style="flex:1; margin:0;" onclick="goToRegStep(1)">ย้อนกลับ</button>
+                    <button type="submit" class="btn" style="flex:2; margin:0;">บันทึกข้อมูล ✅</button>
+                </div>
+            </form>
+         </div>
      </div>
   </div>
 
@@ -415,9 +474,9 @@
     <div class="modal-sheet">
       <div class="modal-header-row">
         <div class="modal-main-title" id="pri-title">หัวข้อ</div>
-        <button class="btn-close" id="pri-close-btn" onclick="closeAllModals()">✖ ปิด</button>
+        <button class="btn-close" id="pri-close-btn" onclick="closeAllModals()">ปิด</button>
       </div>
-      <div class="modal-ai-ask" id="pri-ask">วันนี้คุณ <span class="name-pink">...</span> ... ได้ค่าเท่าไหร่คะ?</div>
+      <div class="modal-ai-ask" id="pri-ask">วันนี้คุณ <span class="name-pink" id="pri-name">...</span> ... ได้ค่าเท่าไหร่คะ?</div>
       <div id="pri-body"></div>
     </div>
   </div>
@@ -426,7 +485,7 @@
     <div class="modal-sheet" style="border-top-color: #FFB300;">
       <div class="modal-header-row">
         <div class="modal-main-title" style="color:#FFB300;">ระบุข้อมูลเพิ่ม</div>
-        <button class="btn-close" onclick="$('#secondary-modal').style.display='none'">✖ ย้อนกลับ</button>
+        <button class="btn-close" onclick="$('#secondary-modal').style.display='none'">ย้อนกลับ</button>
       </div>
       <div class="modal-ai-ask" id="sec-ask">ลืมระบุอะไรไปหรือเปล่าคะ?</div>
       <div id="sec-body"></div>
@@ -437,7 +496,7 @@
     <div class="modal-sheet">
       <div class="modal-header-row">
         <div class="modal-main-title">แก้ไขข้อมูลส่วนตัว</div>
-        <button class="btn-close" onclick="closeAllModals()">✖ ปิด</button>
+        <button class="btn-close" onclick="closeAllModals()">ปิด</button>
       </div>
       <form id="edit-form" onsubmit="submitEditProfile(event)">
           <div class="form-label">ชื่อที่ใช้เรียก</div>
@@ -458,7 +517,7 @@
     <div class="modal-sheet" style="background:#FFF8E1; color:#3E2723; border-top: 4px solid #1976D2;">
       <div class="modal-header-row">
         <div class="modal-main-title" style="color:#1976D2; text-shadow:none;">รายงานแพทย์</div>
-        <button class="btn-close" style="background:#FFF; color:#3E2723; border-color:#D7CCC8;" onclick="closeAllModals();">✖ ปิด</button>
+        <button class="btn-close" style="background:#FFF; color:#3E2723; border-color:#D7CCC8;" onclick="closeAllModals();">ปิด</button>
       </div>
       <div style="max-height: 70vh; overflow-y: auto; padding-right: 5px;">
           <div style="text-align:center; margin-bottom:15px; font-size:18px; font-weight:700;">สถานะ 14 วันล่าสุด: <span id="report-status" class="status-badge status-waiting">Waiting</span></div>
@@ -483,7 +542,7 @@
 
 <script>
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzvLY5kLKw2sUaSelEZcxka2CsdiRoGdA9jmHMoKs3oB04ypte7yDwStWo6cFwb2-Y8Sw/exec'; 
-    let LIFF_ID = '2007840605-zKl7p3Aa'; // 🔥 อัปเดตใส่ LIFF ID ของจริง
+    let LIFF_ID = '2007840605-zKl7p3Aa'; 
     const TEST_USER_ID = 'U4b2462c3ea87936a546558354070ef4d'; 
 
     let liffProfile = { userId: TEST_USER_ID, displayName: "ผู้ใช้งาน" }; 
@@ -497,9 +556,10 @@
 
     const $ = selector => document.querySelector(selector);
     
-    const swalAlert = Swal.mixin({ customClass: { popup: 'swal-red-popup', confirmButton: 'btn', cancelButton: 'btn-white-round' }, buttonsStyling: false });
-    const swalSuccess = Swal.mixin({ customClass: { popup: 'swal-green-popup', confirmButton: 'btn' }, buttonsStyling: false });
-    const swalForm = Swal.mixin({ customClass: { popup: 'swal-brown-popup', confirmButton: 'btn', cancelButton: 'btn-close' }, buttonsStyling: false });
+    // --- Swal Color Mixins ---
+    const swalAlert = Swal.mixin({ customClass: { popup: 'swal-red-popup', confirmButton: 'btn', cancelButton: 'btn-white-round' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
+    const swalSuccess = Swal.mixin({ customClass: { popup: 'swal-green-popup', confirmButton: 'btn' }, buttonsStyling: false, confirmButtonText: 'ตกลง' });
+    const swalForm = Swal.mixin({ customClass: { popup: 'swal-brown-popup', confirmButton: 'btn', cancelButton: 'btn-close' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
 
     function getImageUrl(url) {
         if (!url) return 'https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H';
@@ -521,27 +581,30 @@
       document.querySelectorAll('.note-item').forEach(el => { let rnd = (Math.random() * 4).toFixed(2); el.style.animationDelay = `${rnd}s`; });
       
       try {
-        // 🔥 เปิดใช้งาน LIFF ของจริง
         await liff.init({ liffId: LIFF_ID });
-        if (liff.isLoggedIn()) {
-            liffProfile = await liff.getProfile();
-        } else {
-            liff.login();
-            return; // หยุดรอจนกว่าจะล็อกอินเสร็จ
-        }
-      } catch (err) { 
-        console.error("LIFF Init Error:", err); 
-        liffProfile.userId = TEST_USER_ID; // Fallback เผื่อรันบนเบราว์เซอร์ปกติ
-      }
+        if (liff.isLoggedIn()) { liffProfile = await liff.getProfile(); } 
+        else { liff.login(); return; }
+      } catch (err) { console.error("LIFF Init Error:", err); liffProfile.userId = TEST_USER_ID; }
       
-      await fetchUserProfile(); 
-      
+      // Fast Deep Link Loading - โหลด Form ก่อน รอข้อมูล User
       const params = new URLSearchParams(window.location.search); let actionParam = params.get('action');
+      let mappedAction = null;
       if(actionParam) {
           const map = { 'sgbm': 'SBGM', 'hypertension': 'BP', 'food': 'FOOD', 'weight': 'WEIGHT', 'waist': 'WAIST', 'bodymass': 'BODYCOMP', 'hba1c': 'HBA1C', 'sleep': 'SLEEP', 'exercise': 'EXERCISE', 'medication': 'MED', 'sideeffect': 'ADVERSE', 'checkup': 'CHECKUP', 'history': 'HIST', 'doctor': 'DOC', 'nutrition': 'NUTRITION', 'community': 'COMMUNITY' };
-          let mapped = map[actionParam.toLowerCase()];
-          if (mapped === 'HIST') openHistory(); else if (mapped === 'DOC') openReport(); else if (mapped === 'COMMUNITY') openCommunity(); else if (mapped) openNoteForm(mapped);
+          mappedAction = map[actionParam.toLowerCase()];
+          if (mappedAction && mappedAction !== 'HIST' && mappedAction !== 'DOC' && mappedAction !== 'COMMUNITY') {
+              openNoteForm(mappedAction); 
+          } else if (mappedAction === 'HIST') {
+              openHistory();
+          } else if (mappedAction === 'COMMUNITY') {
+              openCommunity();
+          } else if (mappedAction === 'DOC') {
+              // Wait for user fetch before opening doc report
+          }
       }
+
+      await fetchUserProfile(); 
+      if (mappedAction === 'DOC') openReport();
     }
 
     // --- CAROUSEL LOGIC ---
@@ -580,34 +643,21 @@
 
     function closeViews() { 
         $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'none'; $('#register-view').style.display = 'none'; $('#community-view').style.display = 'none'; $('#edit-history-view').style.display = 'none';
-        
-        $('.navbar').style.display = 'flex';
-        $('#shared-profile-container').style.display = 'block';
-        $('#main-content').style.display = 'block'; 
-        $('#main-grid').style.display = 'grid'; 
-        
+        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'block'; $('#main-content').style.display = 'block'; $('#main-grid').style.display = 'grid'; 
         window.scrollTo(0,0); 
         let btn = $('#nav-mode-btn'); btn.innerText = 'ชุมชนคนคุมหวาน'; btn.className = 'nav-community-btn';
     }
     
     function closeAllModals() { 
         document.querySelectorAll('.modal-overlay, .secondary-modal-overlay').forEach(m => m.style.display = 'none'); 
-        
-        $('.navbar').style.display = 'flex';
-        $('#shared-profile-container').style.display = 'block';
-        
+        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'block';
         let btn = $('#nav-mode-btn');
         if (btn && btn.innerText === 'ชุมชนคนคุมหวาน') {
-            $('#main-content').style.display = 'block'; 
-            $('#main-grid').style.display = 'grid'; 
-            $('#community-view').style.display = 'none';
+            $('#main-content').style.display = 'block'; $('#main-grid').style.display = 'grid'; $('#community-view').style.display = 'none';
         } else {
-            $('#community-view').style.display = 'block';
-            $('#main-content').style.display = 'none'; 
+            $('#community-view').style.display = 'block'; $('#main-content').style.display = 'none'; 
         }
-        
-        const askEl = $('#pri-ask');
-        if(askEl) askEl.style.display = 'block';
+        const askEl = $('#pri-ask'); if(askEl) askEl.style.display = 'block';
     }
     
     async function showLoading(show) { $('#loading').style.display = show ? 'flex' : 'none'; if(show) await new Promise(r => setTimeout(r, 50)); }
@@ -621,14 +671,75 @@
     }
     window.selectChip = function(groupId, value, btn) { $('#val-'+groupId).value = value; btn.parentElement.querySelectorAll('.chip-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
 
+    // --- REGISTRATION LOGIC ---
+    let regData = { group: '' };
+
+    window.goToRegStep = function(step) {
+        document.querySelectorAll('.reg-step').forEach(el => el.style.display = 'none');
+        document.getElementById('reg-step-' + step).style.display = 'block';
+        window.scrollTo(0,0);
+    }
+
+    window.selectRegGroup = function(group) {
+        regData.group = group;
+        if(group === 'DM Remission') window.goToRegStep(2);
+        else { window.setupRegForm(); window.goToRegStep(3); }
+    }
+
+    window.setupRegForm = function() {
+        const profImg = $('#reg-prof-img');
+        if(profImg) profImg.src = getImageUrl(liffProfile.pictureUrl);
+        let today = new Date();
+        $('#reg-startdate').value = today.toISOString().split('T')[0];
+        let endObj = new Date(today);
+        endObj.setDate(today.getDate() + 180);
+        $('#reg-enddate').value = endObj.toISOString().split('T')[0];
+    }
+
+    window.calculateEndDate = function() {
+        let start = $('#reg-startdate').value;
+        if(start) {
+            let sDate = new Date(start);
+            sDate.setDate(sDate.getDate() + 180);
+            $('#reg-enddate').value = sDate.toISOString().split('T')[0];
+        }
+    }
+
+    window.submitRegistration = async function(e) {
+        e.preventDefault();
+        const genderEl = document.querySelector('input[name="reg-gender"]:checked');
+        if(!genderEl) return swalAlert.fire('แจ้งเตือน', 'กรุณาระบุเพศด้วยนะคะ', 'warning');
+        
+        regData.nameUse = $('#reg-name').value.trim();
+        regData.hn = $('#reg-hn').value.trim();
+        regData.job = $('#reg-job').value.trim();
+        regData.gender = genderEl.value;
+        regData.age = $('#reg-age').value.trim();
+        regData.weight = $('#reg-weight').value.trim();
+        regData.startDate = $('#reg-startdate').value;
+        regData.endDate = $('#reg-enddate').value;
+        regData.consent = $('#reg-consent').checked;
+
+        if(regData.hn.length !== 9) return swalAlert.fire('แจ้งเตือน', 'กรุณาระบุ HN ให้ครบ 9 หลัก', 'warning');
+
+        await showLoading(true);
+        const payload = { userId: liffProfile.userId, displayName: liffProfile.displayName, pictureUrl: liffProfile.pictureUrl || '', ...regData };
+        const res = await apiPost('registerUser', payload);
+        showLoading(false);
+        
+        if(res && res.ok) {
+            swalSuccess.fire('สำเร็จ', 'ลงทะเบียนเรียบร้อยแล้วค่ะ', 'success').then(() => {
+                $('#register-view').style.display = 'none';
+                fetchUserProfile();
+            });
+        } else {
+            swalAlert.fire('ข้อผิดพลาด', 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่', 'error');
+        }
+    }
+
     // --- COMMUNITY MODULE ---
     async function openCommunity() {
-        $('.navbar').style.display = 'flex';
-        $('#shared-profile-container').style.display = 'block';
-        $('#main-content').style.display = 'none'; 
-        $('#history-view').style.display = 'none'; 
-        $('#community-view').style.display = 'block';
-        
+        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'block'; $('#main-content').style.display = 'none'; $('#history-view').style.display = 'none'; $('#community-view').style.display = 'block';
         let btn = $('#nav-mode-btn'); btn.innerText = '📝 บันทึกผล'; btn.className = 'nav-return-btn';
 
         await showLoading(true);
@@ -637,7 +748,7 @@
         
         if (res && res.ok) {
             $('#comm-total-users').innerText = res.totalUsers;
-            $('#comm-rem-users').innerText = res.remissionCount > 0 ? res.remissionCount : '0';
+            $('#comm-rem-users').innerText = res.remissionCount || '0';
             
             if(res.myBadges && res.myBadges.length > 0) {
                 let bHtml = res.myBadges.map(b => `${b.icon} ${b.name}`).join('<br>');
@@ -669,38 +780,31 @@
             if (res.communityFoods && res.communityFoods.length > 0) {
                 let itemsHtml = res.communityFoods.map(item => {
                     let d = new Date(item.ts); let sbgmHtml = item.sbgms ? `<div class="comm-sbgm">🩸 น้ำตาล: ${item.sbgms}</div>` : '';
-                    let cleanAdvice = item.flag.replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                    return `<div class="comm-card" style="display:inline-flex; flex-direction:column; white-space:normal; vertical-align:top; margin-right:15px;">
-                                <button class="like-btn" onclick="likeFood(this, ${item.rowIndex})">❤️ น่าสนใจ <span class="like-count">${item.likes||0}</span></button>
-                                <img src="${getImageUrl(item.img)}" class="comm-img">
+                    let cleanAdvice = item.flag.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "<br>");
+                    let imgUrl = getImageUrl(item.img);
+                    return `<div class="comm-card" style="display:inline-flex; flex-direction:column; white-space:normal; vertical-align:top; margin-right:15px; cursor:pointer;" onclick="showFullFoodDetail('${item.name}', '${item.qty}', '${item.unit}', '${cleanAdvice}', '${imgUrl}')">
+                                <button class="like-btn" onclick="event.stopPropagation(); likeFood(this, ${item.rowIndex})">❤️ น่าสนใจ <span class="like-count">${item.likes||0}</span></button>
+                                <img src="${imgUrl}" class="comm-img">
                                 <div class="comm-body">
                                     <div class="comm-user">คุณ ${item.userName}</div>
                                     <div style="font-size:12px; color:#888;">${d.toLocaleDateString('th-TH')} ${item.subtype||''}</div>
                                     <div style="font-weight:800; color:#3E2723; font-size:18px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name} (${item.qty} ${item.unit})</div>
-                                    <div style="font-size:16px; color:#5D4037; line-height:1.2; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer; background:#FFF9C4; padding:4px 8px; border-radius:10px;" onclick="showFoodDetail('${item.name}', '${item.qty}', '${item.unit}', '${cleanAdvice}')">💬 ${item.flag} (คลิกอ่าน)</div>
+                                    <div style="font-size:16px; color:#5D4037; line-height:1.2; margin-top:5px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:#FFF9C4; padding:4px 8px; border-radius:10px;">💬 ${item.flag} (คลิกอ่าน)</div>
                                     ${sbgmHtml}
                                 </div>
                             </div>`;
                 }).join('');
-                $('#comm-carousel').innerHTML = `<div id="comm-carousel-track" style="display:flex; width:max-content;">${itemsHtml + itemsHtml}</div>`;
+                $('#comm-carousel').innerHTML = `<div id="comm-carousel-track" style="display:flex; width:max-content;">${carouselHtml + carouselHtml}</div>`;
                 setTimeout(() => initAutoScroll('comm-carousel'), 100);
             } else { $('#comm-carousel').innerHTML = `<div style="padding:20px; color:#888;">ยังไม่มีรายการอาหารในชุมชนช่วง 7 วันนี้ค่ะ</div>`; }
-
-            let myHtml = '';
-            if (res.myFoods && res.myFoods.length > 0) {
-                res.myFoods.forEach(item => {
-                    let d = new Date(item.ts); let imgHtml = item.img ? `<img src="${getImageUrl(item.img)}" style="width:60px; height:60px; border-radius:10px; object-fit:cover; margin-right:10px;">` : '';
-                    myHtml += `<div style="background:#FFF; padding:10px; border-radius:15px; border:2px solid #EFEBE9; display:flex; align-items:center;">${imgHtml}<div><div style="font-size:12px; color:#888;">${d.toLocaleDateString('th-TH')} ${item.subtype||''}</div><div style="font-weight:800; color:#3E2723; font-size:16px;">${item.name} <span style="font-weight:400; font-size:14px;">(${item.qty} ${item.unit})</span></div><div style="font-size:12px; color:#5D4037;">${item.flag !== 'NORMAL' ? item.flag : ''}</div></div></div>`;
-                });
-            } else { myHtml = `<div style="padding:20px; color:#888;">คุณยังไม่ได้บันทึกอาหารเลยค่ะ</div>`; }
-            $('#comm-my-foods').innerHTML = myHtml;
         }
     }
 
-    window.showFoodDetail = function(name, qty, unit, advice) {
+    window.showFullFoodDetail = function(name, qty, unit, advice, imgUrl) {
         swalForm.fire({
-            title: 'คำแนะนำจาก AI 🤖',
-            html: `<div style="font-size:24px; text-align:left; line-height:1.4;"><b>เมนู:</b> ${name} (${qty} ${unit})<br><br><b>คำแนะนำ:</b><br>${advice}</div>`,
+            title: 'ไอเดียอาหาร 🍲',
+            html: `<img src="${imgUrl}" style="width:100%; border-radius:15px; margin-bottom:15px; max-height:250px; object-fit:cover;">
+                   <div style="font-size:24px; text-align:left; line-height:1.4;"><b>เมนู:</b> ${name} (${qty} ${unit})<br><br><b>คำแนะนำ:</b><br>${advice}</div>`,
             confirmButtonText: 'ปิด'
         });
     }
@@ -723,17 +827,12 @@
     function openNoteForm(actionType) {
         currentAction = actionType; pendingFormData = {}; 
         
-        $('.navbar').style.display = 'none';
-        $('#shared-profile-container').style.display = 'none';
-        $('#main-content').style.display = 'none'; 
-        $('#community-view').style.display = 'none';
-        $('#history-view').style.display = 'none';
-        $('#calendar-view').style.display = 'none';
+        $('.navbar').style.display = 'none'; $('#shared-profile-container').style.display = 'none'; $('#main-content').style.display = 'none'; $('#community-view').style.display = 'none'; $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'none';
         
-        const namePink = `<span class="name-pink">${userDisplayName}</span>`;
+        const namePink = `<span class="name-pink" id="pri-name">${userDisplayName}</span>`;
         let title = ''; let ask = ''; let bodyHTML = '';
 
-        if(actionType === 'ADVERSE') $('#pri-close-btn').innerHTML = '✖ ไม่มีอาการ'; else $('#pri-close-btn').innerHTML = '✖ ปิด';
+        if(actionType === 'ADVERSE') $('#pri-close-btn').innerHTML = 'ไม่มีอาการ'; else $('#pri-close-btn').innerHTML = 'ปิด';
 
         if (actionType === 'SBGM') {
             title = 'ค่าน้ำตาลในเลือด'; ask = `วันนี้คุณ ${namePink} เจาะน้ำตาลปลายนิ้ว ได้ค่าเท่าไหร่คะ?`;
@@ -1116,7 +1215,7 @@
             await apiPost('updateEventLog', { userId: liffProfile.userId, rowIndex: rowIndex, ...formValues });
             showLoading(false);
             swalSuccess.fire({title: 'อัปเดตประวัติเรียบร้อย', timer: 1500, showConfirmButton: false});
-            openEditHistoryView(); // รีเฟรชรายการ
+            openEditHistoryView(); 
         }
     }
 
@@ -1172,6 +1271,9 @@
         if (res && res.profile) {
             window.currentProfile = res.profile; userDisplayName = res.profile.NameUse || liffProfile.displayName;
             window.currentMedList = res.meds || []; 
+
+            const priName = $('#pri-name');
+            if (priName && priName.innerText === '...') priName.innerText = userDisplayName;
 
             const mainProfileHeader = $('#main-profile-header'); if(mainProfileHeader) mainProfileHeader.style.display = 'flex';
             const headAvatar = $('#head-avatar'); if(headAvatar) headAvatar.src = getImageUrl(res.profile.PicUrl || liffProfile.pictureUrl);
