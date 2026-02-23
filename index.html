@@ -371,7 +371,7 @@
 
   <!-- VIEW: Register -->
   <div id="register-view" style="display:none; background:#FFF8E1; min-height:100vh;">
-     <nav class="navbar"><div class="nav-brand" style="margin: 0 auto;">📝 ลงทะเบียนสวีคุมหวาน</div></nav>
+     <nav class="navbar"><div class="nav-brand" style="margin: 0 auto; color: #FFF; font-weight: 800; font-size: 24px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">📝 ลงทะเบียนสวีคุมหวาน</div></nav>
      <div style="padding: 20px; max-width: 500px; margin: 0 auto;">
          
          <!-- Step 1: Welcome & Group Selection -->
@@ -425,7 +425,7 @@
                 </div>
                 <div class="reg-form-group" style="margin-bottom: 15px;">
                     <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">เลขผู้ป่วย รพ.สวี (HN)</label>
-                    <input required type="tel" id="reg-hn" pattern="\d{9}" maxlength="9" placeholder="ระบุเลข 9 หลัก" oninput="validateNumber(this)">
+                    <input type="tel" id="reg-hn" maxlength="9" placeholder="ระบุเลข 9 หลัก (ไม่บังคับ)" oninput="validateNumber(this)">
                 </div>
                 <div class="reg-form-group" style="margin-bottom: 15px;">
                     <label style="font-weight: bold; color: #5D4037; display: block; margin-bottom: 5px;">อาชีพ</label>
@@ -537,7 +537,8 @@
     </div>
   </div>
 
-  <input type="file" id="media-input" accept="image/*" style="display:none" onchange="uploadFoodImage(this)">
+  <input type="file" id="media-input-camera" accept="image/*" capture="environment" style="display:none" onchange="uploadFoodImage(this)">
+  <input type="file" id="media-input-gallery" accept="image/*" style="display:none" onchange="uploadFoodImage(this)">
   <input type="file" id="profile-pic-input" accept="image/*" style="display:none" onchange="uploadProfilePic(this)">
 
 <script>
@@ -720,7 +721,7 @@
         regData.endDate = $('#reg-enddate').value;
         regData.consent = $('#reg-consent').checked;
 
-        if(regData.hn.length !== 9) return swalAlert.fire('แจ้งเตือน', 'กรุณาระบุ HN ให้ครบ 9 หลัก', 'warning');
+        if(regData.hn && regData.hn.length !== 9) return swalAlert.fire('แจ้งเตือน', 'ถ้าระบุ HN กรุณากรอกให้ครบ 9 หลักค่ะ', 'warning');
 
         await showLoading(true);
         const payload = { userId: liffProfile.userId, displayName: liffProfile.displayName, pictureUrl: liffProfile.pictureUrl || '', ...regData };
@@ -733,7 +734,7 @@
                 fetchUserProfile();
             });
         } else {
-            swalAlert.fire('ข้อผิดพลาด', 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่', 'error');
+            swalAlert.fire('ข้อผิดพลาด', 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่ (โปรดตรวจสอบว่าชีต patient_profiles มีหัวตารางแล้ว)', 'error');
         }
     }
 
@@ -780,9 +781,15 @@
             if (res.communityFoods && res.communityFoods.length > 0) {
                 let itemsHtml = res.communityFoods.map(item => {
                     let d = new Date(item.ts); let sbgmHtml = item.sbgms ? `<div class="comm-sbgm">🩸 น้ำตาล: ${item.sbgms}</div>` : '';
-                    let cleanAdvice = item.flag.replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "<br>");
+                    
+                    // ป้องกัน Error จากตัวอักษรพิเศษที่เป็นสาเหตุให้หน้าจอไม่แสดงอาหาร
+                    let cleanAdvice = String(item.flag || '').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "<br>");
+                    let cleanName = String(item.name || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                    let cleanUnit = String(item.unit || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                    let cleanQty = String(item.qty || '');
                     let imgUrl = getImageUrl(item.img);
-                    return `<div class="comm-card" style="display:inline-flex; flex-direction:column; white-space:normal; vertical-align:top; margin-right:15px; cursor:pointer;" onclick="showFullFoodDetail('${item.name}', '${item.qty}', '${item.unit}', '${cleanAdvice}', '${imgUrl}')">
+                    
+                    return `<div class="comm-card" style="display:inline-flex; flex-direction:column; white-space:normal; vertical-align:top; margin-right:15px; cursor:pointer;" onclick="event.stopPropagation(); showFullFoodDetail('${cleanName}', '${cleanQty}', '${cleanUnit}', '${cleanAdvice}', '${imgUrl}')">
                                 <button class="like-btn" onclick="event.stopPropagation(); likeFood(this, ${item.rowIndex})">❤️ น่าสนใจ <span class="like-count">${item.likes||0}</span></button>
                                 <img src="${imgUrl}" class="comm-img">
                                 <div class="comm-body">
@@ -794,7 +801,7 @@
                                 </div>
                             </div>`;
                 }).join('');
-                $('#comm-carousel').innerHTML = `<div id="comm-carousel-track" style="display:flex; width:max-content;">${carouselHtml + carouselHtml}</div>`;
+                $('#comm-carousel').innerHTML = `<div id="comm-carousel-track" style="display:flex; width:max-content;">${itemsHtml + itemsHtml}</div>`;
                 setTimeout(() => initAutoScroll('comm-carousel'), 100);
             } else { $('#comm-carousel').innerHTML = `<div style="padding:20px; color:#888;">ยังไม่มีรายการอาหารในชุมชนช่วง 7 วันนี้ค่ะ</div>`; }
         }
@@ -829,7 +836,7 @@
         
         $('.navbar').style.display = 'none'; $('#shared-profile-container').style.display = 'none'; $('#main-content').style.display = 'none'; $('#community-view').style.display = 'none'; $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'none';
         
-        const namePink = `<span class="name-pink" id="pri-name">${userDisplayName}</span>`;
+        const namePink = `<span class="name-pink">${userDisplayName}</span>`;
         let title = ''; let ask = ''; let bodyHTML = '';
 
         if(actionType === 'ADVERSE') $('#pri-close-btn').innerHTML = 'ไม่มีอาการ'; else $('#pri-close-btn').innerHTML = 'ปิด';
@@ -865,7 +872,12 @@
         } else if (actionType === 'FOOD') {
             title = 'บันทึกอาหาร'; ask = `คุณ ${namePink} ทานอะไรไปบ้างคะ?`;
             let greenBtn = !window.currentNutritionProfile ? `<button class="btn btn-metallic-green" onclick="openNoteForm('NUTRITION')">✨ คำนวณพลังงานอาหารต่อวัน (คลิก!)</button>` : '';
-            bodyHTML = `${greenBtn}<img id="food-preview" style="width:100%; border-radius:15px; margin-bottom:15px; max-height:200px; object-fit:cover; display:none;"><button class="btn" style="margin-bottom: 20px; font-size: 24px;" onclick="$('#media-input').click()">📸 ถ่ายรูป / อัปโหลดอาหาร</button><div class="form-label">--- หรือพิมพ์เอง ---</div><div id="food-rows"><div class="food-row" style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" class="food-n main-input-anim" placeholder="ชื่ออาหาร" style="flex:2;"><input type="tel" class="food-q" placeholder="ปริมาณ" inputmode="decimal" oninput="validateNumber(this)" style="flex:1;"><input type="text" class="food-u" placeholder="หน่วย" style="flex:1;"></div></div><button class="btn-white-round" onclick="addFoodRow(true)">+ เพิ่มอาหารอีก</button><button class="btn" onclick="processFoodManual()">บันทึกอาหาร ✅</button>`;
+            bodyHTML = `${greenBtn}<img id="food-preview" style="width:100%; border-radius:15px; margin-bottom:15px; max-height:200px; object-fit:cover; display:none;">
+              <div style="display:flex; gap:10px; margin-bottom:20px;">
+                  <button class="btn" style="font-size: 20px; flex:1; padding: 15px 5px;" onclick="$('#media-input-camera').click()">📸 ถ่ายรูป</button>
+                  <button class="btn" style="font-size: 20px; flex:1; padding: 15px 5px; background: linear-gradient(135deg, #4FC3F7 0%, #0288D1 100%); color: #FFF; border-color: #E1F5FE;" onclick="$('#media-input-gallery').click()">🖼️ อัปโหลด</button>
+              </div>
+              <div class="form-label">--- หรือพิมพ์เอง ---</div><div id="food-rows"><div class="food-row" style="display:flex; gap:5px; margin-bottom:15px;"><input type="text" class="food-n main-input-anim" placeholder="ชื่ออาหาร" style="flex:2;"><input type="tel" class="food-q" placeholder="ปริมาณ" inputmode="decimal" oninput="validateNumber(this)" style="flex:1;"><input type="text" class="food-u" placeholder="หน่วย" style="flex:1;"></div></div><button class="btn-white-round" onclick="addFoodRow(true)">+ เพิ่มอาหารอีก</button><button class="btn" onclick="processFoodManual()">บันทึกอาหาร ✅</button>`;
         } else if (actionType === 'SLEEP') {
             title = 'การนอน/ความเครียด'; ask = `ช่วงนี้คุณ ${namePink} รู้สึกอย่างไรบ้างคะ?`;
             bodyHTML = `${getChipsHTML('sleep', ['นอนหลับดี','นอนไม่หลับ','มีสมาธิน้อย','หงุดหงิด','เบื่อเซ็ง','ไม่อยากพบคน'], '')}<button class="btn" onclick="processSleep()">ถัดไป ➡️</button>`;
