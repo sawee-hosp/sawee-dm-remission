@@ -63,7 +63,6 @@
     input:focus { border-color: #FF9100 !important; outline: none; }
     input::placeholder { color: #B0BEC5; font-weight: 400; font-size: 24px; }
     
-    /* --- NEW NAVBAR & SHINING TITLE --- */
     .navbar { background: linear-gradient(90deg, #4E342E, #3E2723); padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
     .nav-brand-container { display: flex; align-items: center; gap: 8px; }
     .nav-icon { width: 40px; height: 40px; object-fit: contain; } 
@@ -90,7 +89,6 @@
 
     .container { max-width: 600px; margin: 0 auto; padding: 15px; padding-bottom: 30px; }
     
-    /* --- COMPACT PROFILE CARD --- */
     .compact-profile { background: linear-gradient(135deg, #A08963, #C9B194); border-radius: 20px; padding: 12px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid #FFF; display: flex; gap: 12px; align-items: flex-start; position: relative; }
     .pic-wrapper { position: relative; cursor: pointer; flex-shrink: 0; margin-top: 5px; }
     .pic-wrapper img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #FFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2); background: #EEE; }
@@ -109,17 +107,13 @@
     
     .profile-row-4 { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
     .med-badge-inline { background: rgba(0, 131, 143, 0.2); color: #00838F; padding: 2px 8px; border-radius: 15px; font-size: 10px; font-weight: 700; display: inline-block; margin-bottom: 4px; }
-    .stat-mini-badge { background: #5D4037; color: #FFF; padding: 2px 8px; border-radius: 15px; font-size: 8px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .stat-mini-badge { background: #5D4037; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-    /* --- GRID MENU (HUGE & SQUARE) --- */
     .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .note-item { 
-      border-radius: 15px; 
-      padding: 0; 
-      aspect-ratio: 1 / 1; 
+      border-radius: 15px; padding: 0; aspect-ratio: 1 / 1; 
       display: flex; flex-direction: column; justify-content: center; align-items: center; 
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; transition: 0.1s; border: 2px solid rgba(255,255,255,0.3); 
-      box-sizing: border-box; overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; transition: 0.1s; border: 2px solid rgba(255,255,255,0.3); box-sizing: border-box; overflow: hidden;
     }
     .note-item:active { transform: scale(0.95); filter: brightness(0.9); }
     .note-icon { font-size: 55px; line-height: 1; margin-bottom: 2px; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); }
@@ -127,7 +121,6 @@
     
     .bg-sbgm { background: linear-gradient(135deg, #e94b3c, #b71c1c); } .bg-bp { background: linear-gradient(135deg, #2b3a67, #1a237e); } .bg-food { background: linear-gradient(135deg, #fe9554, #e65100); } .bg-weight { background: linear-gradient(135deg, #8bd365, #33691e); } .bg-waist { background: linear-gradient(135deg, #00b4d8, #01579b); } .bg-bmi { background: linear-gradient(135deg, #8d6e63, #4e342e); } .bg-ex { background: linear-gradient(135deg, #ab47bc, #4a148c); } .bg-sleep { background: linear-gradient(135deg, #5c6bc0, #1a237e); } .bg-adverse { background: linear-gradient(135deg, #ef5350, #b71c1c); } .bg-hba1c { background: linear-gradient(135deg, #ec407a, #880e4f); } .bg-checkup { background: linear-gradient(135deg, #00acc1, #006064); } .bg-med { background: linear-gradient(135deg, #00897b, #004d40); } .bg-hist { background: linear-gradient(135deg, #757575, #212121); } .bg-doc { background: linear-gradient(135deg, #1976d2, #0d47a1); } .bg-nutri { background: linear-gradient(135deg, #fbc02d, #f57f17); }
 
-    /* --- UNIFIED MODAL --- */
     .modal-overlay { position: fixed; inset: 0; z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
     .modal-sheet { background: linear-gradient(180deg, var(--modal-bg-start), var(--modal-bg-end)); width: 100%; max-width: 600px; border-radius: 40px 40px 0 0; padding: 30px 20px 50px 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 95vh; overflow-y: auto; color: #FFF; border-top: 4px solid #FFD600; position: relative; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -148,7 +141,6 @@
     .bodycomp-row input { width: 35%; padding: 6px; font-size: 20px; margin-bottom: 0; border-radius: 10px; text-align: center;}
     .bodycomp-row span { font-size: 16px; color: #FFCC80; width: 20%; text-align: right;}
 
-    /* --- HISTORY UI --- */
     .hist-card-flex { display: flex; background: #FFF; border-radius: 20px; padding: 15px; gap: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #FFE0B2; position: relative; padding-top: 35px; }
     .hist-card-flex.risk { background: #FFEBEE; border-color: #EF9A9A; }
     .hist-date-badge { position: absolute; top: -12px; left: 15px; background: #5D4037; color: #FFF; padding: 4px 15px; border-radius: 20px; font-size: 14px; font-weight: 700; }
@@ -186,7 +178,6 @@
     .swal-brown-popup .swal2-title { color: #FFD600 !important; }
     .swal-brown-popup .swal2-html-container { color: #FFF !important; }
 
-    /* LOADING SPINNER AROUND LOGO */
     .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     .loader-logo-container { position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
     .loader-logo { width: 70px; height: 70px; border-radius: 50%; object-fit: contain; z-index: 2; position: relative;}
@@ -194,7 +185,6 @@
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .swee-spinner-ring { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 6px solid rgba(255,255,255,0.2); border-top: 6px solid #FF9100; border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
     
-    /* COMMUNITY UI */
     .comm-card { min-width: 260px; max-width: 260px; background: #FFF; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #81D4FA; flex-shrink: 0; overflow: hidden; display: flex; flex-direction: column; position: relative; scroll-snap-align: start; cursor: pointer; }
     .comm-img { width: 100%; height: 160px; object-fit: cover; }
     .comm-body { padding: 12px; }
@@ -206,7 +196,6 @@
     .float-up { position: absolute; font-size: 20px; font-weight: bold; color: #FF9100; pointer-events: none; animation: floatUpAnim 1s forwards; opacity: 0; text-shadow: 1px 1px 0 #FFF; z-index: 20;}
     @keyframes floatUpAnim { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
 
-    /* Scrollable Carousel Wrapper */
     .comm-carousel-wrapper { 
         overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding-bottom: 15px; 
         scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch;
@@ -218,7 +207,6 @@
     .medal-card { border-radius: 15px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
     .medal-icon { font-size: 60px; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; background: rgba(0,0,0,0.05);}
 
-    /* NUTRITION UI */
     .nutri-step { display: none; animation: slideUp 0.4s ease; }
     .nutri-step.active { display: block; }
     .nutri-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; background: #FFF; color: #3E2723; border-radius: 10px; overflow: hidden;}
@@ -783,15 +771,15 @@
                     let d = new Date(item.ts); let sbgmHtml = item.sbgms ? `<div class="comm-sbgm">🩸 น้ำตาล: ${item.sbgms}</div>` : '';
                     
                     // ป้องกัน Error จากตัวอักษรพิเศษที่เป็นสาเหตุให้หน้าจอไม่แสดงอาหาร
-                    let cleanAdvice = String(item.flag || '').replace(/'/g, "\\'").replace(/"/g, "&quot;").replace(/\n/g, "<br>");
-                    let cleanName = String(item.name || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                    let cleanUnit = String(item.unit || '').replace(/'/g, "\\'").replace(/"/g, "&quot;");
-                    let cleanQty = String(item.qty || '');
-                    let imgUrl = getImageUrl(item.img);
+                    let cleanAdvice = encodeURIComponent(String(item.flag || ''));
+                    let cleanName = encodeURIComponent(String(item.name || ''));
+                    let cleanUnit = encodeURIComponent(String(item.unit || ''));
+                    let cleanQty = encodeURIComponent(String(item.qty || ''));
+                    let imgUrl = encodeURIComponent(getImageUrl(item.img));
                     
                     return `<div class="comm-card" style="display:inline-flex; flex-direction:column; white-space:normal; vertical-align:top; margin-right:15px; cursor:pointer;" onclick="event.stopPropagation(); showFullFoodDetail('${cleanName}', '${cleanQty}', '${cleanUnit}', '${cleanAdvice}', '${imgUrl}')">
                                 <button class="like-btn" onclick="event.stopPropagation(); likeFood(this, ${item.rowIndex})">❤️ น่าสนใจ <span class="like-count">${item.likes||0}</span></button>
-                                <img src="${imgUrl}" class="comm-img">
+                                <img src="${getImageUrl(item.img)}" class="comm-img">
                                 <div class="comm-body">
                                     <div class="comm-user">คุณ ${item.userName}</div>
                                     <div style="font-size:12px; color:#888;">${d.toLocaleDateString('th-TH')} ${item.subtype||''}</div>
@@ -807,7 +795,12 @@
         }
     }
 
-    window.showFullFoodDetail = function(name, qty, unit, advice, imgUrl) {
+    window.showFullFoodDetail = function(encName, encQty, encUnit, encAdvice, encImgUrl) {
+        let name = decodeURIComponent(encName);
+        let qty = decodeURIComponent(encQty);
+        let unit = decodeURIComponent(encUnit);
+        let advice = decodeURIComponent(encAdvice).replace(/\n/g, "<br>");
+        let imgUrl = decodeURIComponent(encImgUrl);
         swalForm.fire({
             title: 'ไอเดียอาหาร 🍲',
             html: `<img src="${imgUrl}" style="width:100%; border-radius:15px; margin-bottom:15px; max-height:250px; object-fit:cover;">
@@ -836,7 +829,7 @@
         
         $('.navbar').style.display = 'none'; $('#shared-profile-container').style.display = 'none'; $('#main-content').style.display = 'none'; $('#community-view').style.display = 'none'; $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'none';
         
-        const namePink = `<span class="name-pink">${userDisplayName}</span>`;
+        const namePink = `<span class="name-pink" id="pri-name">${userDisplayName}</span>`;
         let title = ''; let ask = ''; let bodyHTML = '';
 
         if(actionType === 'ADVERSE') $('#pri-close-btn').innerHTML = 'ไม่มีอาการ'; else $('#pri-close-btn').innerHTML = 'ปิด';
