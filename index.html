@@ -75,6 +75,7 @@
         -webkit-background-clip: text; background-clip: text;
         animation: metallicShine 3s infinite linear; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.8));
     }
+    .nav-subtitle { font-size: 14px; font-weight: 400; color: #FFF; animation: none; text-shadow: none; -webkit-background-clip: initial; background-clip: initial;}
 
     .nav-community-btn {
         background: linear-gradient(135deg, #4FC3F7, #0288D1); color: #FFF; border: 2px solid #E1F5FE; border-radius: 20px;
@@ -106,7 +107,7 @@
     .compact-target { color: #D84315; font-size: 18px; font-weight: 800; margin-top: 4px; line-height: 1.2;}
     
     .profile-row-4 { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 2px; }
-    .med-badge-inline { background: rgba(0, 131, 143, 0.2); color: #00838F; padding: 2px 8px; border-radius: 15px; font-size: 10px; font-weight: 700; display: inline-block; margin-bottom: 4px; }
+    .med-badge-inline { background: #0288D1; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 4px; width: fit-content; align-self: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .stat-mini-badge { background: #5D4037; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
     .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
@@ -719,6 +720,8 @@
         if(res && res.ok) {
             swalSuccess.fire('สำเร็จ', 'ลงทะเบียนเรียบร้อยแล้วค่ะ', 'success').then(() => {
                 $('#register-view').style.display = 'none';
+                $('#main-content').style.display = 'block';
+                $('#main-grid').style.display = 'grid';
                 fetchUserProfile();
             });
         } else {
@@ -737,7 +740,7 @@
         
         if (res && res.ok) {
             $('#comm-total-users').innerText = res.totalUsers;
-            $('#comm-rem-users').innerText = res.remissionCount || '0';
+            $('#comm-rem-users').innerText = res.remissionCount > 0 ? res.remissionCount : '0';
             
             if(res.myBadges && res.myBadges.length > 0) {
                 let bHtml = res.myBadges.map(b => `${b.icon} ${b.name}`).join('<br>');
