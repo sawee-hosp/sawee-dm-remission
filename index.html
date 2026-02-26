@@ -214,6 +214,14 @@
     .nutri-table th { background: #FFD600; color: #3E2723; padding: 10px; text-align: center; }
     .nutri-table td { border-bottom: 1px solid #EEE; padding: 8px 4px; text-align: center; vertical-align: middle; }
     .nutri-table td:first-child { text-align: left; font-weight: bold; }
+
+    /* 🔥 NEW: Metric Cards UI */
+    .metrics-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-top: 10px; animation: fadeIn 1.5s ease-in-out forwards; }
+    .metric-card { background: #FFF; border-left: 4px solid #FF9100; padding: 8px 10px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); text-align: left;}
+    .metric-title { font-size: 11px; color: #888; font-weight: 700; display: block;}
+    .metric-value { font-size: 16px; color: #3E2723; font-weight: 800; line-height: 1; margin: 2px 0; }
+    .metric-desc { font-size: 10px; color: #5D4037; line-height: 1.2; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
 </head>
 <body>
@@ -243,25 +251,32 @@
 
   <!-- SHARED PROFILE CONTAINER -->
   <div id="shared-profile-container" class="container" style="padding-top: 15px; padding-bottom: 0;">
-      <div class="profile-header compact-profile" id="main-profile-header" style="display: none;">
-          <div class="pic-wrapper" onclick="$('#profile-pic-input').click()">
-              <img id="head-avatar" src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt="Avatar">
-              <div class="change-pic-badge">เปลี่ยนรูป</div>
-          </div>
-          <div class="compact-info">
-              <div class="profile-row-1">
-                  <div class="compact-name" id="head-name">...</div>
-                  <div class="edit-badge" onclick="openEditProfile()">✏️ แก้ไข</div>
+      <div class="profile-header compact-profile" id="main-profile-header" style="display: none; flex-direction:column;">
+          
+          <div style="display: flex; gap: 12px; width: 100%; align-items: flex-start;">
+              <div class="pic-wrapper" onclick="$('#profile-pic-input').click()">
+                  <img id="head-avatar" src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt="Avatar">
+                  <div class="change-pic-badge">เปลี่ยนรูป</div>
               </div>
-              <div class="profile-row-2"><div class="compact-badge" id="head-start">เริ่มต้นเมื่อ : ...</div><div class="compact-text" id="head-target">เหลืออีก ... วันจะถึงเป้าหมาย</div></div>
-              <div class="compact-target" id="head-weight-target" style="display:none;">ต้องลดน้ำหนักอีก ... กิโลกรัม เพื่อพิชิตเป้าหมาย</div>
-              <div id="head-med-stat" class="med-badge-inline" style="display:none;"></div>
-              <div class="profile-row-4">
-                  <div class="stat-mini-badge">เจาะเลือด <span id="stat-sbgm">0</span> ครั้ง</div>
-                  <div class="stat-mini-badge">บันทึกอาหาร <span id="stat-food">0</span> ครั้ง</div>
-                  <div class="stat-mini-badge">ออกกำลังกาย <span id="stat-ex">0</span> นาที</div>
+              <div class="compact-info">
+                  <div class="profile-row-1">
+                      <div class="compact-name" id="head-name">...</div>
+                      <div class="edit-badge" onclick="openEditProfile()">✏️ แก้ไข</div>
+                  </div>
+                  <div class="profile-row-2"><div class="compact-badge" id="head-start">เริ่มต้นเมื่อ : ...</div><div class="compact-text" id="head-target">เหลืออีก ... วันจะถึงเป้าหมาย</div></div>
+                  <div class="compact-target" id="head-weight-target" style="display:none;">ต้องลดน้ำหนักอีก ... กิโลกรัม เพื่อพิชิตเป้าหมาย</div>
+                  <div id="head-med-stat" class="med-badge-inline" style="display:none;"></div>
+                  <div class="profile-row-4">
+                      <div class="stat-mini-badge">เจาะเลือด <span id="stat-sbgm">0</span> ครั้ง</div>
+                      <div class="stat-mini-badge">บันทึกอาหาร <span id="stat-food">0</span> ครั้ง</div>
+                      <div class="stat-mini-badge">ออกกำลังกาย <span id="stat-ex">0</span> นาที</div>
+                  </div>
               </div>
           </div>
+          
+          <!-- 🔥 NEW: พื้นที่แสดงค่า Body Composition (ซ่อนไว้ก่อน แล้วค่อยแสดง) -->
+          <div id="body-metrics-container" class="metrics-container" style="display:none; width: 100%;"></div>
+
       </div>
   </div>
 
@@ -538,7 +553,8 @@
     let liffProfile = { userId: TEST_USER_ID, displayName: "ผู้ใช้งาน" }; 
     let userDisplayName = "คุณ";
     let currentAction = ''; let pendingFormData = {}; window.appEvents = []; window.currentProfile = null; window.currentNutritionProfile = null; 
-    
+    window.latestBodyMetrics = {}; // 🔥 เก็บค่าล่าสุด
+
     let sbgmChartInst = null; let bpChartInst = null; let wwChartInst = null; let plateChartInst = null; let calMonthOffset = 0;
     
     // Carousel Animation Handlers
@@ -891,8 +907,23 @@
             title = 'คำนวณพลังงาน'; ask = `กรอกข้อมูลเพื่อประเมินพลังงานให้ ${namePink} ค่ะ`;
             let p = window.currentNutritionProfile || {};
             let defW = p.weight_kg || (window.currentProfile ? window.currentProfile.Weight : '');
-            let defH = p.height_cm || ''; let defFav = p.favorite_food || ''; let defDis = p.dislike_food || ''; let defAct = p.profile || '2';
-            bodyHTML = `<div id="nutri-form-section"><div style="display:flex; gap:10px;"><input type="tel" id="nutri-w" class="main-input-anim" placeholder="น้ำหนัก (กก.)" inputmode="decimal" value="${defW}" oninput="validateNumber(this)"><input type="tel" id="nutri-h" placeholder="ส่วนสูง (ซม.)" inputmode="decimal" value="${defH}" oninput="validateNumber(this)"></div><div class="form-label" style="text-align:left; font-size:16px;">ระดับกิจกรรม (1=นั่งทำงาน, 5=ใช้แรงงานหนัก)</div>${getChipsHTML('nutri-act', ['1','2','3','4','5'], String(defAct))}<input type="text" id="nutri-fav" placeholder="อาหารที่ชอบ (ตัวเลือก)" value="${defFav}"><input type="text" id="nutri-dis" placeholder="อาหารที่ไม่ชอบ/แพ้ (ตัวเลือก)" value="${defDis}"><button class="btn" style="margin-top:20px;" onclick="processNutrition()">คำนวณพลังงานจากอาหาร 🧮</button></div><div id="nutri-result-section" style="display:none; padding-bottom:30px;"></div>`;
+            let defH = p.height_cm || ''; let defFav = p.favorite_food || ''; let defDis = p.dislike_food || ''; 
+            let defAct = p.profile || '1'; // Default เป็น 1 = นั่งทำงาน
+            
+            // ดึงค่า BMR ล่าสุดมาโชว์ถ้ามี
+            let defBMR = window.latestBodyMetrics['RESTINGMET'] ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
+
+            bodyHTML = `
+                <div id="nutri-form-section">
+                    <div style="display:flex; gap:10px;"><input type="tel" id="nutri-w" class="main-input-anim" placeholder="น้ำหนัก (กก.)" inputmode="decimal" value="${defW}" oninput="validateNumber(this)"><input type="tel" id="nutri-h" placeholder="ส่วนสูง (ซม.)" inputmode="decimal" value="${defH}" oninput="validateNumber(this)"></div>
+                    <div class="form-label" style="text-align:left; font-size:16px;">ระดับกิจกรรม (1=นั่งทำงาน, 5=แรงงานหนัก) <span style="font-size:12px;color:#FF9100;">${defBMR}</span></div>
+                    ${getChipsHTML('nutri-act', ['1','2','3','4','5'], String(defAct))}
+                    <input type="text" id="nutri-fav" placeholder="อาหารที่ชอบ (ตัวเลือก)" value="${defFav}">
+                    <input type="text" id="nutri-dis" placeholder="อาหารที่ไม่ชอบ/แพ้ (ตัวเลือก)" value="${defDis}">
+                    <button class="btn" style="margin-top:20px;" onclick="processNutrition()">คำนวณพลังงานจากอาหาร 🧮</button>
+                </div>
+                <div id="nutri-result-section" style="display:none; padding-bottom:30px;"></div>
+            `;
         }
 
         $('#pri-title').innerText = title; $('#pri-ask').innerHTML = ask; $('#pri-body').innerHTML = bodyHTML;
@@ -1005,8 +1036,17 @@
         if(!w || !h) return swalForm.fire('ข้อมูลไม่ครบ', 'กรุณาระบุน้ำหนักและส่วนสูงค่ะ', 'warning');
         let act = $('#val-nutri-act').value; let fav = $('#nutri-fav').value; let dis = $('#nutri-dis').value;
 
+        // 🔥 ดึงค่า BMR, Muscle, Gender ส่งไปคำนวณด้วย
+        let payloadData = { 
+            userId: liffProfile.userId, weight: w, height: h, profile: act, 
+            favFood: fav, dislikeFood: dis,
+            bmr: window.latestBodyMetrics['RESTINGMET'] || 0,
+            muscle: window.latestBodyMetrics['MUSCLE'] || 0,
+            gender: window.currentProfile ? window.currentProfile.Gender : 'Female'
+        };
+
         await showLoading(true);
-        const res = await apiPost('logNutrition', { userId: liffProfile.userId, weight: w, height: h, profile: act, favFood: fav, dislikeFood: dis });
+        const res = await apiPost('logNutrition', payloadData);
         showLoading(false);
 
         if(res && res.ok) { window.currentNutritionProfile = res.data; renderNutritionSteps(res.data); } 
@@ -1234,6 +1274,14 @@
         if (allEvents.length === 0) { if(container) container.innerHTML = '<div style="text-align:center; margin-top:50px;">ยังไม่มีข้อมูลค่ะ</div>'; return; }
         allEvents.sort((a,b) => new Date(b.ts) - new Date(a.ts)); 
 
+        // 🔥 กรองหาค่า Body Composition ล่าสุด
+        window.latestBodyMetrics = {};
+        const trackingTypes = ['RESTINGMET', 'MUSCLE', 'VISCERALFAT', 'BMI', '%FAT', 'BODYAGE', 'WAIST'];
+        trackingTypes.forEach(type => {
+            const found = allEvents.find(e => e.event_type === type);
+            if (found && !isNaN(parseFloat(found.v1))) window.latestBodyMetrics[type] = parseFloat(found.v1);
+        });
+
         const groups = {};
         allEvents.forEach(e => {
             const d = new Date(e.ts); const dateStr = d.toLocaleDateString('th-TH', {day:'numeric', month:'short', year:'2-digit'}); const hour = d.getHours();
@@ -1319,6 +1367,28 @@
             
             let st = res.profile.Status || 'Waiting'; const reportStatus = $('#report-status');
             if (reportStatus) { reportStatus.className = 'status-badge ' + (st==='Hypoglycemia Alert'?'status-hypo':st==='Hyperglycemia'?'status-hyper':st==='Monitor'?'status-monitor':st==='Stable'?'status-stable':'status-waiting'); reportStatus.innerText = st; }
+
+            // 🔥 แสดงผลการ์ดเชิงลึกอย่างช้าๆ
+            setTimeout(() => {
+                const mc = $('#body-metrics-container');
+                if(mc && Object.keys(window.latestBodyMetrics).length > 0) {
+                    let m = window.latestBodyMetrics; let html = '';
+                    if(m['RESTINGMET']) html += `<div class="metric-card"><span class="metric-title">🔥 BMR (อัตราเผาผลาญ)</span><div class="metric-value">${m['RESTINGMET']} <span style="font-size:12px;">kcal</span></div><div class="metric-desc">นี่คือพลังงานขั้นต่ำที่ร่างกายคุณต้องการ</div></div>`;
+                    if(m['MUSCLE']) html += `<div class="metric-card"><span class="metric-title">💪 % Muscle (กล้ามเนื้อ)</span><div class="metric-value">${m['MUSCLE']}%</div><div class="metric-desc">กล้ามเนื้อคือเตาเผา ต้องกินโปรตีนให้ถึง ${Math.round(window.currentProfile.Weight * 1.2)} กรัม</div></div>`;
+                    if(m['VISCERALFAT']) html += `<div class="metric-card"><span class="metric-title">🛡️ Visceral Fat (ไขมันช่องท้อง)</span><div class="metric-value">ระดับ ${m['VISCERALFAT']}</div><div class="metric-desc">ไขมันช่องท้องลดลง = ตับอ่อนทำงานดีขึ้น</div></div>`;
+                    if(m['%FAT']) html += `<div class="metric-card"><span class="metric-title">🥑 % Body Fat (ไขมันรวม)</span><div class="metric-value">${m['%FAT']}%</div><div class="metric-desc">น้ำหนักที่ลดลง เป็นไขมันจริงๆ หรือไม่</div></div>`;
+                    if(m['BODYAGE'] && window.currentProfile.Age) {
+                        let ageDiff = parseInt(window.currentProfile.Age) - m['BODYAGE'];
+                        let desc = ageDiff > 0 ? `ว้าว! ร่างกายคุณเด็กลงไปอีก ${ageDiff} ปีแล้ว` : `อายุร่างกายคือ ${m['BODYAGE']} ปี มาทำให้อ่อนเยาว์ลงกัน!`;
+                        html += `<div class="metric-card"><span class="metric-title">🧬 Body Age (อายุร่างกาย)</span><div class="metric-value">${m['BODYAGE']} <span style="font-size:12px;">ปี</span></div><div class="metric-desc">${desc}</div></div>`;
+                    }
+                    if(m['BMI']) html += `<div class="metric-card"><span class="metric-title">⚖️ BMI (ดัชนีมวลกาย)</span><div class="metric-value">${m['BMI']}</div><div class="metric-desc">เป้าหมายของคุณคือลดน้ำหนักให้ได้ 10%</div></div>`;
+                    if(m['WAIST']) html += `<div class="metric-card"><span class="metric-title">📏 รอบเอว</span><div class="metric-value">${m['WAIST']} <span style="font-size:12px;">ซม.</span></div><div class="metric-desc">รอบเอวที่ลดลง ลดความเสี่ยงโรคหัวใจ</div></div>`;
+                    
+                    mc.innerHTML = html;
+                    mc.style.display = 'grid';
+                }
+            }, 800); // ดีเลย์ให้โหลดโครงหน้าเสร็จก่อน
         }
     }
     
