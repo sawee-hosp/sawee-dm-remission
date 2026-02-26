@@ -112,7 +112,6 @@
     .med-badge-inline { background: #0288D1; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 4px; width: fit-content; align-self: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .stat-mini-badge { background: #5D4037; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-    /* --- GRID MENU (HUGE & SQUARE) --- */
     .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .note-item { 
       border-radius: 15px; padding: 0; aspect-ratio: 1 / 1; 
@@ -125,7 +124,6 @@
     
     .bg-sbgm { background: linear-gradient(135deg, #e94b3c, #b71c1c); } .bg-bp { background: linear-gradient(135deg, #2b3a67, #1a237e); } .bg-food { background: linear-gradient(135deg, #fe9554, #e65100); } .bg-weight { background: linear-gradient(135deg, #8bd365, #33691e); } .bg-waist { background: linear-gradient(135deg, #00b4d8, #01579b); } .bg-bmi { background: linear-gradient(135deg, #8d6e63, #4e342e); } .bg-ex { background: linear-gradient(135deg, #ab47bc, #4a148c); } .bg-sleep { background: linear-gradient(135deg, #5c6bc0, #1a237e); } .bg-adverse { background: linear-gradient(135deg, #ef5350, #b71c1c); } .bg-hba1c { background: linear-gradient(135deg, #ec407a, #880e4f); } .bg-checkup { background: linear-gradient(135deg, #00acc1, #006064); } .bg-med { background: linear-gradient(135deg, #00897b, #004d40); } .bg-hist { background: linear-gradient(135deg, #757575, #212121); } .bg-doc { background: linear-gradient(135deg, #1976d2, #0d47a1); } .bg-nutri { background: linear-gradient(135deg, #fbc02d, #f57f17); }
 
-    /* --- UNIFIED MODAL --- */
     .modal-overlay { position: fixed; inset: 0; z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
     .modal-sheet { background: linear-gradient(180deg, var(--modal-bg-start), var(--modal-bg-end)); width: 100%; max-width: 600px; border-radius: 40px 40px 0 0; padding: 30px 20px 50px 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 95vh; overflow-y: auto; color: #FFF; border-top: 4px solid #FFD600; position: relative; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
@@ -184,7 +182,6 @@
     .swal-brown-popup .swal2-title { color: #FFD600 !important; }
     .swal-brown-popup .swal2-html-container { color: #FFF !important; }
 
-    /* LOADING SPINNER AROUND LOGO */
     .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
     .loader-logo-container { position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
     .loader-logo { width: 70px; height: 70px; border-radius: 50%; object-fit: contain; z-index: 2; position: relative;}
@@ -192,7 +189,6 @@
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     .swee-spinner-ring { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 6px solid rgba(255,255,255,0.2); border-top: 6px solid #FF9100; border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
     
-    /* COMMUNITY UI */
     .comm-card { min-width: 260px; max-width: 260px; background: #FFF; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #81D4FA; flex-shrink: 0; overflow: hidden; display: flex; flex-direction: column; position: relative; scroll-snap-align: start; cursor: pointer; }
     .comm-img { width: 100%; height: 160px; object-fit: cover; }
     .comm-body { padding: 12px; }
@@ -204,7 +200,6 @@
     .float-up { position: absolute; font-size: 20px; font-weight: bold; color: #FF9100; pointer-events: none; animation: floatUpAnim 1s forwards; opacity: 0; text-shadow: 1px 1px 0 #FFF; z-index: 20;}
     @keyframes floatUpAnim { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-40px) scale(1.5); } }
 
-    /* Scrollable Carousel Wrapper */
     .comm-carousel-wrapper { 
         overflow-x: auto; overflow-y: hidden; white-space: nowrap; padding-bottom: 15px; 
         scrollbar-width: none; -ms-overflow-style: none; -webkit-overflow-scrolling: touch;
@@ -216,7 +211,6 @@
     .medal-card { border-radius: 15px; padding: 15px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
     .medal-icon { font-size: 60px; width: 90px; height: 90px; display: flex; align-items: center; justify-content: center; border-radius: 50%; flex-shrink: 0; background: rgba(0,0,0,0.05);}
 
-    /* NUTRITION UI */
     .nutri-step { display: none; animation: slideUp 0.4s ease; }
     .nutri-step.active { display: block; }
     .nutri-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; background: #FFF; color: #3E2723; border-radius: 10px; overflow: hidden;}
@@ -289,14 +283,15 @@
               </div>
           </div>
           
-          <!-- พื้นที่แสดงค่า Body Composition -->
+          <!-- พื้นที่แสดงค่า Body Composition (ซ่อนไว้ก่อน แล้วค่อยแสดง) -->
           <div id="body-metrics-container" class="metrics-container" style="display:none; width: 100%; margin-top: 15px;"></div>
 
       </div>
   </div>
 
   <!-- MAIN CONTENT CONTAINER (Grid Menu) -->
-  <div id="main-content" class="container" style="padding-top: 0; padding-bottom: 60px; display: none;">
+  <!-- 🔥 ตั้งค่า display:block ให้เห็นเมนูทันทีสำหรับโหมดหน้าจอปกติ -->
+  <div id="main-content" class="container" style="padding-top: 0; padding-bottom: 60px; display: block;">
       <!-- MENU GRID -->
       <div class="note-grid" id="main-grid">
         <div class="note-item bg-sbgm" onclick="openNoteForm('SBGM')"><div class="note-icon">🩸</div><div class="note-label">น้ำตาล<br>ปลายนิ้ว</div></div>
@@ -312,7 +307,7 @@
         <div class="note-item bg-checkup" onclick="openNoteForm('CHECKUP')"><div class="note-icon">👣</div><div class="note-label">ตรวจไต<br>ตา/เท้า</div></div>
         <div class="note-item bg-med" onclick="openNoteForm('MED')"><div class="note-icon">💊</div><div class="note-label">รายการยา</div></div>
         <div class="note-item bg-nutri" style="grid-column: 1 / -1; min-height:60px; flex-direction:row; gap:15px; padding:15px;" onclick="openNoteForm('NUTRITION')">
-             <div class="note-icon" style="margin:0; font-size:32px;">🥗</div><div class="note-label" style="font-size:20px;">คำนวณพลังงานอาหาร</div>
+             <div class="note-icon" style="margin:0; font-size:40px;">🥗</div><div class="note-label" style="font-size:24px;">คำนวณพลังงานอาหาร</div>
         </div>
       </div>
       
@@ -571,9 +566,12 @@
     
     let sbgmChartInst = null; let bpChartInst = null; let wwChartInst = null; let plateChartInst = null; let calMonthOffset = 0;
     
+    // Carousel Animation Handlers
     let animFrames = {};
+
     const $ = selector => document.querySelector(selector);
     
+    // --- Swal Color Mixins ---
     const swalAlert = Swal.mixin({ customClass: { popup: 'swal-red-popup', confirmButton: 'btn', cancelButton: 'btn-white-round' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
     const swalSuccess = Swal.mixin({ customClass: { popup: 'swal-green-popup', confirmButton: 'btn' }, buttonsStyling: false, confirmButtonText: 'ตกลง' });
     const swalForm = Swal.mixin({ customClass: { popup: 'swal-brown-popup', confirmButton: 'btn', cancelButton: 'btn-close' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
@@ -595,25 +593,41 @@
     }
 
     async function main() {
+      // 1. กระตุกเมนูสวยๆ
       document.querySelectorAll('.note-item').forEach(el => { el.style.animationDelay = `${(Math.random() * 4).toFixed(2)}s`; });
       
-      const params = new URLSearchParams(window.location.search); let actionParam = params.get('action');
+      const params = new URLSearchParams(window.location.search); 
+      let actionParam = params.get('action');
       let mappedAction = null;
+
       if(actionParam) {
           const map = { 'sgbm': 'SBGM', 'hypertension': 'BP', 'food': 'FOOD', 'weight': 'WEIGHT', 'waist': 'WAIST', 'bodymass': 'BODYCOMP', 'hba1c': 'HBA1C', 'sleep': 'SLEEP', 'exercise': 'EXERCISE', 'medication': 'MED', 'sideeffect': 'ADVERSE', 'checkup': 'CHECKUP', 'history': 'HIST', 'doctor': 'DOC', 'nutrition': 'NUTRITION', 'community': 'COMMUNITY' };
           mappedAction = map[actionParam.toLowerCase()];
       }
 
+      // 2. ถ้าเข้าแบบมีพารามิเตอร์ Deep Link
       if (mappedAction && mappedAction !== 'HIST' && mappedAction !== 'DOC' && mappedAction !== 'COMMUNITY') {
-          $('#main-content').style.display = 'none'; $('#shared-profile-container').style.display = 'none'; $('.navbar').style.display = 'none';
+          // ซ่อนโครงสร้างพื้นหลังทั้งหมด
+          $('#main-content').style.display = 'none'; 
+          $('#shared-profile-container').style.display = 'none'; 
+          $('.navbar').style.display = 'none';
+          
           showLoading(true);
           await initLiff();
-          await fetchUserProfile(); 
+          await fetchUserProfile(); // รอโหลดข้อมูลชื่อและสถิติให้เสร็จ
           showLoading(false);
-          openNoteForm(mappedAction); 
+          
+          openNoteForm(mappedAction); // เปิด Modal ทันที 
       } else {
-          $('#main-content').style.display = 'block'; $('#shared-profile-container').style.display = 'block'; $('.navbar').style.display = 'flex';
+          // 3. ถ้าเข้าหน้าปกติ (ไม่มีพารามิเตอร์) ให้แสดงปุ่มเมนูทันทีเลย!
+          $('#main-content').style.display = 'block'; 
+          $('.navbar').style.display = 'flex';
+          
           initLiff().then(() => fetchUserProfile()).then(() => {
+              // พอดึงข้อมูลเสร็จ ค่อยแสดงการ์ดประวัติ (ไม่แสดงรอเพื่อป้องกันความงง)
+              if(window.currentProfile) {
+                  $('#shared-profile-container').style.display = 'block';
+              }
               if (mappedAction === 'HIST') openHistory();
               else if (mappedAction === 'DOC') openReport();
               else if (mappedAction === 'COMMUNITY') openCommunity();
@@ -629,6 +643,7 @@
         } catch (err) { console.error("LIFF Init Error:", err); liffProfile.userId = TEST_USER_ID; }
     }
 
+    // --- CAROUSEL LOGIC ---
     function initAutoScroll(wrapperId) {
         const wrapper = document.getElementById(wrapperId);
         if(!wrapper) return;
@@ -741,19 +756,32 @@
 
     function closeViews() { 
         $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'none'; $('#register-view').style.display = 'none'; $('#community-view').style.display = 'none'; $('#edit-history-view').style.display = 'none';
-        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'block'; $('#main-content').style.display = 'block'; $('#main-grid').style.display = 'grid'; 
+        
+        // คืนค่าหน้าหลัก
+        $('.navbar').style.display = 'flex'; 
+        if(window.currentProfile) $('#shared-profile-container').style.display = 'block'; 
+        $('#main-content').style.display = 'block'; 
+        $('#main-grid').style.display = 'grid'; 
+        
         window.scrollTo(0,0); 
         let btn = $('#nav-mode-btn'); btn.innerText = 'ชุมชนคนคุมหวาน'; btn.className = 'nav-community-btn';
     }
     
     function closeAllModals() { 
         document.querySelectorAll('.modal-overlay, .secondary-modal-overlay').forEach(m => m.style.display = 'none'); 
-        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'block';
+        
+        // ฟื้นฟูหน้าหลักให้สมบูรณ์ป้องกันปัญหาเปิดเมนูแล้วกดไม่ได้/เมนูหาย
+        $('.navbar').style.display = 'flex'; 
+        if(window.currentProfile) $('#shared-profile-container').style.display = 'block';
+        
         let btn = $('#nav-mode-btn');
         if (btn && btn.innerText === 'ชุมชนคนคุมหวาน') {
-            $('#main-content').style.display = 'block'; $('#main-grid').style.display = 'grid'; $('#community-view').style.display = 'none';
+            $('#main-content').style.display = 'block'; 
+            $('#main-grid').style.display = 'grid'; 
+            $('#community-view').style.display = 'none';
         } else {
-            $('#community-view').style.display = 'block'; $('#main-content').style.display = 'none'; 
+            $('#community-view').style.display = 'block'; 
+            $('#main-content').style.display = 'none'; 
         }
         const askEl = $('#pri-ask'); if(askEl) askEl.style.display = 'block';
     }
@@ -880,6 +908,7 @@
             if (res.communityFoods && res.communityFoods.length > 0) {
                 let itemsHtml = res.communityFoods.map(item => {
                     let d = new Date(item.ts); let sbgmHtml = item.sbgms ? `<div class="comm-sbgm">🩸 น้ำตาล: ${item.sbgms}</div>` : '';
+                    
                     let cleanAdvice = encodeURIComponent(String(item.flag || ''));
                     let cleanName = encodeURIComponent(String(item.name || ''));
                     let cleanUnit = encodeURIComponent(String(item.unit || ''));
@@ -932,10 +961,17 @@
         await apiPost('likeProfile', { targetUserId: targetUserId });
     }
 
+    // --- UNIVERSAL OPEN MODAL ---
     function openNoteForm(actionType) {
         currentAction = actionType; pendingFormData = {}; 
         
-        $('.navbar').style.display = 'none'; $('#shared-profile-container').style.display = 'none'; $('#main-content').style.display = 'none'; $('#community-view').style.display = 'none'; $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'none';
+        // 🔥 โหมด Focus: ซ่อนพื้นหลังเมนูทั้งหมด
+        $('.navbar').style.display = 'none'; 
+        $('#shared-profile-container').style.display = 'none'; 
+        $('#main-content').style.display = 'none'; 
+        $('#community-view').style.display = 'none'; 
+        $('#history-view').style.display = 'none'; 
+        $('#calendar-view').style.display = 'none';
         
         const namePink = `<span class="name-pink" id="pri-name">${userDisplayName}</span>`;
         let title = ''; let ask = ''; let bodyHTML = '';
@@ -972,6 +1008,7 @@
             bodyHTML = `<div class="form-label" style="text-align:left; font-size:18px;">ค่าการทำงานของไต (eGFR)</div><input type="tel" id="chk-egfr" class="main-input-anim" placeholder="มล./นาที/1.73 ตร.ม." inputmode="decimal" oninput="validateNumber(this)"><div class="form-label" style="text-align:left; font-size:18px;">ผลตรวจจอตา</div>${getChipsHTML('chk-eye', ['ปกติ','ผิดปกติ'])}<div class="form-label" style="text-align:left; font-size:18px;">ผลตรวจเท้า</div>${getChipsHTML('chk-foot', ['ปกติ','ผิดปกติ'])}<button class="btn" style="margin-top:15px;" onclick="processCheckup()">บันทึกข้อมูล ✅</button>`;
         } else if (actionType === 'FOOD') {
             title = 'บันทึกอาหาร'; ask = `คุณ ${namePink} ทานอะไรไปบ้างคะ?`;
+            let defW = window.currentNutritionProfile ? window.currentNutritionProfile.weight_kg : (window.currentProfile ? window.currentProfile.Weight : '');
             let greenBtn = !window.currentNutritionProfile ? `<button class="btn btn-metallic-green" onclick="openNoteForm('NUTRITION')">✨ คำนวณพลังงานอาหารต่อวัน (คลิก!)</button>` : '';
             bodyHTML = `${greenBtn}<img id="food-preview" style="width:100%; border-radius:15px; margin-bottom:15px; max-height:200px; object-fit:cover; display:none;">
               <div style="display:flex; gap:10px; margin-bottom:20px;">
@@ -998,8 +1035,7 @@
             let defW = p.weight_kg || (window.currentProfile ? window.currentProfile.Weight : '');
             let defH = p.height_cm || ''; let defFav = p.favorite_food || ''; let defDis = p.dislike_food || ''; 
             let defAct = p.profile || '1';
-            
-            let defBMR = window.latestBodyMetrics['RESTINGMET'] ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
+            let defBMR = (window.latestBodyMetrics && window.latestBodyMetrics['RESTINGMET']) ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
 
             bodyHTML = `
                 <div id="nutri-form-section">
@@ -1123,8 +1159,8 @@
         let payloadData = { 
             userId: liffProfile.userId, weight: w, height: h, profile: act, 
             favFood: fav, dislikeFood: dis,
-            bmr: window.latestBodyMetrics['RESTINGMET'] || 0,
-            muscle: window.latestBodyMetrics['MUSCLE'] || 0,
+            bmr: window.latestBodyMetrics ? window.latestBodyMetrics['RESTINGMET'] : 0,
+            muscle: window.latestBodyMetrics ? window.latestBodyMetrics['MUSCLE'] : 0,
             gender: window.currentProfile ? window.currentProfile.Gender : 'Female'
         };
 
@@ -1274,14 +1310,26 @@
     }
     async function submitEditProfile(e) { e.preventDefault(); showLoading(true); const payload = { userId: liffProfile.userId, nameUse: $('#edit-name').value.trim(), age: $('#edit-age').value.trim(), weight: $('#edit-weight').value.trim(), job: $('#edit-job').value.trim() }; await apiPost('updateProfile', payload); showLoading(false); closeAllModals(); swalSuccess.fire({title: 'บันทึกเรียบร้อย', text: 'ส่งข้อมูลอัปเดตแล้ว', timer: 1500, showConfirmButton: false}); fetchUserProfile(); }
 
-    function openHistory() { $('#main-content').style.display = 'none'; $('#shared-profile-container').style.display = 'none'; $('#history-view').style.display = 'block'; }
-    function openCalendar() { $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'block'; calMonthOffset = 0; renderCalendar(); }
+    function openHistory() { 
+        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'none'; $('#main-content').style.display = 'none'; $('#community-view').style.display = 'none'; 
+        $('#history-view').style.display = 'block'; 
+        
+        // Auto-render calendar when opening history
+        if (window.appEvents && window.appEvents.length > 0) {
+            renderCalendar();
+        }
+    }
+    
+    function openCalendar() { 
+        $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'block'; calMonthOffset = 0; renderCalendar(); 
+    }
+    
     function changeMonth(offset) { calMonthOffset += offset; renderCalendar(); }
 
     function renderCalendar() {
         let date = new Date(); date.setMonth(date.getMonth() + calMonthOffset); let month = date.getMonth(); let year = date.getFullYear();
         const monthNames = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
-        $('#cal-month-title').innerText = `${monthNames[month]} ${year+543}`;
+        const calTitle = $('#cal-month-title'); if(calTitle) calTitle.innerText = `${monthNames[month]} ${year+543}`;
         let firstDay = new Date(year, month, 1).getDay(); let daysInMonth = new Date(year, month+1, 0).getDate();
         let html = ''; for(let i=0; i<firstDay; i++) html += `<div></div>`;
         for(let d=1; d<=daysInMonth; d++) {
@@ -1290,10 +1338,10 @@
             let cClass = 'cal-date'; if(hasRisk) cClass += ' has-risk'; else if(hasData) cClass += ' has-data';
             html += `<div class="${cClass}" onclick="if(${hasData}) showHistoryForDate('${chkDate}')">${d}</div>`;
         }
-        $('#cal-grid-body').innerHTML = html;
+        const calGrid = $('#cal-grid-body'); if(calGrid) calGrid.innerHTML = html;
     }
+    
     window.showHistoryForDate = function(dateStr) { 
-        // Filter events for the selected date
         let filteredEvents = window.appEvents.filter(e => new Date(e.ts).toLocaleDateString('th-TH') === dateStr);
         renderDashboard(filteredEvents);
         $('#history-clear-filter').style.display = 'inline-block';
@@ -1355,10 +1403,9 @@
         const container = $('#history-container'); if(container) container.innerHTML = '';
         let allEvents = []; if(eventsData) Object.values(eventsData).flat().forEach(e => { if(e && e.event_type) allEvents.push(e); });
         
-        // ถ้าเป็นการอัปเดต global ให้จำไว้ และเรนเดอร์ปฏิทินด้วย
         if(eventsData === window.appEvents || eventsData === undefined) {
             window.appEvents = allEvents; 
-            if($('#history-view').style.display === 'block') renderCalendar();
+            if($('#history-view') && $('#history-view').style.display === 'block') renderCalendar();
         }
 
         if (allEvents.length === 0) { if(container) container.innerHTML = '<div style="text-align:center; margin-top:50px;">ยังไม่มีข้อมูลค่ะ</div>'; return; }
