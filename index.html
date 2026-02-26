@@ -75,7 +75,6 @@
         -webkit-background-clip: text; background-clip: text;
         animation: metallicShine 3s infinite linear; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.8));
     }
-    .nav-subtitle { font-size: 14px; font-weight: 400; color: #FFF; animation: none; text-shadow: none; -webkit-background-clip: initial; background-clip: initial;}
 
     .nav-community-btn {
         background: linear-gradient(135deg, #4FC3F7, #0288D1); color: #FFF; border: 2px solid #E1F5FE; border-radius: 20px;
@@ -112,7 +111,7 @@
     .med-badge-inline { background: #0288D1; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 4px; width: fit-content; align-self: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .stat-mini-badge { background: #5D4037; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-    /* --- GRID MENU --- */
+    /* --- GRID MENU: ปรับให้ทุกปุ่มขนาดเท่ากันและเป็นสี่เหลี่ยมจัตุรัส --- */
     .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .note-item { 
       border-radius: 15px; padding: 0; aspect-ratio: 1 / 1; 
@@ -248,7 +247,6 @@
       </div>
       <div style="display:flex; align-items:center;">
           <button id="nav-mode-btn" class="nav-community-btn" onclick="toggleCommunityMode()">ชุมชนคนคุมหวาน</button>
-          <button class="btn-nav-close" onclick="liff.closeWindow()">ปิด</button>
       </div>
   </nav>
 
@@ -306,7 +304,6 @@
         <div class="note-item bg-checkup" onclick="openNoteForm('CHECKUP')"><div class="note-icon">👣</div><div class="note-label">ตรวจไต<br>ตา/เท้า</div></div>
         <div class="note-item bg-med" onclick="openNoteForm('MED')"><div class="note-icon">💊</div><div class="note-label">รายการยา</div></div>
         <div class="note-item bg-nutri" onclick="openNoteForm('NUTRITION')"><div class="note-icon">🥗</div><div class="note-label">คำนวณ<br>พลังงาน</div></div>
-        <div class="note-item bg-doc" onclick="openReport()"><div class="note-icon">🩺</div><div class="note-label">รายงาน<br>แพทย์</div></div>
       </div>
       
       <div style="text-align:center; font-size:12px; color:#5D4037; margin-top:30px; margin-bottom:20px;">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
@@ -588,6 +585,9 @@
     }
 
     async function main() {
+      // ทำให้เมนูกระตุกแบบแรนดอม
+      document.querySelectorAll('.note-item').forEach(el => { el.style.animationDelay = `${(Math.random() * 4).toFixed(2)}s`; });
+      
       const params = new URLSearchParams(window.location.search); 
       let actionParam = params.get('action');
       let mappedAction = null;
@@ -598,26 +598,27 @@
       }
 
       if (mappedAction) {
-          // โหมดเข้าผ่าน Deep Link (Smart Preload)
-          // ซ่อนเมนูทั้งหมด โชว์แต่ Loading
+          // โหมด Deep Link: ซ่อนเมนู -> โชว์ Modal ทันที -> แอบโหลด Data ข้างหลัง
           $('#main-content').style.display = 'none'; 
           $('#shared-profile-container').style.display = 'none'; 
           $('.navbar').style.display = 'none';
-          showLoading(true);
           
-          await initLiff();
-          await fetchUserProfile(); 
+          if (mappedAction !== 'HIST' && mappedAction !== 'DOC' && mappedAction !== 'COMMUNITY') {
+              openNoteForm(mappedAction); // เด้ง Modal ทันที 0 วิ
+          } else {
+              showLoading(true); // ถ้าเป็นหน้าดูประวัติต้องรอโหลดข้อมูลก่อน
+          }
           
-          // โหลดเสร็จ เปิด Modal ทันที ซ่อน Loading
-          showLoading(false);
-          
-          if (mappedAction === 'HIST') openHistory();
-          else if (mappedAction === 'DOC') openReport();
-          else if (mappedAction === 'COMMUNITY') openCommunity();
-          else openNoteForm(mappedAction); 
+          // โหลดข้อมูลหลังบ้านเงียบๆ
+          initLiff().then(() => fetchUserProfile()).then(() => {
+              showLoading(false);
+              if (mappedAction === 'HIST') openHistory();
+              else if (mappedAction === 'DOC') openReport();
+              else if (mappedAction === 'COMMUNITY') openCommunity();
+          });
           
       } else {
-          // โหมดเข้าปกติ (แสดงเมนูให้กดได้ทันที ไม่ต้องรอโหลดข้อมูล)
+          // โหมดเข้าปกติ: โชว์เมนูให้กดได้ทันที ไม่ต้องรอโหลด
           $('#main-content').style.display = 'block'; 
           $('.navbar').style.display = 'flex';
           
@@ -748,6 +749,7 @@
         if (btn.innerText === 'ชุมชนคนคุมหวาน') openCommunity(); else closeViews();
     }
 
+    // ฟังก์ชันคืนค่าหน้าจอหลักให้กลับมาเหมือนเดิม 100%
     function closeViews() { 
         $('#history-view').style.display = 'none'; 
         $('#calendar-view').style.display = 'none'; 
@@ -765,27 +767,10 @@
         if(btn) { btn.innerText = 'ชุมชนคนคุมหวาน'; btn.className = 'nav-community-btn'; }
     }
     
+    // ปิด Modal ทั้งหมดแล้วเรียกคืนหน้าจอ
     function closeAllModals() { 
         document.querySelectorAll('.modal-overlay, .secondary-modal-overlay').forEach(m => m.style.display = 'none'); 
-        
-        // ฟื้นฟูหน้าหลักให้กลับมาทำงานปกติ 100%
-        $('.navbar').style.display = 'flex'; 
-        if(window.currentProfile) $('#shared-profile-container').style.display = 'block';
-        
-        let btn = $('#nav-mode-btn');
-        if (btn && btn.innerText === 'ชุมชนคนคุมหวาน') {
-            $('#main-content').style.display = 'block'; 
-            $('#main-grid').style.display = 'grid'; 
-            $('#community-view').style.display = 'none';
-        } else {
-            $('#community-view').style.display = 'block'; 
-            $('#main-content').style.display = 'none'; 
-        }
-        
-        $('#history-view').style.display = 'none';
-        $('#calendar-view').style.display = 'none';
-        
-        const askEl = $('#pri-ask'); if(askEl) askEl.style.display = 'block';
+        closeViews();
     }
     
     function showLoading(show) { $('#loading').style.display = show ? 'flex' : 'none'; }
@@ -1029,7 +1014,8 @@
             let defW = p.weight_kg || (window.currentProfile ? window.currentProfile.Weight : '');
             let defH = p.height_cm || ''; let defFav = p.favorite_food || ''; let defDis = p.dislike_food || ''; 
             let defAct = p.profile || '1';
-            let defBMR = (window.latestBodyMetrics && window.latestBodyMetrics['RESTINGMET']) ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
+            
+            let defBMR = window.latestBodyMetrics['RESTINGMET'] ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
 
             bodyHTML = `
                 <div id="nutri-form-section">
@@ -1047,6 +1033,7 @@
         $('#pri-title').innerText = title; 
         $('#pri-ask').innerHTML = ask; 
         $('#pri-body').innerHTML = bodyHTML;
+        
         $('#primary-modal').style.display = 'flex';
     }
 
@@ -1278,8 +1265,11 @@
     }
 
     function showMissingModal(askText, bodyHtml) { $('#sec-ask').innerHTML = askText; $('#sec-body').innerHTML = bodyHtml; $('#secondary-modal').style.display = 'flex'; }
-    async function doSave(type, subtype, v1, v2, vt, unit) { showLoading(true); await apiPost('logEvent', { userId: liffProfile.userId, type, subtype, v1, v2, vt, unit }); showLoading(false); closeAllModals(); fetchUserProfile(); swalSuccess.fire({ title: 'บันทึกเรียบร้อย', timer: 1500, showConfirmButton: false }); }
-    async function doSaveMed(medName, changeType, currRegimen, dateStr) { showLoading(true); await apiPost('logMedication', { userId: liffProfile.userId, medName: medName, changeType: changeType, actionDate: dateStr, currentRegimen: currRegimen }); showLoading(false); closeAllModals(); fetchUserProfile(); swalSuccess.fire({ title: 'อัปเดตรายการยาแล้ว', timer: 1500, showConfirmButton: false }); }
+    
+    // บันทึกแล้วปิด 1 วิ ให้กลับหน้าเมนู
+    async function doSave(type, subtype, v1, v2, vt, unit) { showLoading(true); await apiPost('logEvent', { userId: liffProfile.userId, type, subtype, v1, v2, vt, unit }); showLoading(false); closeAllModals(); fetchUserProfile(); swalSuccess.fire({ title: 'บันทึกเรียบร้อย', timer: 1000, showConfirmButton: false }); }
+    async function doSaveMed(medName, changeType, currRegimen, dateStr) { showLoading(true); await apiPost('logMedication', { userId: liffProfile.userId, medName: medName, changeType: changeType, actionDate: dateStr, currentRegimen: currRegimen }); showLoading(false); closeAllModals(); fetchUserProfile(); swalSuccess.fire({ title: 'อัปเดตรายการยาแล้ว', timer: 1000, showConfirmButton: false }); }
+    
     async function askAdverseAfterSave() { const res = await swalForm.fire({ title: 'มีอาการผิดปกติไหมคะ?', showCancelButton: true, confirmButtonText: 'มีอาการ', cancelButtonText: 'ไม่มี (เสร็จสิ้น)' }); if(res.isConfirmed) openNoteForm('ADVERSE'); }
 
     async function uploadProfilePic(input) {
@@ -1488,11 +1478,6 @@
             if (priName) priName.innerText = userDisplayName;
 
             const mainProfileHeader = $('#main-profile-header'); if(mainProfileHeader) mainProfileHeader.style.display = 'flex';
-            
-            // เปิดแสดง profile เฉพาะเมื่อไม่ได้เปิด Modal อยู่ และไม่ได้อยู่ในหน้าอื่น
-            if ($('#primary-modal').style.display !== 'flex' && $('#history-view').style.display !== 'block' && $('#community-view').style.display !== 'block') {
-                $('#shared-profile-container').style.display = 'block';
-            }
 
             const headAvatar = $('#head-avatar'); if(headAvatar) headAvatar.src = getImageUrl(res.profile.PicUrl || liffProfile.pictureUrl);
             const headName = $('#head-name'); if(headName) headName.innerText = `คุณ${userDisplayName}`;
