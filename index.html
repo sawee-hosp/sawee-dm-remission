@@ -112,7 +112,7 @@
     .med-badge-inline { background: #0288D1; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 4px; width: fit-content; align-self: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .stat-mini-badge { background: #5D4037; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
-    /* --- GRID MENU (HUGE & SQUARE - FIXED EQUAL SIZES) --- */
+    /* --- GRID MENU --- */
     .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .note-item { 
       border-radius: 15px; padding: 0; aspect-ratio: 1 / 1; 
@@ -123,7 +123,7 @@
     .note-icon { font-size: 55px; line-height: 1; margin-bottom: 2px; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); }
     .note-label { font-size: 22px; font-weight: 800; line-height: 1; color: #FFF; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); width: 100%;}
     
-    .bg-sbgm { background: linear-gradient(135deg, #e94b3c, #b71c1c); } .bg-bp { background: linear-gradient(135deg, #2b3a67, #1a237e); } .bg-food { background: linear-gradient(135deg, #fe9554, #e65100); } .bg-weight { background: linear-gradient(135deg, #8bd365, #33691e); } .bg-waist { background: linear-gradient(135deg, #00b4d8, #01579b); } .bg-bmi { background: linear-gradient(135deg, #8d6e63, #4e342e); } .bg-ex { background: linear-gradient(135deg, #ab47bc, #4a148c); } .bg-sleep { background: linear-gradient(135deg, #5c6bc0, #1a237e); } .bg-adverse { background: linear-gradient(135deg, #ef5350, #b71c1c); } .bg-hba1c { background: linear-gradient(135deg, #ec407a, #880e4f); } .bg-checkup { background: linear-gradient(135deg, #00acc1, #006064); } .bg-med { background: linear-gradient(135deg, #00897b, #004d40); } .bg-hist { background: linear-gradient(135deg, #757575, #212121); } .bg-doc { background: linear-gradient(135deg, #1976d2, #0d47a1); } .bg-nutri { background: linear-gradient(135deg, #fbc02d, #f57f17); }
+    .bg-sbgm { background: linear-gradient(135deg, #e94b3c, #b71c1c); } .bg-bp { background: linear-gradient(135deg, #2b3a67, #1a237e); } .bg-food { background: linear-gradient(135deg, #fe9554, #e65100); } .bg-weight { background: linear-gradient(135deg, #8bd365, #33691e); } .bg-waist { background: linear-gradient(135deg, #00b4d8, #01579b); } .bg-bmi { background: linear-gradient(135deg, #8d6e63, #4e342e); } .bg-ex { background: linear-gradient(135deg, #ab47bc, #4a148c); } .bg-sleep { background: linear-gradient(135deg, #5c6bc0, #1a237e); } .bg-adverse { background: linear-gradient(135deg, #ef5350, #b71c1c); } .bg-hba1c { background: linear-gradient(135deg, #ec407a, #880e4f); } .bg-checkup { background: linear-gradient(135deg, #00acc1, #006064); } .bg-med { background: linear-gradient(135deg, #00897b, #004d40); } .bg-doc { background: linear-gradient(135deg, #1976d2, #0d47a1); } .bg-nutri { background: linear-gradient(135deg, #fbc02d, #f57f17); }
 
     .modal-overlay { position: fixed; inset: 0; z-index: 2000; display: none; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.6); }
     .modal-sheet { background: linear-gradient(180deg, var(--modal-bg-start), var(--modal-bg-end)); width: 100%; max-width: 600px; border-radius: 40px 40px 0 0; padding: 30px 20px 50px 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 95vh; overflow-y: auto; color: #FFF; border-top: 4px solid #FFD600; position: relative; }
@@ -568,6 +568,7 @@
     let animFrames = {};
     const $ = selector => document.querySelector(selector);
     
+    // --- Swal Color Mixins ---
     const swalAlert = Swal.mixin({ customClass: { popup: 'swal-red-popup', confirmButton: 'btn', cancelButton: 'btn-white-round' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
     const swalSuccess = Swal.mixin({ customClass: { popup: 'swal-green-popup', confirmButton: 'btn' }, buttonsStyling: false, confirmButtonText: 'ตกลง' });
     const swalForm = Swal.mixin({ customClass: { popup: 'swal-brown-popup', confirmButton: 'btn', cancelButton: 'btn-close' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
@@ -604,6 +605,11 @@
           // โหมดเข้าผ่าน Deep Link (Smart Preload)
           $('#main-content').style.display = 'none'; 
           $('#shared-profile-container').style.display = 'none'; 
+          $('.navbar').style.display = 'none';
+          
+          if (mappedAction !== 'HIST' && mappedAction !== 'DOC' && mappedAction !== 'COMMUNITY') {
+              openNoteForm(mappedAction); 
+          }
           
           showLoading(true);
           await initLiff();
@@ -613,14 +619,14 @@
           if (mappedAction === 'HIST') openHistory();
           else if (mappedAction === 'DOC') openReport();
           else if (mappedAction === 'COMMUNITY') openCommunity();
-          else openNoteForm(mappedAction); 
+          
       } else {
           // โหมดเข้าปกติ (แสดงเมนูทันที)
           $('#main-content').style.display = 'block'; 
           $('.navbar').style.display = 'flex';
           
           initLiff().then(() => fetchUserProfile()).then(() => {
-              if(window.currentProfile) {
+              if(window.currentProfile && $('#primary-modal').style.display !== 'flex') {
                   $('#shared-profile-container').style.display = 'block';
               }
           });
@@ -746,7 +752,11 @@
     }
 
     function closeViews() { 
-        $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'none'; $('#register-view').style.display = 'none'; $('#community-view').style.display = 'none'; $('#edit-history-view').style.display = 'none';
+        $('#history-view').style.display = 'none'; 
+        $('#calendar-view').style.display = 'none'; 
+        $('#register-view').style.display = 'none'; 
+        $('#community-view').style.display = 'none'; 
+        $('#edit-history-view').style.display = 'none';
         
         $('.navbar').style.display = 'flex'; 
         if(window.currentProfile) $('#shared-profile-container').style.display = 'block'; 
@@ -754,13 +764,13 @@
         $('#main-grid').style.display = 'grid'; 
         
         window.scrollTo(0,0); 
-        let btn = $('#nav-mode-btn'); btn.innerText = 'ชุมชนคนคุมหวาน'; btn.className = 'nav-community-btn';
+        let btn = $('#nav-mode-btn'); 
+        if(btn) { btn.innerText = 'ชุมชนคนคุมหวาน'; btn.className = 'nav-community-btn'; }
     }
     
     function closeAllModals() { 
         document.querySelectorAll('.modal-overlay, .secondary-modal-overlay').forEach(m => m.style.display = 'none'); 
         
-        // ฟื้นฟูหน้าหลักให้สมบูรณ์ป้องกันปัญหาเปิดเมนูแล้วปุ่มหาย
         $('.navbar').style.display = 'flex'; 
         if(window.currentProfile) $('#shared-profile-container').style.display = 'block';
         
@@ -773,6 +783,10 @@
             $('#community-view').style.display = 'block'; 
             $('#main-content').style.display = 'none'; 
         }
+        
+        $('#history-view').style.display = 'none';
+        $('#calendar-view').style.display = 'none';
+        
         const askEl = $('#pri-ask'); if(askEl) askEl.style.display = 'block';
     }
     
@@ -851,7 +865,7 @@
                 fetchUserProfile();
             });
         } else {
-            swalAlert.fire('ข้อผิดพลาด', 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่', 'error');
+            swalAlert.fire('ข้อผิดพลาด', 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่ (โปรดตรวจสอบว่าชีต patient_profiles มีหัวตารางแล้ว)', 'error');
         }
     }
 
@@ -958,7 +972,7 @@
         const namePink = `<span class="name-pink" id="pri-name">${userDisplayName}</span>`;
         let title = ''; let ask = ''; let bodyHTML = '';
 
-        if(actionType === 'ADVERSE') $('#pri-close-btn').innerHTML = 'ไม่มีอาการ'; else $('#pri-close-btn').innerHTML = 'ปิด';
+        $('#pri-close-btn').innerHTML = (actionType === 'ADVERSE') ? 'ไม่มีอาการ' : 'ปิด';
 
         if (actionType === 'SBGM') {
             title = 'ค่าน้ำตาลในเลือด'; ask = `วันนี้คุณ ${namePink} เจาะน้ำตาลปลายนิ้ว ได้ค่าเท่าไหร่คะ?`;
@@ -1033,7 +1047,18 @@
             `;
         }
 
-        $('#pri-title').innerText = title; $('#pri-ask').innerHTML = ask; $('#pri-body').innerHTML = bodyHTML;
+        $('#pri-title').innerText = title; 
+        $('#pri-ask').innerHTML = ask; 
+        $('#pri-body').innerHTML = bodyHTML;
+        
+        // ซ่อนพื้นหลังเมื่อเปิด Modal
+        $('.navbar').style.display = 'none'; 
+        $('#shared-profile-container').style.display = 'none'; 
+        $('#main-content').style.display = 'none'; 
+        $('#community-view').style.display = 'none'; 
+        $('#history-view').style.display = 'none'; 
+        $('#calendar-view').style.display = 'none';
+
         $('#primary-modal').style.display = 'flex';
     }
 
@@ -1312,7 +1337,7 @@
 
     function renderCalendar() {
         let date = new Date(); date.setMonth(date.getMonth() + calMonthOffset); let month = date.getMonth(); let year = date.getFullYear();
-        const monthNames = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
+        const monthNames = ["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรดฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"];
         const calTitle = $('#cal-month-title'); if(calTitle) calTitle.innerText = `${monthNames[month]} ${year+543}`;
         let firstDay = new Date(year, month, 1).getDay(); let daysInMonth = new Date(year, month+1, 0).getDate();
         let html = ''; for(let i=0; i<firstDay; i++) html += `<div></div>`;
@@ -1390,7 +1415,10 @@
         
         if (!isFiltered) {
             window.appEvents = allEvents; 
-            if($('#history-view') && $('#history-view').style.display === 'block') renderCalendar();
+            // รีเฟรชปฏิทินเสมอเมื่อข้อมูลใหม่มา และหน้าประวัติเปิดอยู่
+            if(document.getElementById('history-view') && document.getElementById('history-view').style.display === 'block') {
+                renderCalendar();
+            }
         }
 
         if (allEvents.length === 0) { if(container) container.innerHTML = '<div style="text-align:center; margin-top:50px;">ยังไม่มีข้อมูลค่ะ</div>'; return; }
@@ -1452,19 +1480,26 @@
         const nutriRes = await apiPost('getNutritionProfile', { userId: liffProfile.userId });
         if(nutriRes && nutriRes.profile) { window.currentNutritionProfile = nutriRes.profile; }
 
-        if (res && res.isRegistered === false) { const regView = $('#register-view'); const mainContent = $('#main-content'); if(regView) regView.style.display = 'block'; if(mainContent) mainContent.style.display = 'none'; return; } 
+        if (res && res.isRegistered === false) { 
+            closeAllModals(); 
+            $('#register-view').style.display = 'block'; 
+            $('#main-content').style.display = 'none'; 
+            $('#shared-profile-container').style.display = 'none';
+            $('.navbar').style.display = 'flex';
+            return; 
+        } 
         
         if (res && res.profile) {
             window.currentProfile = res.profile; userDisplayName = res.profile.NameUse || liffProfile.displayName;
             window.currentMedList = res.meds || []; 
 
             const priName = $('#pri-name');
-            if (priName && priName.innerText === '...') priName.innerText = userDisplayName;
+            if (priName) priName.innerText = userDisplayName;
 
             const mainProfileHeader = $('#main-profile-header'); if(mainProfileHeader) mainProfileHeader.style.display = 'flex';
             
-            // เปิดแสดง profile เฉพาะเมื่อไม่ได้เปิด Modal อยู่
-            if ($('#primary-modal').style.display !== 'flex') {
+            // เปิดแสดง profile เฉพาะเมื่อไม่ได้เปิด Modal อยู่ และไม่ได้อยู่ในหน้าอื่น
+            if ($('#primary-modal').style.display !== 'flex' && $('#history-view').style.display !== 'block' && $('#community-view').style.display !== 'block') {
                 $('#shared-profile-container').style.display = 'block';
             }
 
