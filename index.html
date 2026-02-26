@@ -92,7 +92,6 @@
 
     .container { max-width: 600px; margin: 0 auto; padding: 15px; padding-bottom: 30px; }
     
-    /* นำ animation เลื่อนขึ้นออก */
     .compact-profile { background: linear-gradient(135deg, #A08963, #C9B194); border-radius: 20px; padding: 12px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid #FFF; display: flex; gap: 12px; align-items: flex-start; position: relative; }
     .pic-wrapper { position: relative; cursor: pointer; flex-shrink: 0; margin-top: 5px; }
     .pic-wrapper img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #FFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2); background: #EEE; }
@@ -220,11 +219,11 @@
     .nutri-table td { border-bottom: 1px solid #EEE; padding: 8px 4px; text-align: center; vertical-align: middle; }
     .nutri-table td:first-child { text-align: left; font-weight: bold; }
 
-    /* 🔥 Metric Cards UI */
+    /* 🔥 Metric Cards UI: Stack Vertical */
     .metrics-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-    .metric-card { background: #FFF; border-left: 5px solid #FF9100; padding: 12px 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: left;}
-    .metric-title { font-size: 16px; color: #888; font-weight: 700; display: block;}
-    .metric-value { font-size: 36px; color: #3E2723; font-weight: 800; line-height: 1; margin: 4px 0; display:flex; align-items:baseline; flex-wrap:wrap; }
+    .metric-card { background: #FFF; border-left: 5px solid #FF9100; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: left; position: relative;}
+    .metric-title { font-size: 16px; color: #888; font-weight: 700; display: block; margin-bottom: 5px;}
+    .metric-value { font-size: 36px; color: #3E2723; font-weight: 800; line-height: 1; margin: 5px 0; display:flex; align-items:baseline; flex-wrap:wrap; }
     .metric-desc { font-size: 16px; color: #5D4037; line-height: 1.4; font-weight:700;}
   </style>
 </head>
@@ -276,7 +275,7 @@
                       <div class="stat-mini-badge">ออกกำลังกาย <span id="stat-ex">0</span> นาที</div>
                   </div>
                   
-                  <!-- ปุ่มดูสัดส่วนและดูประวัติ -->
+                  <!-- ปุ่มดูสัดส่วนและดูประวัติ แนวนอน -->
                   <div style="display:flex; gap:10px; margin-top:12px; width: 100%;">
                       <button class="btn-brown" onclick="toggleBodyMetrics()" style="flex:1;">ดูสัดส่วนร่างกาย</button>
                       <button class="btn-brown" onclick="openHistory()" style="flex:1;">ดูประวัติ</button>
@@ -284,7 +283,7 @@
               </div>
           </div>
           
-          <!-- พื้นที่แสดงค่า Body Composition (ซ่อนไว้ก่อน แล้วค่อยแสดง) -->
+          <!-- พื้นที่แสดงค่า Body Composition เรียงแนวตั้งซ่อนไว้ก่อน -->
           <div id="body-metrics-container" class="metrics-container" style="display:none; width: 100%;"></div>
 
       </div>
@@ -568,7 +567,6 @@
     let animFrames = {};
     const $ = selector => document.querySelector(selector);
     
-    // --- Swal Color Mixins ---
     const swalAlert = Swal.mixin({ customClass: { popup: 'swal-red-popup', confirmButton: 'btn', cancelButton: 'btn-white-round' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
     const swalSuccess = Swal.mixin({ customClass: { popup: 'swal-green-popup', confirmButton: 'btn' }, buttonsStyling: false, confirmButtonText: 'ตกลง' });
     const swalForm = Swal.mixin({ customClass: { popup: 'swal-brown-popup', confirmButton: 'btn', cancelButton: 'btn-close' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
@@ -590,9 +588,6 @@
     }
 
     async function main() {
-      // 1. กระตุกเมนูสวยๆ
-      document.querySelectorAll('.note-item').forEach(el => { el.style.animationDelay = `${(Math.random() * 4).toFixed(2)}s`; });
-      
       const params = new URLSearchParams(window.location.search); 
       let actionParam = params.get('action');
       let mappedAction = null;
@@ -604,31 +599,25 @@
 
       if (mappedAction) {
           // โหมดเข้าผ่าน Deep Link (Smart Preload)
-          // ซ่อนพื้นหลังก่อน
+          // ซ่อนเมนูทั้งหมด โชว์แต่ Loading
           $('#main-content').style.display = 'none'; 
           $('#shared-profile-container').style.display = 'none'; 
           $('.navbar').style.display = 'none';
-          
-          if (mappedAction !== 'HIST' && mappedAction !== 'DOC' && mappedAction !== 'COMMUNITY') {
-              openNoteForm(mappedAction); 
-          }
-          
           showLoading(true);
+          
           await initLiff();
           await fetchUserProfile(); 
+          
+          // โหลดเสร็จ เปิด Modal ทันที ซ่อน Loading
           showLoading(false);
           
-          // โหลดเสร็จแล้ว แสดงพื้นหลังกลับมาแต่อยู่หลัง Modal
-          $('#main-content').style.display = 'block'; 
-          if(window.currentProfile) $('#shared-profile-container').style.display = 'block'; 
-          $('.navbar').style.display = 'flex';
-
           if (mappedAction === 'HIST') openHistory();
           else if (mappedAction === 'DOC') openReport();
           else if (mappedAction === 'COMMUNITY') openCommunity();
+          else openNoteForm(mappedAction); 
           
       } else {
-          // โหมดเข้าปกติ (แสดงเมนูทันที)
+          // โหมดเข้าปกติ (แสดงเมนูให้กดได้ทันที ไม่ต้องรอโหลดข้อมูล)
           $('#main-content').style.display = 'block'; 
           $('.navbar').style.display = 'flex';
           
@@ -696,8 +685,8 @@
             let curr = m[type][0]; let prev = m[type][1];
             if(curr === prev) return '';
             let isBetter = isGoodUp ? (curr > prev) : (curr < prev);
-            if(isBetter) { return `<span style="color:#2E7D32; font-size:14px; margin-left:5px; font-weight:bold;">(แนวโน้มดีขึ้น)</span>`; } 
-            else { return `<span style="color:#D32F2F; font-size:14px; margin-left:5px; font-weight:bold;">(แนวโน้มแย่ลง)</span>`; }
+            if(isBetter) { return `<span style="color:#2E7D32; font-size:16px; margin-left:5px; font-weight:bold;">(แนวโน้มดีขึ้น)</span>`; } 
+            else { return `<span style="color:#D32F2F; font-size:16px; margin-left:5px; font-weight:bold;">(แนวโน้มแย่ลง)</span>`; }
         };
 
         if(m['BODYAGE']) {
@@ -779,7 +768,7 @@
     function closeAllModals() { 
         document.querySelectorAll('.modal-overlay, .secondary-modal-overlay').forEach(m => m.style.display = 'none'); 
         
-        // ฟื้นฟูหน้าหลักให้สมบูรณ์ป้องกันปัญหาเปิดเมนูแล้วกดไม่ได้/เมนูหาย
+        // ฟื้นฟูหน้าหลักให้กลับมาทำงานปกติ 100%
         $('.navbar').style.display = 'flex'; 
         if(window.currentProfile) $('#shared-profile-container').style.display = 'block';
         
@@ -874,13 +863,13 @@
                 fetchUserProfile();
             });
         } else {
-            swalAlert.fire('ข้อผิดพลาด', 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่ (โปรดตรวจสอบว่าชีต patient_profiles มีหัวตารางแล้ว)', 'error');
+            swalAlert.fire('ข้อผิดพลาด', 'ไม่สามารถลงทะเบียนได้ กรุณาลองใหม่', 'error');
         }
     }
 
     // --- COMMUNITY MODULE ---
     async function openCommunity() {
-        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'block'; $('#main-content').style.display = 'none'; $('#history-view').style.display = 'none'; $('#community-view').style.display = 'block';
+        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'none'; $('#main-content').style.display = 'none'; $('#history-view').style.display = 'none'; $('#community-view').style.display = 'block';
         let btn = $('#nav-mode-btn'); btn.innerText = '📝 บันทึกผล'; btn.className = 'nav-return-btn';
 
         showLoading(true);
@@ -1040,8 +1029,7 @@
             let defW = p.weight_kg || (window.currentProfile ? window.currentProfile.Weight : '');
             let defH = p.height_cm || ''; let defFav = p.favorite_food || ''; let defDis = p.dislike_food || ''; 
             let defAct = p.profile || '1';
-            
-            let defBMR = window.latestBodyMetrics['RESTINGMET'] ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
+            let defBMR = (window.latestBodyMetrics && window.latestBodyMetrics['RESTINGMET']) ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
 
             bodyHTML = `
                 <div id="nutri-form-section">
@@ -1059,7 +1047,6 @@
         $('#pri-title').innerText = title; 
         $('#pri-ask').innerHTML = ask; 
         $('#pri-body').innerHTML = bodyHTML;
-        
         $('#primary-modal').style.display = 'flex';
     }
 
@@ -1322,7 +1309,10 @@
     async function submitEditProfile(e) { e.preventDefault(); showLoading(true); const payload = { userId: liffProfile.userId, nameUse: $('#edit-name').value.trim(), age: $('#edit-age').value.trim(), weight: $('#edit-weight').value.trim(), job: $('#edit-job').value.trim() }; await apiPost('updateProfile', payload); showLoading(false); closeAllModals(); swalSuccess.fire({title: 'บันทึกเรียบร้อย', text: 'ส่งข้อมูลอัปเดตแล้ว', timer: 1500, showConfirmButton: false}); fetchUserProfile(); }
 
     function openHistory() { 
-        $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'none'; $('#main-content').style.display = 'none'; $('#community-view').style.display = 'none'; 
+        $('.navbar').style.display = 'flex'; 
+        $('#shared-profile-container').style.display = 'none'; 
+        $('#main-content').style.display = 'none'; 
+        $('#community-view').style.display = 'none'; 
         $('#history-view').style.display = 'block'; 
         
         if (window.appEvents && window.appEvents.length > 0) {
