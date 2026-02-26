@@ -92,7 +92,7 @@
 
     .container { max-width: 600px; margin: 0 auto; padding: 15px; padding-bottom: 30px; }
     
-    .compact-profile { background: linear-gradient(135deg, #A08963, #C9B194); border-radius: 20px; padding: 12px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid #FFF; display: flex; gap: 12px; align-items: flex-start; position: relative; }
+    .compact-profile { background: linear-gradient(135deg, #A08963, #C9B194); border-radius: 20px; padding: 12px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid #FFF; display: flex; gap: 12px; align-items: flex-start; position: relative; animation: slideUp 0.8s ease-out forwards; }
     .pic-wrapper { position: relative; cursor: pointer; flex-shrink: 0; margin-top: 5px; }
     .pic-wrapper img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #FFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2); background: #EEE; }
     .change-pic-badge { position: absolute; bottom: -2px; right: -2px; background: #3E2723; color: #FFF; font-size: 8px; padding: 1px 4px; border-radius: 8px; font-weight: 700; border: 1px solid #FFF; }
@@ -112,6 +112,7 @@
     .med-badge-inline { background: #0288D1; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; display: inline-block; margin-bottom: 4px; width: fit-content; align-self: flex-start; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     .stat-mini-badge { background: #5D4037; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
 
+    /* --- GRID MENU (HUGE & SQUARE - FIXED EQUAL SIZES) --- */
     .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
     .note-item { 
       border-radius: 15px; padding: 0; aspect-ratio: 1 / 1; 
@@ -124,7 +125,7 @@
     
     .bg-sbgm { background: linear-gradient(135deg, #e94b3c, #b71c1c); } .bg-bp { background: linear-gradient(135deg, #2b3a67, #1a237e); } .bg-food { background: linear-gradient(135deg, #fe9554, #e65100); } .bg-weight { background: linear-gradient(135deg, #8bd365, #33691e); } .bg-waist { background: linear-gradient(135deg, #00b4d8, #01579b); } .bg-bmi { background: linear-gradient(135deg, #8d6e63, #4e342e); } .bg-ex { background: linear-gradient(135deg, #ab47bc, #4a148c); } .bg-sleep { background: linear-gradient(135deg, #5c6bc0, #1a237e); } .bg-adverse { background: linear-gradient(135deg, #ef5350, #b71c1c); } .bg-hba1c { background: linear-gradient(135deg, #ec407a, #880e4f); } .bg-checkup { background: linear-gradient(135deg, #00acc1, #006064); } .bg-med { background: linear-gradient(135deg, #00897b, #004d40); } .bg-hist { background: linear-gradient(135deg, #757575, #212121); } .bg-doc { background: linear-gradient(135deg, #1976d2, #0d47a1); } .bg-nutri { background: linear-gradient(135deg, #fbc02d, #f57f17); }
 
-    .modal-overlay { position: fixed; inset: 0; z-index: 2000; display: none; align-items: flex-end; justify-content: center; }
+    .modal-overlay { position: fixed; inset: 0; z-index: 2000; display: none; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.6); }
     .modal-sheet { background: linear-gradient(180deg, var(--modal-bg-start), var(--modal-bg-end)); width: 100%; max-width: 600px; border-radius: 40px 40px 0 0; padding: 30px 20px 50px 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 95vh; overflow-y: auto; color: #FFF; border-top: 4px solid #FFD600; position: relative; }
     @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
     
@@ -222,7 +223,7 @@
     .metrics-container { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; animation: fadeIn 1.5s ease-in-out forwards; }
     .metric-card { background: #FFF; border-left: 4px solid #FF9100; padding: 12px; border-radius: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.05); text-align: left;}
     .metric-title { font-size: 14px; color: #888; font-weight: 700; display: block;}
-    .metric-value { font-size: 32px; color: #3E2723; font-weight: 800; line-height: 1; margin: 4px 0; display:flex; align-items:baseline; }
+    .metric-value { font-size: 32px; color: #3E2723; font-weight: 800; line-height: 1; margin: 4px 0; display:flex; align-items:baseline; flex-wrap:wrap; }
     .metric-desc { font-size: 14px; color: #5D4037; line-height: 1.3; font-weight:700;}
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -239,7 +240,7 @@
   </div>
 
   <!-- Navbar -->
-  <nav class="navbar" id="main-navbar">
+  <nav class="navbar" id="main-navbar" style="display:none;">
       <div class="nav-brand-container">
           <img class="nav-icon" src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt="Logo">
           <div class="nav-title-box">
@@ -254,7 +255,7 @@
 
   <!-- SHARED PROFILE CONTAINER -->
   <div id="shared-profile-container" class="container" style="padding-top: 15px; padding-bottom: 0; display: none;">
-      <div class="profile-header compact-profile" id="main-profile-header" style="display: flex; flex-direction:column;">
+      <div class="profile-header compact-profile" id="main-profile-header">
           
           <div style="display: flex; gap: 12px; width: 100%; align-items: flex-start;">
               <div class="pic-wrapper" onclick="$('#profile-pic-input').click()">
@@ -290,8 +291,7 @@
   </div>
 
   <!-- MAIN CONTENT CONTAINER (Grid Menu) -->
-  <!-- 🔥 ตั้งค่า display:block ให้เห็นเมนูทันทีสำหรับโหมดหน้าจอปกติ -->
-  <div id="main-content" class="container" style="padding-top: 0; padding-bottom: 60px; display: block;">
+  <div id="main-content" class="container" style="padding-top: 0; padding-bottom: 60px; display: none;">
       <!-- MENU GRID -->
       <div class="note-grid" id="main-grid">
         <div class="note-item bg-sbgm" onclick="openNoteForm('SBGM')"><div class="note-icon">🩸</div><div class="note-label">น้ำตาล<br>ปลายนิ้ว</div></div>
@@ -306,9 +306,8 @@
         <div class="note-item bg-hba1c" onclick="openNoteForm('HBA1C')"><div class="note-icon">🧪</div><div class="note-label">น้ำตาล<br>สะสม</div></div>
         <div class="note-item bg-checkup" onclick="openNoteForm('CHECKUP')"><div class="note-icon">👣</div><div class="note-label">ตรวจไต<br>ตา/เท้า</div></div>
         <div class="note-item bg-med" onclick="openNoteForm('MED')"><div class="note-icon">💊</div><div class="note-label">รายการยา</div></div>
-        <div class="note-item bg-nutri" style="grid-column: 1 / -1; min-height:60px; flex-direction:row; gap:15px; padding:15px;" onclick="openNoteForm('NUTRITION')">
-             <div class="note-icon" style="margin:0; font-size:40px;">🥗</div><div class="note-label" style="font-size:24px;">คำนวณพลังงานอาหาร</div>
-        </div>
+        <div class="note-item bg-nutri" onclick="openNoteForm('NUTRITION')"><div class="note-icon">🥗</div><div class="note-label">คำนวณ<br>พลังงาน</div></div>
+        <div class="note-item bg-doc" onclick="openReport()"><div class="note-icon">🩺</div><div class="note-label">รายงาน<br>แพทย์</div></div>
       </div>
       
       <div style="text-align:center; font-size:12px; color:#5D4037; margin-top:30px; margin-bottom:20px;">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
@@ -348,7 +347,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap:wrap; gap:5px;">
           <h2 style="color:#5D4037; margin:0; display:flex; align-items:center; gap:10px;">ประวัติสุขภาพ</h2>
           <div style="display:flex; gap:5px;">
-              <button id="history-clear-filter" onclick="renderDashboard(window.appEvents); this.style.display='none';" style="display:none; background:#9E9E9E; color:#FFF; border:none; border-radius:15px; padding:6px 12px; font-size:14px; font-weight:700; cursor:pointer;">ดูทั้งหมด</button>
+              <button id="history-clear-filter" onclick="renderDashboard(window.appEvents, false); this.style.display='none';" style="display:none; background:#9E9E9E; color:#FFF; border:none; border-radius:15px; padding:6px 12px; font-size:14px; font-weight:700; cursor:pointer;">ดูทั้งหมด</button>
               <button class="edit-hist-btn" onclick="openEditHistoryView()">✏️ แก้ไขประวัติ</button>
               <button onclick="closeViews()" style="background:#FF9100; color:#FFF; border:none; border-radius:15px; padding:6px 12px; font-size:16px; font-weight:700; cursor:pointer;">กลับ</button>
           </div>
@@ -385,7 +384,7 @@
 
   <!-- VIEW: Register -->
   <div id="register-view" style="display:none; background:#FFF8E1; min-height:100vh;">
-     <nav class="navbar"><div class="nav-brand" style="margin: 0 auto; color: #FFF; font-weight: 800; font-size: 24px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">📝 ลงทะเบียนสวีคุมหวาน</div></nav>
+     <nav class="navbar" style="display:flex;"><div class="nav-brand" style="margin: 0 auto; color: #FFF; font-weight: 800; font-size: 24px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5);">📝 ลงทะเบียนสวีคุมหวาน</div></nav>
      <div style="padding: 20px; max-width: 500px; margin: 0 auto;">
          
          <!-- Step 1: Welcome & Group Selection -->
@@ -566,12 +565,9 @@
     
     let sbgmChartInst = null; let bpChartInst = null; let wwChartInst = null; let plateChartInst = null; let calMonthOffset = 0;
     
-    // Carousel Animation Handlers
     let animFrames = {};
-
     const $ = selector => document.querySelector(selector);
     
-    // --- Swal Color Mixins ---
     const swalAlert = Swal.mixin({ customClass: { popup: 'swal-red-popup', confirmButton: 'btn', cancelButton: 'btn-white-round' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
     const swalSuccess = Swal.mixin({ customClass: { popup: 'swal-green-popup', confirmButton: 'btn' }, buttonsStyling: false, confirmButtonText: 'ตกลง' });
     const swalForm = Swal.mixin({ customClass: { popup: 'swal-brown-popup', confirmButton: 'btn', cancelButton: 'btn-close' }, buttonsStyling: false, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก' });
@@ -593,7 +589,6 @@
     }
 
     async function main() {
-      // 1. กระตุกเมนูสวยๆ
       document.querySelectorAll('.note-item').forEach(el => { el.style.animationDelay = `${(Math.random() * 4).toFixed(2)}s`; });
       
       const params = new URLSearchParams(window.location.search); 
@@ -605,32 +600,29 @@
           mappedAction = map[actionParam.toLowerCase()];
       }
 
-      // 2. ถ้าเข้าแบบมีพารามิเตอร์ Deep Link
-      if (mappedAction && mappedAction !== 'HIST' && mappedAction !== 'DOC' && mappedAction !== 'COMMUNITY') {
-          // ซ่อนโครงสร้างพื้นหลังทั้งหมด
+      if (mappedAction) {
+          // โหมดเข้าผ่าน Deep Link (Smart Preload)
           $('#main-content').style.display = 'none'; 
           $('#shared-profile-container').style.display = 'none'; 
-          $('.navbar').style.display = 'none';
           
           showLoading(true);
           await initLiff();
-          await fetchUserProfile(); // รอโหลดข้อมูลชื่อและสถิติให้เสร็จ
+          await fetchUserProfile(); 
           showLoading(false);
           
-          openNoteForm(mappedAction); // เปิด Modal ทันที 
+          if (mappedAction === 'HIST') openHistory();
+          else if (mappedAction === 'DOC') openReport();
+          else if (mappedAction === 'COMMUNITY') openCommunity();
+          else openNoteForm(mappedAction); 
       } else {
-          // 3. ถ้าเข้าหน้าปกติ (ไม่มีพารามิเตอร์) ให้แสดงปุ่มเมนูทันทีเลย!
+          // โหมดเข้าปกติ (แสดงเมนูทันที)
           $('#main-content').style.display = 'block'; 
           $('.navbar').style.display = 'flex';
           
           initLiff().then(() => fetchUserProfile()).then(() => {
-              // พอดึงข้อมูลเสร็จ ค่อยแสดงการ์ดประวัติ (ไม่แสดงรอเพื่อป้องกันความงง)
               if(window.currentProfile) {
                   $('#shared-profile-container').style.display = 'block';
               }
-              if (mappedAction === 'HIST') openHistory();
-              else if (mappedAction === 'DOC') openReport();
-              else if (mappedAction === 'COMMUNITY') openCommunity();
           });
       }
     }
@@ -643,7 +635,6 @@
         } catch (err) { console.error("LIFF Init Error:", err); liffProfile.userId = TEST_USER_ID; }
     }
 
-    // --- CAROUSEL LOGIC ---
     function initAutoScroll(wrapperId) {
         const wrapper = document.getElementById(wrapperId);
         if(!wrapper) return;
@@ -757,7 +748,6 @@
     function closeViews() { 
         $('#history-view').style.display = 'none'; $('#calendar-view').style.display = 'none'; $('#register-view').style.display = 'none'; $('#community-view').style.display = 'none'; $('#edit-history-view').style.display = 'none';
         
-        // คืนค่าหน้าหลัก
         $('.navbar').style.display = 'flex'; 
         if(window.currentProfile) $('#shared-profile-container').style.display = 'block'; 
         $('#main-content').style.display = 'block'; 
@@ -770,7 +760,7 @@
     function closeAllModals() { 
         document.querySelectorAll('.modal-overlay, .secondary-modal-overlay').forEach(m => m.style.display = 'none'); 
         
-        // ฟื้นฟูหน้าหลักให้สมบูรณ์ป้องกันปัญหาเปิดเมนูแล้วกดไม่ได้/เมนูหาย
+        // ฟื้นฟูหน้าหลักให้สมบูรณ์ป้องกันปัญหาเปิดเมนูแล้วปุ่มหาย
         $('.navbar').style.display = 'flex'; 
         if(window.currentProfile) $('#shared-profile-container').style.display = 'block';
         
@@ -965,14 +955,6 @@
     function openNoteForm(actionType) {
         currentAction = actionType; pendingFormData = {}; 
         
-        // 🔥 โหมด Focus: ซ่อนพื้นหลังเมนูทั้งหมด
-        $('.navbar').style.display = 'none'; 
-        $('#shared-profile-container').style.display = 'none'; 
-        $('#main-content').style.display = 'none'; 
-        $('#community-view').style.display = 'none'; 
-        $('#history-view').style.display = 'none'; 
-        $('#calendar-view').style.display = 'none';
-        
         const namePink = `<span class="name-pink" id="pri-name">${userDisplayName}</span>`;
         let title = ''; let ask = ''; let bodyHTML = '';
 
@@ -1035,14 +1017,17 @@
             let defW = p.weight_kg || (window.currentProfile ? window.currentProfile.Weight : '');
             let defH = p.height_cm || ''; let defFav = p.favorite_food || ''; let defDis = p.dislike_food || ''; 
             let defAct = p.profile || '1';
-            let defBMR = (window.latestBodyMetrics && window.latestBodyMetrics['RESTINGMET']) ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
+            
+            let defBMR = window.latestBodyMetrics['RESTINGMET'] ? `(BMR ล่าสุด: ${window.latestBodyMetrics['RESTINGMET']} kcal)` : '';
 
             bodyHTML = `
                 <div id="nutri-form-section">
                     <div style="display:flex; gap:10px;"><input type="tel" id="nutri-w" class="main-input-anim" placeholder="น้ำหนัก (กก.)" inputmode="decimal" value="${defW}" oninput="validateNumber(this)"><input type="tel" id="nutri-h" placeholder="ส่วนสูง (ซม.)" inputmode="decimal" value="${defH}" oninput="validateNumber(this)"></div>
                     <div class="form-label" style="text-align:left; font-size:16px;">ระดับกิจกรรม (1=นั่งทำงาน, 5=แรงงานหนัก) <span style="font-size:12px;color:#FF9100;">${defBMR}</span></div>
                     ${getChipsHTML('nutri-act', ['1','2','3','4','5'], String(defAct))}
-                    <input type="text" id="nutri-fav" placeholder="อาหารที่ชอบ (ตัวเลือก)" value="${defFav}"><input type="text" id="nutri-dis" placeholder="อาหารที่ไม่ชอบ/แพ้ (ตัวเลือก)" value="${defDis}"><button class="btn" style="margin-top:20px;" onclick="processNutrition()">คำนวณพลังงานจากอาหาร 🧮</button>
+                    <input type="text" id="nutri-fav" placeholder="อาหารที่ชอบ (ตัวเลือก)" value="${defFav}">
+                    <input type="text" id="nutri-dis" placeholder="อาหารที่ไม่ชอบ/แพ้ (ตัวเลือก)" value="${defDis}">
+                    <button class="btn" style="margin-top:20px;" onclick="processNutrition()">คำนวณพลังงานจากอาหาร 🧮</button>
                 </div>
                 <div id="nutri-result-section" style="display:none; padding-bottom:30px;"></div>
             `;
@@ -1314,7 +1299,6 @@
         $('.navbar').style.display = 'flex'; $('#shared-profile-container').style.display = 'none'; $('#main-content').style.display = 'none'; $('#community-view').style.display = 'none'; 
         $('#history-view').style.display = 'block'; 
         
-        // Auto-render calendar when opening history
         if (window.appEvents && window.appEvents.length > 0) {
             renderCalendar();
         }
@@ -1343,7 +1327,7 @@
     
     window.showHistoryForDate = function(dateStr) { 
         let filteredEvents = window.appEvents.filter(e => new Date(e.ts).toLocaleDateString('th-TH') === dateStr);
-        renderDashboard(filteredEvents);
+        renderDashboard(filteredEvents, true); // วาดเฉพาะวันนั้น
         $('#history-clear-filter').style.display = 'inline-block';
         swalSuccess.fire({title: 'กำลังแสดงข้อมูลวันที่', text: dateStr, timer:1500, showConfirmButton:false}); 
     }
@@ -1399,11 +1383,12 @@
         }
     }
 
-    function renderDashboard(eventsData) {
+    // เพิ่ม Parameter isFiltered เพื่อแยกการทำงาน
+    function renderDashboard(eventsData, isFiltered = false) {
         const container = $('#history-container'); if(container) container.innerHTML = '';
         let allEvents = []; if(eventsData) Object.values(eventsData).flat().forEach(e => { if(e && e.event_type) allEvents.push(e); });
         
-        if(eventsData === window.appEvents || eventsData === undefined) {
+        if (!isFiltered) {
             window.appEvents = allEvents; 
             if($('#history-view') && $('#history-view').style.display === 'block') renderCalendar();
         }
@@ -1411,19 +1396,21 @@
         if (allEvents.length === 0) { if(container) container.innerHTML = '<div style="text-align:center; margin-top:50px;">ยังไม่มีข้อมูลค่ะ</div>'; return; }
         allEvents.sort((a,b) => new Date(b.ts) - new Date(a.ts)); 
 
-        window.latestBodyMetrics = {};
-        const trackingTypes = ['RESTINGMET', 'MUSCLE', 'VISCERALFAT', 'BMI', '%FAT', 'BODYAGE', 'WAIST'];
-        
-        window.bodyMetricsHistory = {};
-        allEvents.forEach(e => {
-            if (trackingTypes.includes(e.event_type) && !isNaN(parseFloat(e.v1))) {
-                if (!window.bodyMetricsHistory[e.event_type]) window.bodyMetricsHistory[e.event_type] = [];
-                if (window.bodyMetricsHistory[e.event_type].length < 2) {
-                    window.bodyMetricsHistory[e.event_type].push(parseFloat(e.v1));
+        if (!isFiltered) {
+            window.latestBodyMetrics = {};
+            const trackingTypes = ['RESTINGMET', 'MUSCLE', 'VISCERALFAT', 'BMI', '%FAT', 'BODYAGE', 'WAIST'];
+            
+            window.bodyMetricsHistory = {};
+            allEvents.forEach(e => {
+                if (trackingTypes.includes(e.event_type) && !isNaN(parseFloat(e.v1))) {
+                    if (!window.bodyMetricsHistory[e.event_type]) window.bodyMetricsHistory[e.event_type] = [];
+                    if (window.bodyMetricsHistory[e.event_type].length < 2) {
+                        window.bodyMetricsHistory[e.event_type].push(parseFloat(e.v1));
+                    }
+                    if (!window.latestBodyMetrics[e.event_type]) window.latestBodyMetrics[e.event_type] = parseFloat(e.v1);
                 }
-                if (!window.latestBodyMetrics[e.event_type]) window.latestBodyMetrics[e.event_type] = parseFloat(e.v1);
-            }
-        });
+            });
+        }
 
         const groups = {};
         allEvents.forEach(e => {
@@ -1458,7 +1445,7 @@
         }
     }
 
-    async function apiPost(action, payload) { try { const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action, payload }) }); const data = await res.json(); if (action === 'getDashboard' || action === 'getEventLog') renderDashboard(data.events); return data; } catch(e) { return { ok: false }; } }
+    async function apiPost(action, payload) { try { const res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify({ action, payload }) }); const data = await res.json(); if (action === 'getDashboard' || action === 'getEventLog') renderDashboard(data.events, false); return data; } catch(e) { return { ok: false }; } }
 
     async function fetchUserProfile() {
         const res = await apiPost('getDashboard', { userId: liffProfile.userId });
@@ -1475,6 +1462,12 @@
             if (priName && priName.innerText === '...') priName.innerText = userDisplayName;
 
             const mainProfileHeader = $('#main-profile-header'); if(mainProfileHeader) mainProfileHeader.style.display = 'flex';
+            
+            // เปิดแสดง profile เฉพาะเมื่อไม่ได้เปิด Modal อยู่
+            if ($('#primary-modal').style.display !== 'flex') {
+                $('#shared-profile-container').style.display = 'block';
+            }
+
             const headAvatar = $('#head-avatar'); if(headAvatar) headAvatar.src = getImageUrl(res.profile.PicUrl || liffProfile.pictureUrl);
             const headName = $('#head-name'); if(headName) headName.innerText = `คุณ${userDisplayName}`;
             
