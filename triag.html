@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สวีคุมหวาน - บันทึกสุขภาพ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- LIFF SDK -->
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap');
+        body { font-family: 'Prompt', sans-serif; background-color: #f3f4f6; }
+        
+        @keyframes pulse-border {
+            0% { border-color: #ef4444; background-color: #fee2e2; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+            70% { border-color: #ef4444; background-color: #ffffff; box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { border-color: #ef4444; background-color: #fee2e2; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .needs-attention {
+            animation: pulse-border 1.5s infinite;
+            border-width: 2px !important;
+        }
+
+        .btn-large {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.25rem;
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        #loadingOverlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            z-index: 50;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .loader {
+            border: 8px solid #f3f3f3; border-top: 8px solid #3b82f6;
+            border-radius: 50%; width: 60px; height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Custom Toast Notification */
+        #toastBox {
+            position: fixed; top: -100px; left: 50%; transform: translateX(-50%);
+            background: #333; color: white; padding: 12px 24px; border-radius: 8px;
+            z-index: 100; transition: top 0.4s ease-in-out;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 90%; max-width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="p-4 text-gray-800 pb-10">
+
+    <!-- Loading Screen -->
+    <div id="loadingOverlay">
+        <div class="loader mb-4"></div>
+        <h2 id="loadingText" class="text-xl font-semibold text-blue-600">กำลังประมวลผล...</h2>
+        <p class="text-gray-500 mt-2">กรุณารอสักครู่ครับ</p>
+    </div>
+
+    <!-- Toast Notification (แทนที่ Alert) -->
+    <div id="toastBox" class="text-sm font-semibold"></div>
+
+    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-md p-6">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-blue-700">สวีคุมหวาน 💖</h1>
+            <p class="text-sm text-gray-500">ผู้ป่วย: <span id="userNameDisplay">กำลังโหลด...</span></p>
+        </div>
+
+        <!-- Section: ถ่ายรูปสมุด -->
+        <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-100">
+            <h2 class="text-lg font-semibold mb-2">📸 สแกนสมุดประจำตัว</h2>
+            <p class="text-sm text-gray-600 mb-3">ให้ AI ช่วยอ่านค่าจากสมุด</p>
+            
+            <label class="btn-large bg-blue-600 text-white flex justify-center items-center cursor-pointer hover:bg-blue-700 shadow-lg">
+                <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                ถ่ายรูปสมุดประจำตัว
+                <input type="file" id="bookletImage" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+            </label>
+        </div>
+
+        <!-- Section: ผลการวิเคราะห์จาก AI -->
+        <div id="aiAnalysisBox" class="hidden mb-6 p-4 bg-yellow-50 border-l-4 border-yellow-400 rounded-r-xl">
+            <h3 class="font-semibold text-yellow-800 mb-1">💡 คำแนะนำจาก AI โค้ช:</h3>
+            <p id="aiAnalysisText" class="text-sm text-yellow-700"></p>
+        </div>
+
+        <!-- Section: แบบฟอร์มกรอกข้อมูล -->
+        <form id="healthForm" onsubmit="submitForm(event)">
+            
+            <!-- หมวด: เบาหวาน และ ร่างกาย -->
+            <div class="grid grid-cols-2 gap-4 mb-5 p-3 bg-blue-50 rounded-xl">
+                <div class="col-span-2"><h3 class="text-sm font-bold text-blue-800">🩸 เบาหวาน & น้ำหนัก</h3></div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">น้ำตาล (FBS)</label>
+                    <input type="number" id="fbs" class="w-full p-3 border rounded-xl text-lg focus:ring-2 focus:ring-blue-500" placeholder="เช่น 120" oninput="removeBlink(this)">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">น้ำหนัก (กก.)</label>
+                    <input type="number" step="0.1" id="weight" class="w-full p-3 border rounded-xl text-lg focus:ring-2 focus:ring-blue-500" placeholder="กก." oninput="removeBlink(this)">
+                </div>
+            </div>
+
+            <!-- หมวด: ความดันโลหิต -->
+            <div class="grid grid-cols-2 gap-4 mb-5 p-3 bg-red-50 rounded-xl">
+                <div class="col-span-2"><h3 class="text-sm font-bold text-red-800">❤️ ความดันโลหิต</h3></div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">ความดัน (บน)</label>
+                    <input type="number" id="sys" class="w-full p-3 border rounded-xl text-lg focus:ring-2 focus:ring-blue-500" placeholder="SYS" oninput="removeBlink(this)">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">ความดัน (ล่าง)</label>
+                    <input type="number" id="dia" class="w-full p-3 border rounded-xl text-lg focus:ring-2 focus:ring-blue-500" placeholder="DIA" oninput="removeBlink(this)">
+                </div>
+            </div>
+
+            <!-- หมวด: การทำงานของไต -->
+            <div class="grid grid-cols-2 gap-4 mb-5 p-3 bg-yellow-50 rounded-xl">
+                <div class="col-span-2"><h3 class="text-sm font-bold text-yellow-800">💧 การทำงานของไต (CKD)</h3></div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">ค่าไต (eGFR)</label>
+                    <input type="number" step="0.01" id="egfr" class="w-full p-3 border rounded-xl text-lg focus:ring-2 focus:ring-blue-500" placeholder="เช่น 60.5" oninput="removeBlink(this)">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1">Creatinine</label>
+                    <input type="number" step="0.01" id="creatinine" class="w-full p-3 border rounded-xl text-lg focus:ring-2 focus:ring-blue-500" placeholder="เช่น 1.2" oninput="removeBlink(this)">
+                </div>
+            </div>
+
+            <!-- หมวด: ไขมันในเลือด -->
+            <div class="grid grid-cols-3 gap-3 mb-5 p-3 bg-gray-100 rounded-xl">
+                <div class="col-span-3"><h3 class="text-sm font-bold text-gray-700">🧈 ไขมันในเลือด (DLP)</h3></div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1 text-xs">ไขมันเลว LDL</label>
+                    <input type="number" id="ldl" class="w-full p-2 border rounded-xl text-md focus:ring-2 focus:ring-blue-500" placeholder="LDL" oninput="removeBlink(this)">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1 text-xs">ไขมันดี HDL</label>
+                    <input type="number" id="hdl" class="w-full p-2 border rounded-xl text-md focus:ring-2 focus:ring-blue-500" placeholder="HDL" oninput="removeBlink(this)">
+                </div>
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1 text-xs">ไตรกลีเซอไรด์</label>
+                    <input type="number" id="tg" class="w-full p-2 border rounded-xl text-md focus:ring-2 focus:ring-blue-500" placeholder="TG" oninput="removeBlink(this)">
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn" class="btn-large bg-green-500 text-white hover:bg-green-600 shadow-lg mt-2">
+                บันทึกข้อมูลสุขภาพ
+            </button>
+        </form>
+    </div>
+
+    <script>
+        // การตั้งค่า
+        const LIFF_ID = "2007840605-eJvj2sZ3"; 
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxiS291VKu6_Asj9ZVJNmScwsUn_hlSNEmGTO_5xUSRYPmlOwklJlIncrVZc-C_sNHS/exec";
+        let userLineId = "";
+
+        // UI Helpers
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toastBox');
+            toast.innerText = message;
+            toast.style.backgroundColor = isError ? "#ef4444" : "#10b981"; // แดง / เขียว
+            toast.style.top = "20px";
+            setTimeout(() => { toast.style.top = "-100px"; }, 3500);
+        }
+
+        function showLoading(text) {
+            document.getElementById('loadingText').innerText = text;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+
+        // Initialize LIFF
+        async function initializeLiff() {
+            try {
+                await liff.init({ liffId: LIFF_ID }); 
+                if (liff.isLoggedIn()) {
+                    const profile = await liff.getProfile();
+                    userLineId = profile.userId;
+                    document.getElementById('userNameDisplay').innerText = profile.displayName;
+                } else {
+                    document.getElementById('userNameDisplay').innerText = "ทดสอบผ่านเว็บเบราว์เซอร์";
+                    // liff.login(); // เปิดใช้เมื่อต้องการบังคับ Login
+                }
+            } catch (err) {
+                console.error("LIFF Init Error:", err);
+                showToast("ไม่สามารถเชื่อมต่อ LINE ได้", true);
+            }
+        }
+        
+        window.onload = function() {
+            initializeLiff();
+        };
+
+        function removeBlink(element) {
+            element.classList.remove('needs-attention');
+        }
+
+        // จัดการเมื่อเลือกรูปภาพ
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            document.querySelectorAll('input[type=number]').forEach(input => {
+                input.value = '';
+                removeBlink(input);
+            });
+            document.getElementById('aiAnalysisBox').classList.add('hidden');
+
+            showLoading('กำลังให้ AI วิเคราะห์สมุด...');
+
+            const reader = new FileReader();
+            reader.onloadend = async function() {
+                const base64Data = reader.result;
+                
+                try {
+                    // ยิง API ไปที่ GAS
+                    const response = await fetch(GAS_URL, {
+                        method: 'POST',
+                        // ใช้ text/plain เพื่อป้องกันปัญหา CORS Preflight ในบางเบราว์เซอร์
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'processImage',
+                            data: base64Data
+                        })
+                    });
+                    
+                    const result = await response.json();
+                    hideLoading();
+                    document.getElementById('bookletImage').value = ''; 
+
+                    if (result.success) {
+                        const data = result.data;
+                        fillAndCheckField('fbs', data.fbs);
+                        fillAndCheckField('weight', data.weight);
+                        fillAndCheckField('sys', data.sys);
+                        fillAndCheckField('dia', data.dia);
+                        fillAndCheckField('egfr', data.egfr);
+                        fillAndCheckField('creatinine', data.creatinine);
+                        fillAndCheckField('ldl', data.ldl);
+                        fillAndCheckField('hdl', data.hdl);
+                        fillAndCheckField('tg', data.tg);
+
+                        if(data.analysis) {
+                            document.getElementById('aiAnalysisText').innerText = data.analysis;
+                            document.getElementById('aiAnalysisBox').classList.remove('hidden');
+                        }
+                        showToast("ดึงข้อมูลสำเร็จ");
+                    } else {
+                        showToast("เกิดข้อผิดพลาด: " + result.error, true);
+                    }
+                } catch (error) {
+                    hideLoading();
+                    showToast("ไม่สามารถติดต่อเซิร์ฟเวอร์ได้", true);
+                }
+            }
+            reader.readAsDataURL(file);
+        }
+
+        function fillAndCheckField(elementId, value) {
+            const el = document.getElementById(elementId);
+            if (value !== null && value !== "" && value !== "null" && value !== undefined) {
+                el.value = value;
+                removeBlink(el);
+            } else {
+                el.classList.add('needs-attention');
+                el.placeholder = "ไม่พบค่า กรุณากรอก";
+            }
+        }
+
+        // กดปุ่ม Submit
+        async function submitForm(event) {
+            event.preventDefault(); 
+            
+            const btn = document.getElementById('submitBtn');
+            btn.innerHTML = 'กำลังบันทึก...';
+            btn.disabled = true;
+
+            const formData = {
+                userId: userLineId,
+                fbs: document.getElementById('fbs').value,
+                sys: document.getElementById('sys').value,
+                dia: document.getElementById('dia').value,
+                weight: document.getElementById('weight').value,
+                egfr: document.getElementById('egfr').value,
+                creatinine: document.getElementById('creatinine').value,
+                ldl: document.getElementById('ldl').value,
+                hdl: document.getElementById('hdl').value,
+                tg: document.getElementById('tg').value
+            };
+
+            try {
+                const response = await fetch(GAS_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({
+                        action: 'submitData',
+                        data: formData
+                    })
+                });
+
+                const result = await response.json();
+                
+                if(result.success) {
+                    btn.innerHTML = 'บันทึกสำเร็จ ✅';
+                    btn.classList.replace('bg-green-500', 'bg-blue-600');
+                    showToast(result.message);
+
+                    setTimeout(() => {
+                        if (typeof liff !== 'undefined' && liff.isInClient()) {
+                            liff.closeWindow();
+                        } else {
+                            // Reset form ถ้าเปิดในเบราว์เซอร์ปกติ
+                            btn.innerHTML = 'บันทึกข้อมูลสุขภาพ';
+                            btn.classList.replace('bg-blue-600', 'bg-green-500');
+                            btn.disabled = false;
+                            document.getElementById('healthForm').reset();
+                            document.getElementById('aiAnalysisBox').classList.add('hidden');
+                        }
+                    }, 2000);
+                } else {
+                    btn.innerHTML = 'บันทึกข้อมูลสุขภาพ';
+                    btn.disabled = false;
+                    showToast("เกิดข้อผิดพลาด: " + result.error, true);
+                }
+
+            } catch (error) {
+                btn.innerHTML = 'บันทึกข้อมูลสุขภาพ';
+                btn.disabled = false;
+                showToast("ไม่สามารถติดต่อเซิร์ฟเวอร์ได้", true);
+            }
+        }
+    </script>
+</body>
+</html>
