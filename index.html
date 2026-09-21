@@ -786,7 +786,12 @@
         closeViews();
     }
     
-    function showLoading(show) { $('#loading').style.display = show ? 'flex' : 'none'; }
+    function showLoading(show) {
+        if (show) { if (window.__isSaving) return false; window.__isSaving = true; }
+        else { window.__isSaving = false; }
+        $('#loading').style.display = show ? 'flex' : 'none';
+        return true;
+    }
 
     window.validateNumber = function(input) { input.value = input.value.replace(/[^0-9.]/g, ''); }
 
@@ -848,7 +853,7 @@
 
         if(regData.hn && regData.hn.length !== 9) return swalAlert.fire('แจ้งเตือน', 'ถ้าระบุ HN กรุณากรอกให้ครบ 9 หลักค่ะ', 'warning');
 
-        showLoading(true);
+        if (!showLoading(true)) return;
         const payload = { userId: liffProfile.userId, displayName: liffProfile.displayName, pictureUrl: liffProfile.pictureUrl || '', ...regData };
         const res = await apiPost('registerUser', payload);
         showLoading(false);
@@ -1074,7 +1079,7 @@
         let egfr = $('#chk-egfr').value; let eye = $('#val-chk-eye').value; let foot = $('#val-chk-foot').value;
         if(!egfr && !eye && !foot) return swalForm.fire('ข้อมูลว่าง', 'ระบุผลตรวจอย่างน้อย 1 ช่องนะคะ', 'warning');
         if (egfr && parseFloat(egfr) < 30) { const cf = await swalAlert.fire({ title: 'ค่าไตต่ำผิดปกติ ⚠️', html: `ค่า eGFR = ${egfr} ต่ำกว่า 30<br>กรุณายืนยันข้อมูลนี้ค่ะ`, showCancelButton: true, confirmButtonText: 'รับทราบและปิดหน้าต่าง', cancelButtonText: 'แก้ไข' }); if(!cf.isConfirmed) return; }
-        showLoading(true); let tasks = [];
+        if (!showLoading(true)) return; let tasks = [];
         if(egfr) tasks.push(apiPost('logEvent', { userId: liffProfile.userId, type: 'EGFR', v1: egfr, unit: 'มล./นาที/1.73 ตร.ม.' }));
         if(eye) tasks.push(apiPost('logEvent', { userId: liffProfile.userId, type: 'EYE', vt: eye }));
         if(foot) tasks.push(apiPost('logEvent', { userId: liffProfile.userId, type: 'FOOT', vt: foot }));
@@ -1094,8 +1099,8 @@
                 ? `<div style="text-align:left; font-size:18px; position:relative; z-index:1;"><b>กรณีน้ำตาลต่ำกว่า 70 ให้ปฐมพยาบาลดังนี้ค่า:</b><br>1. ให้คาร์โบไฮเดรตดูดซึมเร็ว 15 กรัม ทันที เลือกอย่างใดอย่างหนึ่ง:<br>&nbsp;&nbsp;◦ น้ำผึ้ง หรือ น้ำเชื่อมเข้มข้น 3 ช้อนชา<br>&nbsp;&nbsp;◦ ลูกอมแบบมีน้ำตาล 3-4 เม็ด<br>&nbsp;&nbsp;◦ น้ำส้มคั้น หรือ น้ำอัดลม (สูตรปกติ) 180 ซีซี<br>&nbsp;&nbsp;◦ ขนมปัง 1 แผ่น หรือ กล้วย 1 ลูก<br><i style="color:#FFF59D; font-size:14px;">ข้อควรระวัง: หลีกเลี่ยงช็อกโกแลต หรือ นม เพราะไขมันจะทำให้ดูดซึมช้าลง</i><br>2. รอ 15 นาที แล้วเจาะนํ้าตาลซ้ำ<br>3. ถ้าน้ำตาลยัง ≤ 70 ให้ทานซ้ำอีก 1 รอบ<br><br><b style="color:#FFCDD2;">🚨 หากผู้ป่วยซึม ชัก หรือหมดสติ โทร 1669 ทันทีค่ะ!</b><img src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" class="nurse-bg-img"></div>`
                 : `<div style="position:relative; z-index:1; text-align:left; font-size:20px;">(เกณฑ์ปกติ ${subtype} คือไม่เกิน ${limitText} มก./ดล.)<br><br>💡 <b>คำแนะนำการปฏิบัติตัว:</b><br>แนะนำคุมอาหารแป้ง/น้ำตาล และดื่มน้ำเปล่าเยอะๆ นะคะ 💧<img src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" class="nurse-bg-img"></div>`;
             swalAlert.fire({ title: '⚠️ ' + msg, html: htmlMsg, showCancelButton: true, confirmButtonText: 'รับทราบและปิดหน้าต่าง', cancelButtonText: 'แก้ไขตัวเลข' }).then((cf) => { 
-                if(cf.isConfirmed) { 
-                    showLoading(true);
+                if(cf.isConfirmed) {
+                    if (!showLoading(true)) return;
                     apiPost('logEvent', { userId: liffProfile.userId, type: 'SBGM', subtype: subtype, v1: v1, vt: period }).then(() => {
                         showLoading(false);
                         closeAllModals();
@@ -1126,7 +1131,7 @@
         let tasks = [];
         const f = $('#bc-fat').value, v = $('#bc-visceral').value, m = $('#bc-muscle').value, b = $('#bc-bmi').value, r = $('#bc-rm').value, a = $('#bc-age').value;
         if(!f && !v && !m && !b && !r && !a) return swalForm.fire('ข้อมูลว่าง', 'ระบุอย่างน้อย 1 ช่องนะคะ', 'warning');
-        showLoading(true);
+        if (!showLoading(true)) return;
         if(f) tasks.push(apiPost('logEvent', { userId: liffProfile.userId, type: '%FAT', v1: f, unit: '%' }));
         if(v) tasks.push(apiPost('logEvent', { userId: liffProfile.userId, type: 'VISCERALFAT', v1: v, unit: 'ระดับ' }));
         if(m) tasks.push(apiPost('logEvent', { userId: liffProfile.userId, type: 'MUSCLE', v1: m, unit: '%' }));
@@ -1147,7 +1152,7 @@
     }
 
     window.saveStress = async function(score) {
-        $('#secondary-modal').style.display = 'none'; showLoading(true);
+        $('#secondary-modal').style.display = 'none'; if (!showLoading(true)) return;
         await apiPost('logEvent', { userId: liffProfile.userId, type: 'STRESS', vt: pendingFormData.stress, v1: score, unit: 'ระดับ' });
         showLoading(false); fetchUserProfile();
         if (score >= 1) swalAlert.fire({ title: 'พักผ่อนและดูแลใจด้วยนะคะ 💖', text: 'มีปัญหาอะไรอยากระบายกับพี่หวีไหมคะ สามารถพิมพ์แจ้งในไลน์ได้เลยนะคะ', confirmButtonText: 'รับทราบและปิดหน้าต่าง' }).then(() => closeAllModals());
@@ -1175,7 +1180,7 @@
             gender: window.currentProfile ? window.currentProfile.Gender : 'Female'
         };
 
-        showLoading(true);
+        if (!showLoading(true)) return;
         const res = await apiPost('logNutrition', payloadData);
         showLoading(false);
 
@@ -1223,7 +1228,7 @@
 
     async function uploadFoodImage(input) {
       if (!input.files || !input.files[0]) return;
-      $('#primary-modal').style.display = 'none'; showLoading(true);
+      $('#primary-modal').style.display = 'none'; if (!showLoading(true)) return;
       try {
         const reader = new FileReader(); reader.readAsDataURL(input.files[0]);
         reader.onload = async (e) => {
@@ -1272,7 +1277,7 @@
     window.finalizeFoodManual = async function(encodedItems, meal) {
         $('#secondary-modal').style.display='none'; $('#primary-modal').style.display='none';
         let itemsArr = JSON.parse(decodeURIComponent(encodedItems));
-        showLoading(true);
+        if (!showLoading(true)) return;
         const res = await apiPost('evaluateFoodText', { items: itemsArr, nutritionCtx: window.currentNutritionProfile, mealType: meal });
         let aiResults = res.results || [];
         for (let i = 0; i < itemsArr.length; i++) {
@@ -1293,16 +1298,16 @@
     function showMissingModal(askText, bodyHtml) { $('#sec-ask').innerHTML = askText; $('#sec-body').innerHTML = bodyHtml; $('#secondary-modal').style.display = 'flex'; }
     
     // บันทึกแล้วปิด ให้กลับหน้าเมนูหรือปิด liff
-    async function doSave(type, subtype, v1, v2, vt, unit) { 
-        showLoading(true); 
+    async function doSave(type, subtype, v1, v2, vt, unit) {
+        if (!showLoading(true)) return;
         await apiPost('logEvent', { userId: liffProfile.userId, type, subtype, v1, v2, vt, unit }); 
         showLoading(false); 
         fetchUserProfile(); 
         swalSuccess.fire({ title: 'บันทึกเรียบร้อยแล้ว', confirmButtonText: 'ปิดหน้าต่าง' }).then(() => closeAllModals()); 
     }
     
-    async function doSaveMed(medName, changeType, currRegimen, dateStr) { 
-        showLoading(true); 
+    async function doSaveMed(medName, changeType, currRegimen, dateStr) {
+        if (!showLoading(true)) return;
         await apiPost('logMedication', { userId: liffProfile.userId, medName: medName, changeType: changeType, actionDate: dateStr, currentRegimen: currRegimen }); 
         showLoading(false); 
         fetchUserProfile(); 
@@ -1311,13 +1316,13 @@
 
     async function uploadProfilePic(input) {
       if (!input.files || !input.files[0]) return;
-      showLoading(true);
+      if (!showLoading(true)) return;
       try {
         const reader = new FileReader(); reader.readAsDataURL(input.files[0]);
         reader.onload = async (e) => {
             const img = new Image(); img.src = e.target.result;
             img.onload = async () => {
-                const canvas = document.createElement('canvas'); let w = img.width, h = img.height, max = 256; 
+                const canvas = document.createElement('canvas'); let w = img.width, h = img.height, max = 256;
                 if (w > h) { if (w > max) { h *= max / w; w = max; } } else { if (h > max) { w *= max / h; h = max; } }
                 canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                 const base64 = canvas.toDataURL('image/jpeg', 0.6).split(',')[1];
@@ -1333,7 +1338,7 @@
         if(window.currentProfile) { $('#edit-name').value = window.currentProfile.NameUse || ''; $('#edit-age').value = window.currentProfile.Age || ''; $('#edit-weight').value = window.currentProfile.Weight || ''; $('#edit-job').value = window.currentProfile.Job || ''; }
         $('#edit-profile-modal').style.display = 'flex';
     }
-    async function submitEditProfile(e) { e.preventDefault(); showLoading(true); const payload = { userId: liffProfile.userId, nameUse: $('#edit-name').value.trim(), age: $('#edit-age').value.trim(), weight: $('#edit-weight').value.trim(), job: $('#edit-job').value.trim() }; await apiPost('updateProfile', payload); showLoading(false); fetchUserProfile(); swalSuccess.fire({title: 'บันทึกเรียบร้อยแล้ว', text: 'ส่งข้อมูลอัปเดตแล้ว', confirmButtonText: 'ปิดหน้าต่าง'}).then(() => closeAllModals()); }
+    async function submitEditProfile(e) { e.preventDefault(); if (!showLoading(true)) return; const payload = { userId: liffProfile.userId, nameUse: $('#edit-name').value.trim(), age: $('#edit-age').value.trim(), weight: $('#edit-weight').value.trim(), job: $('#edit-job').value.trim() }; await apiPost('updateProfile', payload); showLoading(false); fetchUserProfile(); swalSuccess.fire({title: 'บันทึกเรียบร้อยแล้ว', text: 'ส่งข้อมูลอัปเดตแล้ว', confirmButtonText: 'ปิดหน้าต่าง'}).then(() => closeAllModals()); }
 
     function openHistory() { 
         $('.navbar').style.display = 'flex'; 
@@ -1418,7 +1423,7 @@
         });
 
         if (formValues) {
-            showLoading(true);
+            if (!showLoading(true)) return;
             await apiPost('updateEventLog', { userId: liffProfile.userId, rowIndex: rowIndex, ...formValues });
             showLoading(false);
             swalSuccess.fire({title: 'อัปเดตประวัติเรียบร้อย', timer: 1500, showConfirmButton: false});
