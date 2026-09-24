@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>สวีคุมหวาน</title>
+<!--
+  ===================== LIFF สวีคุมหวาน =====================
+  หน้าเดียวจบ — วางที่ไหนก็ได้ที่เปิดด้วย https (GitHub Pages / โฮสต์ของ รพ.)
+  แล้วตั้ง Endpoint URL ของ LIFF ให้ชี้มาที่ไฟล์นี้
+
+  สิ่งที่เปลี่ยนจากของเดิม
+   · รับ ?hn= จาก QR ที่จอหน้าคลินิก → เช็คทะเบียนทันที ไม่ต้องให้เลือกโปรแกรมก่อน
+   · ลงทะเบียนถามแค่ "ชื่อที่อยากให้เรียก" — ที่เหลือโรงพยาบาลส่งมาให้
+   · หน้ายินยอมบอกชัดว่าจะดึงข้อมูลอะไรไปใช้บ้าง
+   · ตัดระบบชุมชน/เหรียญตรา/กดไลก์ออกทั้งหมด
+   · การ์ดผู้ป่วยย่อไว้ก่อน เห็นปุ่มบันทึกเร็ว ๆ กด "ดูเพิ่มเติม" ค่อยคลี่
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Itim&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<style>
+:root{
+  --green:#06c755; --green-d:#04a445; --ink:#1f2937; --soft:#6b7280;
+  --line:#e5e7eb; --bg:#f6f8fa; --card:#fff; --red:#dc2626; --amber:#d97706; --blue:#2563eb;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+     font-family:'Sarabun','Leelawadee UI','Noto Sans Thai',sans-serif;font-size:17px;line-height:1.5}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 28px}
+.screen{display:none}.screen.on{display:block;animation:up .3s ease-out}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+h1{font-family:'Itim',cursive;font-weight:400;font-size:1.65rem;margin:0 0 4px}
+.muted{color:var(--soft);font-size:.94rem}
+.card{background:var(--card);border-radius:18px;padding:16px;box-shadow:0 1px 3px rgba(16,24,40,.07);margin-bottom:12px}
+
+/* ---------- กำลังโหลด ---------- */
+.load{text-align:center;padding:70px 20px;color:var(--soft)}
+.spin{width:38px;height:38px;border:4px solid #e5e7eb;border-top-color:var(--green);
+      border-radius:50%;margin:0 auto 14px;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ---------- ยินยอม ---------- */
+.hn-chip{display:inline-block;background:#ecfdf5;color:#065f46;border:1.5px solid #a7f3d0;
+         border-radius:999px;padding:4px 14px;font-weight:700;margin:6px 0 2px}
+.uses{list-style:none;padding:0;margin:10px 0 0}
+.uses li{display:flex;gap:10px;padding:7px 0;border-bottom:1px solid #f1f2f4;font-size:.97rem}
+.uses li:last-child{border-bottom:0}
+.uses .ic{flex:none;width:24px;text-align:center}
+.fine{font-size:.88rem;color:var(--soft);line-height:1.45;margin-top:10px}
+label.f{display:block;font-weight:600;margin:14px 0 6px}
+input[type=text],input[type=number],select,textarea{
+  width:100%;padding:13px 14px;font:inherit;border:1.5px solid var(--line);border-radius:12px;background:#fff}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--green);box-shadow:0 0 0 3px rgba(6,199,85,.15)}
+.agree{display:flex;gap:10px;align-items:flex-start;margin-top:14px;font-size:.95rem}
+.agree input{width:22px;height:22px;margin-top:2px;flex:none;accent-color:var(--green)}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-weight:700;
+     font-size:1.08rem;color:#fff;background:var(--green);cursor:pointer;margin-top:14px}
+.btn:disabled{background:#c7cbd1;cursor:default}
+.btn.ghost{background:#fff;color:var(--ink);border:1.5px solid var(--line)}
+.btn.sm{padding:10px;font-size:.98rem;margin-top:8px}
+
+/* ---------- การ์ดผู้ป่วย ---------- */
+.who{display:flex;gap:13px;align-items:center}
+.who img{width:56px;height:56px;border-radius:50%;object-fit:cover;background:#e5e7eb;flex:none}
+.who .nm{font-size:1.25rem;font-weight:700;line-height:1.25}
+.who .sd{font-size:.9rem;color:var(--soft)}
+.toggle{width:100%;border:0;background:none;color:var(--blue);font:inherit;font-weight:600;
+        padding:9px 0 2px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.more{display:none;margin-top:10px;border-top:1px solid var(--line);padding-top:11px}
+.more.on{display:block;animation:up .25s ease-out}
+.kv{display:grid;grid-template-columns:1fr auto;gap:5px 10px;font-size:.98rem}
+.kv .k{color:var(--soft)}
+.kv .v{font-weight:600;text-align:right}
+.pill{display:inline-block;border-radius:999px;padding:2px 11px;font-size:.85rem;font-weight:700}
+.pill.ok{background:#dcfce7;color:#14532d}
+.pill.warn{background:#fef3c7;color:#92400e}
+.pill.bad{background:#fee2e2;color:#991b1b}
+
+/* ---------- เมนูบันทึก ---------- */
+.menu{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.mi{border:0;border-radius:16px;padding:18px 10px;background:#fff;cursor:pointer;font:inherit;
+    box-shadow:0 1px 3px rgba(16,24,40,.07);display:flex;flex-direction:column;align-items:center;gap:7px;
+    transition:transform .07s}
+.mi:active{transform:scale(.96)}
+.mi .e{font-size:2.1rem;line-height:1}
+.mi .t{font-weight:600;font-size:1rem}
+.sec{font-family:'Itim',cursive;font-weight:400;font-size:1.25rem;margin:18px 0 9px}
+
+/* ---------- ฟอร์มบันทึก ---------- */
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.chip{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;
+      font:inherit;cursor:pointer}
+.chip.on{border-color:var(--green);background:#ecfdf5;color:#065f46;font-weight:700}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.msg{border-radius:12px;padding:12px 14px;margin-top:12px;font-size:.96rem;display:none}
+.msg.on{display:block}
+.msg.ok{background:#dcfce7;color:#14532d}
+.msg.err{background:#fee2e2;color:#991b1b}
+
+/* ---------- ประวัติ ---------- */
+.hrow{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #f1f2f4}
+.hrow:last-child{border-bottom:0}
+.hrow .l{font-size:.9rem;color:var(--soft)}
+.hrow .r{font-weight:700;text-align:right;white-space:nowrap}
+.hrow .r small{font-weight:400;color:var(--soft)}
+.flagh{color:var(--red)}.flagl{color:var(--amber)}
+.back{border:0;background:none;color:var(--blue);font:inherit;font-weight:600;padding:6px 0;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ===== กำลังตรวจสอบ ===== -->
+  <section id="sLoad" class="screen on">
+    <div class="load"><div class="spin"></div><div>กำลังตรวจสอบข้อมูลของคุณ…</div></div>
+  </section>
+
+  <!-- ===== ยินยอม + ลงทะเบียน (ถามแค่ชื่อ) ===== -->
+  <section id="sReg" class="screen">
+    <div class="card">
+      <h1>ยินดีต้อนรับเข้าโครงการ</h1>
+      <div class="muted">คลินิกเบาหวานระยะสงบ โรงพยาบาลสวี</div>
+      <div class="hn-chip" id="regHn">HN —</div>
+
+      <div style="font-weight:700;margin-top:14px">เราจะดึงข้อมูลอะไรของคุณมาใช้บ้าง</div>
+      <ul class="uses">
+        <li><span class="ic">🆔</span><span>ชื่อ–สกุล และเลข HN จากเวชระเบียนโรงพยาบาลสวี</span></li>
+        <li><span class="ic">🎂</span><span>วันเดือนปีเกิดและเพศ (ใช้คำนวณอายุและเกณฑ์แปลผล)</span></li>
+        <li><span class="ic">⚖️</span><span>น้ำหนัก ส่วนสูง รอบเอว และสัดส่วนร่างกายที่วัดในคลินิก</span></li>
+        <li><span class="ic">🩸</span><span>ผลน้ำตาลสะสม (HbA1c) และผลเลือดที่เกี่ยวกับเบาหวาน</span></li>
+        <li><span class="ic">💊</span><span>จำนวนรายการยาเบาหวานที่ได้รับล่าสุด</span></li>
+        <li><span class="ic">📅</span><span>วันที่มาตรวจล่าสุด และวันนัดครั้งถัดไป</span></li>
+      </ul>
+
+      <div class="fine">
+        <b>ใช้ทำอะไร</b> — เพื่อให้คุณเห็นค่าของตัวเองย้อนหลัง เตือนเมื่อค่าผิดปกติ
+        และให้ทีมคลินิกติดตามผลระหว่างนัดได้<br>
+        <b>ใครเห็นข้อมูล</b> — เฉพาะตัวคุณเองและทีมคลินิกเบาหวานระยะสงบ โรงพยาบาลสวี
+        ไม่เปิดเผยต่อบุคคลอื่น ไม่ใช้เพื่อการค้า<br>
+        <b>สิทธิของคุณ</b> — ขอดู ขอแก้ไข หรือถอนความยินยอมเมื่อใดก็ได้ โดยแจ้งเจ้าหน้าที่คลินิก
+      </div>
+
+      <label class="f" for="regName">ชื่อที่อยากให้เราเรียก</label>
+      <input type="text" id="regName" maxlength="30" placeholder="เช่น ลุงสมชาย, ป้านิด" autocomplete="off">
+
+      <label class="agree">
+        <input type="checkbox" id="regOk">
+        <span>ข้าพเจ้ายินยอมให้โรงพยาบาลสวีนำข้อมูลข้างต้นมาใช้ในการดูแลรักษาและติดตามผลผ่าน LINE นี้</span>
+      </label>
+
+      <button class="btn" id="regBtn" disabled>เริ่มใช้งาน</button>
+      <div class="msg err" id="regErr"></div>
+    </div>
+  </section>
+
+  <!-- ===== หน้าหลัก ===== -->
+  <section id="sHome" class="screen">
+    <div class="card">
+      <div class="who">
+        <img id="hPic" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3C/svg%3E">
+        <div>
+          <div class="nm" id="hName">—</div>
+          <div class="sd" id="hStart">—</div>
+        </div>
+      </div>
+      <button class="toggle" id="hToggle">ดูเพิ่มเติม <span id="hCaret">▾</span></button>
+      <div class="more" id="hMore">
+        <div class="kv">
+          <span class="k">จำนวนครั้งที่บันทึก</span><span class="v" id="hCount">—</span>
+          <span class="k">สถานะปัจจุบัน</span><span class="v" id="hStatus">—</span>
+          <span class="k">จำนวนรายการยาเบาหวาน</span><span class="v" id="hMed">—</span>
+          <span class="k">เป้าหมาย</span><span class="v" id="hGoal">—</span>
+          <span class="k">นัดครั้งถัดไป</span><span class="v" id="hNext">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">บันทึกวันนี้</div>
+    <div class="menu" id="menu"></div>
+
+    <button class="btn ghost sm" id="goHist">📋 ดูประวัติที่บันทึกไว้</button>
+  </section>
+
+  <!-- ===== ฟอร์มบันทึก ===== -->
+  <section id="sForm" class="screen">
+    <button class="back" id="fBack">‹ กลับ</button>
+    <div class="card">
+      <h1 id="fTitle">บันทึก</h1>
+      <div id="fBody"></div>
+      <button class="btn" id="fSave">บันทึก</button>
+      <div class="msg" id="fMsg"></div>
+    </div>
+  </section>
+
+  <!-- ===== ประวัติ ===== -->
+  <section id="sHist" class="screen">
+    <button class="back" id="hBack">‹ กลับ</button>
+    <div class="card">
+      <h1>ประวัติที่บันทึกไว้</h1>
+      <div id="histBody" class="muted">กำลังโหลด…</div>
+    </div>
+  </section>
+</div>
+
+<script>
+/* ===================== ตั้งค่า ===================== */
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbzvLY5kLKw2sUaSelEZcxka2CsdiRoGdA9jmHMoKs3oB04ypte7yDwStWo6cFwb2-Y8Sw/exec';
+var LIFF_ID = '2007840605-zKl7p3Aa';
+
+/* ===================== ตัวช่วย ===================== */
+var $ = function (id) { return document.getElementById(id); };
+var S = { userId: '', displayName: '', pictureUrl: '', hn: '', profile: null, stats: null };
+
+function show(id) {
+  ['sLoad', 'sReg', 'sHome', 'sForm', 'sHist'].forEach(function (s) {
+    $(s).classList.toggle('on', s === id);
+  });
+  window.scrollTo(0, 0);
+}
+
+function api(action, payload) {
+  return fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // เลี่ยง preflight ของ CORS
+    body: JSON.stringify({ action: action, payload: payload || {} }),
+  }).then(function (r) { return r.json(); });
+}
+
+function say(el, text, kind) {
+  el.textContent = text;
+  el.className = 'msg on ' + (kind || 'ok');
+  if (kind === 'ok') setTimeout(function () { el.className = 'msg'; }, 2600);
+}
+
+/** ?hn= จาก QR — LIFF ส่ง query string ต่อมาให้ใน liff.state ด้วย */
+function readHn() {
+  var q = new URLSearchParams(location.search);
+  var hn = q.get('hn');
+  if (!hn) {
+    var st = q.get('liff.state');
+    if (st) { try { hn = new URLSearchParams(st.replace(/^\?/, '')).get('hn'); } catch (e) {} }
+  }
+  return (hn || '').replace(/\D/g, '');
+}
+
+/* ===================== เริ่มทำงาน ===================== */
+(function boot() {
+  S.hn = readHn();
+  if (!window.liff) return fail('เปิดหน้านี้จากแอป LINE เท่านั้น');
+  liff.init({ liffId: LIFF_ID }).then(function () {
+    if (!liff.isLoggedIn()) { liff.login(); return; }
+    return liff.getProfile().then(function (p) {
+      S.userId = p.userId; S.displayName = p.displayName; S.pictureUrl = p.pictureUrl;
+      return api('bootstrap', { userId: S.userId, hn: S.hn, displayName: p.displayName, pictureUrl: p.pictureUrl });
+    }).then(function (r) {
+      if (!r || !r.ok) return fail('เชื่อมต่อระบบไม่ได้ กรุณาลองใหม่');
+      if (r.registered) { S.profile = r.profile; S.stats = r.stats; renderHome(); show('sHome'); }
+      else { S.hn = r.hn || S.hn; renderReg(); show('sReg'); }
+    });
+  }).catch(function (e) { fail('เปิดระบบไม่สำเร็จ: ' + (e && e.message ? e.message : e)); });
+})();
+
+function fail(msg) {
+  $('sLoad').innerHTML = '<div class="load"><div style="font-size:2.4rem">😕</div><div>' + msg + '</div></div>';
+  show('sLoad');
+}
+
+/* ===================== ลงทะเบียน ===================== */
+function renderReg() {
+  $('regHn').textContent = S.hn ? ('HN ' + S.hn) : 'ยังไม่ทราบเลข HN';
+  $('regName').value = S.displayName || '';
+  var ok = $('regOk'), btn = $('regBtn'), nm = $('regName');
+  function check() { btn.disabled = !(ok.checked && nm.value.trim().length > 0 && S.hn); }
+  ok.addEventListener('change', check);
+  nm.addEventListener('input', check);
+  check();
+  if (!S.hn) say($('regErr'), 'ไม่พบเลข HN — กรุณาสแกน QR จากจอหน้าคลินิก หรือแจ้งเจ้าหน้าที่', 'err');
+
+  btn.onclick = function () {
+    btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+    api('register', {
+      userId: S.userId, hn: S.hn, nameUse: nm.value.trim(), consent: true,
+      displayName: S.displayName, pictureUrl: S.pictureUrl,
+    }).then(function (r) {
+      if (!r.ok) { say($('regErr'), r.message || 'ลงทะเบียนไม่สำเร็จ', 'err'); btn.disabled = false; btn.textContent = 'เริ่มใช้งาน'; return; }
+      return api('bootstrap', { userId: S.userId, hn: S.hn }).then(function (b) {
+        S.profile = b.profile; S.stats = b.stats; renderHome(); show('sHome');
+      });
+    });
+  };
+}
+
+/* ===================== หน้าหลัก ===================== */
+var MENU = [
+  { k: 'SBGM',     e: '🩸', t: 'น้ำตาลปลายนิ้ว' },
+  { k: 'BP',       e: '💓', t: 'ความดันโลหิต' },
+  { k: 'FOOD',     e: '🍲', t: 'บันทึกอาหาร' },
+  { k: 'WEIGHT',   e: '⚖️', t: 'ชั่งน้ำหนัก' },
+  { k: 'EXERCISE', e: '🏃', t: 'ออกกำลังกาย' },
+  { k: 'ADVERSE',  e: '⚠️', t: 'อาการผิดปกติ' },
+];
+
+var STATUS_TH = {
+  'Stable': ['คุมได้ดี', 'ok'], 'Monitor': ['ต้องเฝ้าดู', 'warn'],
+  'Hyperglycemia': ['น้ำตาลสูง', 'bad'], 'Hypoglycemia Alert': ['น้ำตาลต่ำ ระวัง', 'bad'],
+  'Waiting': ['ยังไม่มีข้อมูล', 'warn'],
+};
+
+function thDate(s) {
+  if (!s) return '—';
+  var d = new Date(s);
+  if (isNaN(d.getTime())) return s;
+  var m = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+  return d.getDate() + ' ' + m[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+}
+
+function renderHome() {
+  var p = S.profile || {}, st = S.stats || {};
+  if (p.picture) $('hPic').src = p.picture;
+  $('hName').textContent = 'สวัสดี คุณ' + (p.nameUse || '');
+  $('hStart').textContent = p.startDate ? ('มาตรวจล่าสุด ' + thDate(p.startDate)) : 'ยินดีต้อนรับเข้าโครงการ';
+
+  $('hCount').textContent = (st.total || 0) + ' ครั้ง';
+  var s = STATUS_TH[p.status] || [p.status || '—', 'warn'];
+  $('hStatus').innerHTML = '<span class="pill ' + s[1] + '">' + s[0] + '</span>';
+  $('hMed').textContent = (p.medicine === '' || p.medicine === undefined || p.medicine === null)
+      ? '—' : (p.medicine + ' รายการ');
+  $('hGoal').textContent = p.remission ? 'รักษาระยะสงบให้ต่อเนื่อง' : 'น้ำตาลสะสม < 6.5% โดยไม่ใช้ยา';
+  $('hNext').textContent = thDate(p.endDate);
+
+  $('menu').innerHTML = MENU.map(function (m) {
+    return '<button class="mi" data-k="' + m.k + '"><span class="e">' + m.e + '</span><span class="t">' + m.t + '</span></button>';
+  }).join('');
+  Array.prototype.forEach.call($('menu').children, function (b) {
+    b.onclick = function () { openForm(b.getAttribute('data-k')); };
+  });
+}
+
+$('hToggle').onclick = function () {
+  var on = $('hMore').classList.toggle('on');
+  $('hCaret').textContent = on ? '▴' : '▾';
+  $('hToggle').firstChild.textContent = on ? 'ย่อกลับ ' : 'ดูเพิ่มเติม ';
+};
+
+/* ===================== ฟอร์มบันทึก ===================== */
+var FORMS = {
+  SBGM: {
+    title: '🩸 น้ำตาลปลายนิ้ว',
+    html: '<label class="f">ช่วงที่วัด</label>'
+        + '<div class="chips" id="sub">'
+        + '<button class="chip on" data-v="ก่อนอาหาร">ก่อนอาหาร</button>'
+        + '<button class="chip" data-v="หลังอาหาร">หลังอาหาร</button>'
+        + '<button class="chip" data-v="ก่อนนอน">ก่อนนอน</button></div>'
+        + '<label class="f" for="v1">ค่าที่วัดได้ (mg/dL)</label>'
+        + '<input type="number" id="v1" inputmode="numeric" placeholder="เช่น 110">',
+    read: function () { return { subtype: chip('sub'), v1: $('v1').value }; },
+    valid: function (d) { return d.v1 > 20 && d.v1 < 700 ? '' : 'กรุณาใส่ค่าน้ำตาลระหว่าง 20–700'; },
+  },
+  BP: {
+    title: '💓 ความดันโลหิต',
+    html: '<div class="two"><div><label class="f" for="v1">ตัวบน</label>'
+        + '<input type="number" id="v1" inputmode="numeric" placeholder="120"></div>'
+        + '<div><label class="f" for="v2">ตัวล่าง</label>'
+        + '<input type="number" id="v2" inputmode="numeric" placeholder="80"></div></div>',
+    read: function () { return { v1: $('v1').value, v2: $('v2').value }; },
+    valid: function (d) { return (d.v1 > 50 && d.v1 < 300 && d.v2 > 30 && d.v2 < 200) ? '' : 'กรุณาใส่ความดันให้ถูกต้อง'; },
+  },
+  FOOD: {
+    title: '🍲 บันทึกอาหาร',
+    html: '<label class="f">มื้อ</label>'
+        + '<div class="chips" id="sub">'
+        + '<button class="chip on" data-v="เช้า">เช้า</button>'
+        + '<button class="chip" data-v="กลางวัน">กลางวัน</button>'
+        + '<button class="chip" data-v="เย็น">เย็น</button>'
+        + '<button class="chip" data-v="ว่าง">ว่าง</button></div>'
+        + '<label class="f" for="vt">กินอะไรบ้าง</label>'
+        + '<textarea id="vt" rows="3" placeholder="เช่น ข้าวสวย 1 ทัพพี แกงจืด ไข่ต้ม"></textarea>',
+    read: function () { return { subtype: chip('sub'), vt: $('vt').value.trim() }; },
+    valid: function (d) { return d.vt ? '' : 'กรุณาพิมพ์รายการอาหาร'; },
+  },
+  WEIGHT: {
+    title: '⚖️ ชั่งน้ำหนัก',
+    html: '<label class="f" for="v1">น้ำหนัก (กก.)</label>'
+        + '<input type="number" id="v1" step="0.1" inputmode="decimal" placeholder="เช่น 62.5">'
+        + '<label class="f" for="v2">รอบเอว (ซม.) — ถ้าวัดด้วย</label>'
+        + '<input type="number" id="v2" step="0.5" inputmode="decimal" placeholder="ไม่ใส่ก็ได้">',
+    read: function () { return { v1: $('v1').value, v2: $('v2').value }; },
+    valid: function (d) { return (d.v1 > 20 && d.v1 < 300) ? '' : 'กรุณาใส่น้ำหนักระหว่าง 20–300 กก.'; },
+  },
+  EXERCISE: {
+    title: '🏃 ออกกำลังกาย',
+    html: '<label class="f">ทำอะไร</label>'
+        + '<div class="chips" id="sub">'
+        + '<button class="chip on" data-v="เดิน">เดิน</button>'
+        + '<button class="chip" data-v="ปั่นจักรยาน">ปั่นจักรยาน</button>'
+        + '<button class="chip" data-v="ทำสวน/งานบ้าน">ทำสวน/งานบ้าน</button>'
+        + '<button class="chip" data-v="อื่น ๆ">อื่น ๆ</button></div>'
+        + '<label class="f" for="v1">นานกี่นาที</label>'
+        + '<input type="number" id="v1" inputmode="numeric" placeholder="เช่น 30">',
+    read: function () { return { subtype: chip('sub'), v1: $('v1').value }; },
+    valid: function (d) { return (d.v1 > 0 && d.v1 <= 600) ? '' : 'กรุณาใส่จำนวนนาที'; },
+  },
+  ADVERSE: {
+    title: '⚠️ อาการผิดปกติ',
+    html: '<label class="f">อาการที่เป็น</label>'
+        + '<div class="chips" id="sub">'
+        + '<button class="chip on" data-v="ใจสั่น เหงื่อแตก">ใจสั่น เหงื่อแตก</button>'
+        + '<button class="chip" data-v="หน้ามืด จะเป็นลม">หน้ามืด จะเป็นลม</button>'
+        + '<button class="chip" data-v="กระหายน้ำมาก ปัสสาวะบ่อย">กระหายน้ำ ปัสสาวะบ่อย</button>'
+        + '<button class="chip" data-v="แผลที่เท้าไม่หาย">แผลที่เท้าไม่หาย</button>'
+        + '<button class="chip" data-v="อื่น ๆ">อื่น ๆ</button></div>'
+        + '<label class="f" for="vt">เล่าเพิ่มเติม</label>'
+        + '<textarea id="vt" rows="2" placeholder="ไม่ใส่ก็ได้"></textarea>',
+    read: function () { return { vt: (chip('sub') + (($('vt').value.trim()) ? ' — ' + $('vt').value.trim() : '')) }; },
+    valid: function () { return ''; },
+  },
+};
+
+function chip(boxId) {
+  var on = document.querySelector('#' + boxId + ' .chip.on');
+  return on ? on.getAttribute('data-v') : '';
+}
+
+var curType = null;
+function openForm(k) {
+  curType = k;
+  var f = FORMS[k];
+  $('fTitle').textContent = f.title;
+  $('fBody').innerHTML = f.html;
+  $('fMsg').className = 'msg';
+  $('fSave').disabled = false;
+  $('fSave').textContent = 'บันทึก';
+  var box = $('fBody').querySelector('.chips');
+  if (box) {
+    Array.prototype.forEach.call(box.children, function (c) {
+      c.onclick = function () {
+        Array.prototype.forEach.call(box.children, function (x) { x.classList.remove('on'); });
+        c.classList.add('on');
+      };
+    });
+  }
+  show('sForm');
+}
+
+$('fBack').onclick = function () { show('sHome'); };
+$('fSave').onclick = function () {
+  var f = FORMS[curType], d = f.read();
+  var bad = f.valid(d);
+  if (bad) return say($('fMsg'), bad, 'err');
+  $('fSave').disabled = true; $('fSave').textContent = 'กำลังบันทึก…';
+
+  // รอบเอวที่กรอกมาพร้อมน้ำหนัก แยกเป็นอีกรายการหนึ่ง
+  var extra = (curType === 'WEIGHT' && d.v2) ? { type: 'WAIST', v1: d.v2 } : null;
+  if (extra) d.v2 = '';
+
+  api('log', { userId: S.userId, type: curType, subtype: d.subtype, v1: d.v1, v2: d.v2, vt: d.vt })
+    .then(function (r) {
+      if (!r.ok) throw new Error(r.message || 'บันทึกไม่สำเร็จ');
+      if (extra) return api('log', { userId: S.userId, type: extra.type, v1: extra.v1 }).then(function () { return r; });
+      return r;
+    })
+    .then(function (r) {
+      var note = r.flag === 'HIGH' ? ' — ค่าสูงกว่าเกณฑ์ ทีมคลินิกจะเห็นข้อมูลนี้'
+               : r.flag === 'LOW' ? ' — ค่าต่ำกว่าเกณฑ์ ถ้ามีอาการให้รีบแจ้งเจ้าหน้าที่'
+               : '';
+      say($('fMsg'), 'บันทึกเรียบร้อย' + note, r.flag === 'NORMAL' ? 'ok' : 'err');
+      $('fSave').textContent = 'บันทึก';
+      $('fSave').disabled = false;
+      return api('bootstrap', { userId: S.userId }).then(function (b) {
+        if (b && b.ok && b.registered) { S.profile = b.profile; S.stats = b.stats; renderHome(); }
+      });
+    })
+    .catch(function (e) {
+      say($('fMsg'), e.message || 'บันทึกไม่สำเร็จ', 'err');
+      $('fSave').disabled = false; $('fSave').textContent = 'บันทึก';
+    });
+};
+
+/* ===================== ประวัติ ===================== */
+var TYPE_TH = { SBGM: 'น้ำตาล', BP: 'ความดัน', WEIGHT: 'น้ำหนัก', WAIST: 'รอบเอว',
+                FOOD: 'อาหาร', EXERCISE: 'ออกกำลังกาย', ADVERSE: 'อาการ' };
+
+$('goHist').onclick = function () {
+  show('sHist');
+  $('histBody').textContent = 'กำลังโหลด…';
+  api('history', { userId: S.userId, limit: 60 }).then(function (r) {
+    if (!r.ok || !r.events.length) { $('histBody').textContent = 'ยังไม่มีข้อมูลที่บันทึกไว้'; return; }
+    $('histBody').innerHTML = r.events.map(function (e) {
+      var val = '';
+      if (e.v1 !== '' && e.v1 !== null) val += e.v1;
+      if (e.v2 !== '' && e.v2 !== null) val += '/' + e.v2;
+      if (e.vt) val += (val ? ' ' : '') + e.vt;
+      var cls = e.flag === 'HIGH' ? 'flagh' : (e.flag === 'LOW' ? 'flagl' : '');
+      return '<div class="hrow"><div><div>' + (TYPE_TH[e.type] || e.type)
+           + (e.subtype ? ' <small class="l">(' + e.subtype + ')</small>' : '') + '</div>'
+           + '<div class="l">' + e.ts + '</div></div>'
+           + '<div class="r ' + cls + '">' + val + ' <small>' + (e.unit || '') + '</small></div></div>';
+    }).join('');
+  });
+};
+$('hBack').onclick = function () { show('sHome'); };
+</script>
+</body>
+</html>
