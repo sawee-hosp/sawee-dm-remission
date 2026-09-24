@@ -1,412 +1,561 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>สวีคุมหวาน</title>
-<!--
-  ===================== LIFF สวีคุมหวาน =====================
-  ธีมน้ำตาล-ทอง ชุดเดียวกับการ์ด Flex ในแชต (#422809 / #493620 / #a46c2c / #FFD600 / #FFF8E1)
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <title>สวีคุมหวาน • บันทึกผล</title>
 
-  ใช้ได้ทั้งเปิดจากแอป LINE และเปิดในเบราว์เซอร์ (liff.login พากลับมาที่ URL เดิมพร้อม ?hn=)
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-  3 บทบาทในหน้าเดียว
-    - เจ้าของ LINE  : เห็นข้อมูลตัวเองครบ + บันทึกได้
-    - ผู้ดูแล/อสม.  : เห็นแค่ชื่อคนที่ดูแล บันทึกได้อย่างเดียว (ไม่เห็นข้อมูลสุขภาพ)
-    - ยังไม่ลงทะเบียน : ถามก่อนว่าลงให้ตัวเองหรือลงให้คนที่ดูแล
--->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Itim&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-<style>
-:root{
-  /* ---- ชุดสีเดิมจากการ์ด Flex ---- */
-  --dark:#422809; --brownA:#493620; --brownB:#a46c2c;
-  --gold:#FFD600; --cream:#FFF8E1; --creamInk:#5D4037;
-  --tan:#d99a4e; --tanL:#f3c98b; --tanD:#a9682a;
-  --ink:#3b2a17; --soft:#8a7660; --line:#e8dcc9; --bg:#fbf5ea;
-  --ok:#2e7d32; --warn:#ef6c00; --bad:#c62828;
-}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{margin:0;color:var(--ink);font-family:'Sarabun','Leelawadee UI','Noto Sans Thai',Tahoma,sans-serif;
-     font-size:17px;line-height:1.55;
-     background:var(--bg) radial-gradient(1200px 400px at 50% -160px,#f7e3c2,transparent) no-repeat}
-.wrap{max-width:560px;margin:0 auto;padding:14px 14px 34px}
-.screen{display:none}
-.screen.on{display:block;animation:pop .42s cubic-bezier(.2,1.4,.35,1)}
-@keyframes pop{0%{opacity:0;transform:translateY(16px) scale(.97)}100%{opacity:1;transform:none}}
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-h1{font-family:'Itim',cursive;font-weight:400;font-size:1.8rem;margin:0 0 2px;color:var(--dark)}
-h2{font-family:'Itim',cursive;font-weight:400;font-size:1.35rem;margin:20px 0 10px;color:var(--brownB)}
-.muted{color:var(--soft);font-size:.94rem}
+  <!--
+    ============ LIFF สวีคุมหวาน ============
+    ธีม/ฟอนต์/ความดุ๊กดิ๊ก = ของเดิมทั้งหมด
+    ที่เพิ่มจากของเดิม
+      · รับ ?hn= จาก QR ในใบสั่งอาหาร (เปิดในเบราว์เซอร์ก็ได้ ไม่บังคับเปิดใน LINE)
+      · เลือกบทบาทครั้งแรก : เจ้าของ LINE / อสม.-ญาติที่บันทึกให้
+      · โหมดผู้ดูแล เห็นแค่ชื่อคนไข้ บันทึกได้อย่างเดียว ค่าไปรวมที่ HN เดียวกัน
+      · 2 ปุ่มยาว = ของที่คลินิกส่งมาให้ (รายการอาหาร / สัดส่วนร่างกาย)
+  -->
 
-/* ---------- การ์ด ---------- */
-.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:13px;
-      box-shadow:0 2px 0 #f0e2cd,0 10px 26px -18px rgba(66,40,9,.45)}
-.card.brown{background:linear-gradient(160deg,var(--brownA),var(--brownB));border:0;color:#fff;
-            box-shadow:0 12px 26px -14px rgba(66,40,9,.7)}
-.card.brown h1{color:#fff}
+  <style>
+    :root{ --bg: #FFF8E1; --ink: #3E2723; --modal-bg-start: #5D4037; --modal-bg-end: #3E2723; --font-main: 'Mali', cursive; }
+    * { box-sizing: border-box; font-family: var(--font-main) !important; }
+    html, body { height: 100%; margin: 0; padding: 0; background: var(--bg); color: var(--ink); font-size: 20px; -webkit-tap-highlight-color: transparent; }
+    input, button, select, textarea, .swal2-popup { font-family: var(--font-main) !important; }
+    h1, h2, h3 { margin: 0 0 15px 0; font-weight: 700; }
 
-/* ---------- โหลด (ดุ๊กดิ๊ก) ---------- */
-.load{text-align:center;padding:64px 20px}
-.beans{display:flex;gap:11px;justify-content:center;margin-bottom:18px}
-.beans i{width:15px;height:15px;border-radius:50%;background:var(--brownB);display:block;
-         animation:bnc 1s cubic-bezier(.3,.1,.3,1) infinite}
-.beans i:nth-child(2){background:var(--tan);animation-delay:.14s}
-.beans i:nth-child(3){background:var(--gold);animation-delay:.28s}
-@keyframes bnc{0%,80%,100%{transform:translateY(0) scale(1)}40%{transform:translateY(-16px) scale(1.15)}}
-.load .t{font-family:'Itim',cursive;font-size:1.3rem;color:var(--brownB)}
+    .btn {
+      border: 3px solid #FFFFFF; outline: none; background: linear-gradient(135deg, #FFEA00 0%, #FF9100 100%);
+      color: #3E2723; padding: 18px 30px; border-radius: 50px; font-size: 26px; font-weight: 800;
+      width: 100%; cursor: pointer; box-shadow: 0 8px 20px rgba(255, 145, 0, 0.4);
+      display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform 0.1s; position: relative; overflow: hidden;
+    }
+    .btn:active { transform: scale(0.96); box-shadow: 0 4px 10px rgba(255, 145, 0, 0.4); }
+    .btn:disabled { background: linear-gradient(135deg, #E0E0E0 0%, #BDBDBD 100%); color: #757575; box-shadow: none; cursor: default; }
 
-/* ---------- ยินยอม ---------- */
-.hn-chip{display:inline-block;background:var(--cream);color:var(--creamInk);border:2px solid var(--tanL);
-         border-radius:999px;padding:4px 16px;font-weight:700;margin:8px 0 2px}
-.uses{list-style:none;padding:0;margin:10px 0 0}
-.uses li{display:flex;gap:10px;padding:7px 0;border-bottom:1px dashed var(--line);font-size:.97rem}
-.uses li:last-child{border-bottom:0}
-.uses .ic{flex:none;width:26px;text-align:center;font-size:1.15rem}
-.fine{font-size:.88rem;color:var(--soft);line-height:1.5;margin-top:10px;
-      background:#fdf8ef;border-radius:12px;padding:11px 13px}
-label.f{display:block;font-weight:600;margin:15px 0 6px}
-input[type=text],input[type=number],select,textarea{
-  width:100%;padding:13px 14px;font:inherit;border:2px solid var(--line);border-radius:13px;background:#fff;color:var(--ink)}
-input:focus,select:focus,textarea:focus{outline:0;border-color:var(--tan);box-shadow:0 0 0 4px rgba(217,154,78,.2)}
-.agree{display:flex;gap:11px;align-items:flex-start;margin-top:15px;font-size:.95rem}
-.agree input{width:23px;height:23px;margin-top:2px;flex:none;accent-color:var(--brownB)}
+    @keyframes shineSweep { 0% { left: -100%; } 20% { left: 100%; } 100% { left: 100%; } }
+    .btn::after, div:where(button.swal2-confirm)::after {
+        content: ''; position: absolute; top: 0; left: -100%; width: 50px; height: 100%;
+        background: rgba(255, 255, 255, 0.6); transform: skewX(-20deg);
+        animation: shineSweep 3s infinite ease-in-out; pointer-events: none;
+    }
+    .btn:disabled::after { display: none; }
 
-/* ---------- ปุ่ม ---------- */
-.btn{display:block;width:100%;border:0;border-radius:15px;padding:15px;font:inherit;font-weight:700;
-     font-size:1.08rem;color:#fff;cursor:pointer;margin-top:14px;
-     background:linear-gradient(160deg,var(--brownB),var(--tanD));
-     box-shadow:0 4px 0 #7d4d16;transition:transform .08s,box-shadow .08s}
-.btn:active{transform:translateY(4px);box-shadow:0 0 0 #7d4d16}
-.btn:disabled{background:#d9cdb9;box-shadow:0 4px 0 #c6b79f;cursor:default}
-.btn.gold{background:linear-gradient(160deg,#ffcf3f,var(--gold));color:#5a4300;box-shadow:0 4px 0 #c9a300}
-.btn.ghost{background:#fff;color:var(--brownB);border:2px solid var(--tanL);box-shadow:0 3px 0 #efdcc0}
-.btn.sm{padding:11px;font-size:.98rem;margin-top:9px}
+    .btn-close {
+      background: #E53935; color: #FFFFFF; border: 2px solid #C62828;
+      width: auto; font-size: 18px; padding: 6px 16px; border-radius: 50px; font-weight:800; cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 5px;
+    }
+    .btn-white-round {
+        background: #FFFFFF; color: #5D4037; border: 3px solid #D7CCC8;
+        border-radius: 50px; padding: 12px 24px; font-size: 22px; font-weight: 700;
+        margin: 15px auto 25px; display: block; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    .btn-brown { background: #5D4037; color: #FFF; border: none; border-radius: 15px; padding: 12px 8px; font-size: 16px; font-weight: 700; cursor: pointer; transition: 0.1s; box-shadow: 0 4px 8px rgba(0,0,0,0.2); width: 100%; }
+    .btn-brown:active { transform: scale(0.95); }
 
-/* ---------- เลือกบทบาท ---------- */
-.roles{display:grid;gap:12px;margin-top:6px}
-.role{display:flex;gap:14px;align-items:center;text-align:left;width:100%;border:2px solid var(--line);
-      background:#fff;border-radius:18px;padding:16px;font:inherit;cursor:pointer;
-      transition:transform .09s,border-color .12s,box-shadow .12s}
-.role:active{transform:scale(.97)}
-.role:hover{border-color:var(--tan);box-shadow:0 6px 18px -12px rgba(66,40,9,.5)}
-.role .e{font-size:2.5rem;flex:none;animation:tilt 3s ease-in-out infinite}
-.role:nth-child(2) .e{animation-delay:.5s}
-@keyframes tilt{0%,70%,100%{transform:rotate(0)}80%{transform:rotate(-9deg)}90%{transform:rotate(9deg)}}
-.role b{display:block;font-size:1.12rem}
-.role span span{font-size:.9rem;color:var(--soft)}
+    @keyframes pulse-jiggle { 0%, 80%, 100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 179, 0, 0); } 90% { transform: scale(1.03); box-shadow: 0 0 10px rgba(255, 179, 0, 0.3); } }
+    .note-item { animation: pulse-jiggle 4s infinite; }
+    .main-input-anim { animation: pulse-jiggle 2.5s infinite; border-color: #FF9100 !important; box-shadow: 0 0 15px rgba(255, 145, 0, 0.5) !important; }
+    .main-input-anim:focus { animation: none; }
 
-/* ---------- การ์ดผู้ป่วย ---------- */
-.who{display:flex;gap:13px;align-items:center}
-.who img{width:58px;height:58px;border-radius:50%;object-fit:cover;flex:none;
-         background:rgba(255,255,255,.22);border:2.5px solid rgba(255,214,0,.75)}
-.who .nm{font-family:'Itim',cursive;font-size:1.5rem;line-height:1.2}
-.who .sd{font-size:.9rem;opacity:.86}
-.toggle{width:100%;border:0;background:rgba(255,255,255,.16);color:#fff;font:inherit;font-weight:600;
-        padding:9px 0;margin-top:12px;border-radius:11px;cursor:pointer;
-        display:flex;align-items:center;justify-content:center;gap:7px}
-.toggle:active{transform:scale(.98)}
-.more{display:none;margin-top:11px;border-top:1px solid rgba(255,255,255,.28);padding-top:11px}
-.more.on{display:block;animation:pop .32s cubic-bezier(.2,1.4,.35,1)}
-.kv{display:grid;grid-template-columns:1fr auto;gap:7px 10px;font-size:.99rem}
-.kv .k{opacity:.85}
-.kv .v{font-weight:700;text-align:right;color:var(--gold)}
-.pill{display:inline-block;border-radius:999px;padding:2px 12px;font-size:.85rem;font-weight:700}
-.pill.ok{background:#dcf5dd;color:#1b5e20}
-.pill.warn{background:#ffe7c2;color:#8a4b00}
-.pill.bad{background:#ffd9d9;color:#8e1111}
+    input, select, textarea { width: 100%; padding: 20px; font-size: 28px; border: 3px solid #D7CCC8; border-radius: 30px; background: #FFF; color: #333; text-align: center; margin-bottom: 20px; font-weight: 700; transition: all 0.2s; }
+    input:focus, select:focus, textarea:focus { border-color: #FF9100 !important; outline: none; }
+    input::placeholder, textarea::placeholder { color: #B0BEC5; font-weight: 400; font-size: 24px; }
+    input[type=checkbox] { width: 28px; height: 28px; margin: 0; flex-shrink: 0; accent-color: #FF9100; }
 
-/* ---------- เมนูบันทึก 6 ปุ่ม ---------- */
-.menu{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.mi{border:2px solid var(--line);border-radius:18px;padding:14px 6px;background:#fff;cursor:pointer;font:inherit;
-    display:flex;flex-direction:column;align-items:center;gap:7px;
-    box-shadow:0 3px 0 #f0e2cd;transition:transform .09s,box-shadow .09s,border-color .12s}
-.mi:active{transform:translateY(3px);box-shadow:0 0 0 #f0e2cd}
-.mi:hover{border-color:var(--tanL)}
-.mi .e{font-size:2rem;line-height:1;display:block;animation:wig 3.4s ease-in-out infinite}
-.mi:nth-child(2) .e{animation-delay:.3s}.mi:nth-child(3) .e{animation-delay:.6s}
-.mi:nth-child(4) .e{animation-delay:.9s}.mi:nth-child(5) .e{animation-delay:1.2s}
-.mi:nth-child(6) .e{animation-delay:1.5s}
-@keyframes wig{0%,72%,100%{transform:rotate(0) scale(1)}78%{transform:rotate(-10deg) scale(1.1)}
-               86%{transform:rotate(10deg) scale(1.1)}94%{transform:rotate(-4deg) scale(1)}}
-.mi .t{font-weight:600;font-size:.88rem;line-height:1.25;text-align:center;color:var(--ink)}
+    .navbar { background: linear-gradient(90deg, #4E342E, #3E2723); padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+    .nav-brand-container { display: flex; align-items: center; gap: 8px; }
+    .nav-icon { width: 40px; height: 40px; object-fit: contain; }
 
-/* ---------- 2 ปุ่มยาว (ของที่คลินิกส่งมา) ---------- */
-.long{display:block;width:100%;text-align:left;border-radius:16px;padding:15px 18px;margin-top:11px;
-      font:inherit;cursor:pointer;color:var(--creamInk);
-      background:linear-gradient(100deg,var(--cream),#ffeec9);border:2px solid #f0d9a8;
-      box-shadow:0 3px 0 #e8cd97;transition:transform .09s,box-shadow .09s}
-.long:active{transform:translateY(3px);box-shadow:0 0 0 #e8cd97}
-.long b{display:block;font-size:1.1rem;font-weight:700}
-.long span.d{display:block;font-size:.88rem;color:#8a6d4a}
-.long .cv{float:right;font-size:1.2rem;color:var(--brownB);margin-top:6px}
+    @keyframes metallicShine { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+    .nav-title {
+        font-size: 24px; font-weight: 800; line-height: 1.2; padding: 4px 0;
+        background: linear-gradient(90deg, #FFB300 0%, #FFF 50%, #FFB300 100%);
+        background-size: 200% auto; color: transparent;
+        -webkit-background-clip: text; background-clip: text;
+        animation: metallicShine 3s infinite linear; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.8));
+    }
+    .nav-return-btn {
+        background: linear-gradient(135deg, #81C784, #388E3C); color: #FFF; border: 2px solid #C8E6C9; border-radius: 20px;
+        padding: 4px 12px; font-size: 14px; font-weight: 800; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
+        margin-left: auto; margin-right: 5px; white-space: nowrap;
+    }
+    .nav-hist-btn {
+        background: linear-gradient(135deg, #4FC3F7, #0288D1); color: #FFF; border: 2px solid #E1F5FE; border-radius: 20px;
+        padding: 4px 12px; font-size: 14px; font-weight: 800; box-shadow: 0 2px 5px rgba(0,0,0,0.2); cursor: pointer;
+        margin-left: auto; margin-right: 5px; animation: pulse-jiggle 3s infinite; white-space: nowrap;
+    }
 
-/* ---------- ฟอร์ม ---------- */
-.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.chip{border:2px solid var(--line);background:#fff;border-radius:999px;padding:9px 16px;font:inherit;cursor:pointer}
-.chip:active{transform:scale(.95)}
-.chip.on{border-color:var(--brownB);background:var(--cream);color:var(--creamInk);font-weight:700}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.msg{border-radius:13px;padding:12px 15px;margin-top:13px;font-size:.96rem;display:none}
-.msg.on{display:block;animation:pop .3s cubic-bezier(.2,1.4,.35,1)}
-.msg.ok{background:#e4f6e4;color:#1b5e20}
-.msg.err{background:#ffe6e6;color:#8e1111}
-.for{background:var(--cream);border:2px dashed #eccf9a;border-radius:13px;padding:10px 13px;
-     margin-bottom:12px;font-size:.95rem;color:var(--creamInk)}
+    .container { max-width: 600px; margin: 0 auto; padding: 15px; padding-bottom: 30px; }
 
-/* ---------- ประวัติ ---------- */
-.hrow{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line)}
-.hrow:last-child{border-bottom:0}
-.hrow .l{font-size:.88rem;color:var(--soft)}
-.hrow .r{font-weight:700;text-align:right;white-space:nowrap}
-.hrow .r small{font-weight:400;color:var(--soft)}
-.flagh{color:var(--bad)}.flagl{color:var(--warn)}
-.tag{display:inline-block;background:var(--cream);color:var(--creamInk);border-radius:6px;
-     padding:0 6px;font-size:.74rem;font-weight:700;margin-left:5px}
-.back{border:0;background:none;color:var(--brownB);font:inherit;font-weight:700;padding:7px 0;cursor:pointer}
+    /* ---------- การ์ดผู้ป่วย ---------- */
+    .compact-profile { background: linear-gradient(135deg, #A08963, #C9B194); border-radius: 20px; padding: 12px; margin-bottom: 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); border: 3px solid #FFF; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; position: relative; }
+    .pic-wrapper { position: relative; flex-shrink: 0; margin-top: 5px; }
+    .pic-wrapper img { width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 3px solid #FFF; box-shadow: 0 2px 6px rgba(0,0,0,0.2); background: #EEE; }
+    .compact-info { flex: 1; text-align: left; display: flex; flex-direction: column; gap: 4px; }
+    .compact-name { font-size: 28px; font-weight: 800; color: #3E2723; line-height: 1.1; margin: 0; }
+    .compact-badge { background: rgba(255,255,255,0.6); padding: 4px 10px; border-radius: 10px; font-size: 16px; color: #3E2723; font-weight: 700; line-height: 1.2; display: inline-block; }
+    .compact-target { color: #D84315; font-size: 18px; font-weight: 800; margin-top: 4px; line-height: 1.2; }
+    .med-badge-inline { background: #0288D1; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; width: fit-content; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .stat-mini-badge { background: #5D4037; color: #FFF; padding: 4px 10px; border-radius: 15px; font-size: 14px; font-weight: 700; display: inline-block; white-space: nowrap; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    .profile-row-4 { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; margin-top: 4px; }
+    .more-box { display: none; width: 100%; border-top: 2px dashed rgba(255,255,255,0.6); margin-top: 4px; padding-top: 10px; }
+    .more-box.on { display: block; animation: slideDown 0.35s ease; }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .kv-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 17px; color: #3E2723; font-weight: 700; padding: 4px 0; }
+    .kv-row .v { color: #4E342E; background: rgba(255,255,255,0.65); border-radius: 10px; padding: 2px 10px; }
+    .status-pill { padding: 3px 12px; border-radius: 15px; font-size: 15px; font-weight: 800; }
+    .status-pill.ok { background: #C8E6C9; color: #1B5E20; }
+    .status-pill.warn { background: #FFE0B2; color: #E65100; }
+    .status-pill.bad { background: #FFCDD2; color: #B71C1C; }
 
-/* ---------- ตารางอาหาร / สัดส่วน ---------- */
-.plan{display:grid;grid-template-columns:1fr auto;gap:8px 10px;font-size:1rem;align-items:center}
-.plan .n{font-weight:700;color:var(--brownB);white-space:nowrap;text-align:right}
-.big{font-family:'Itim',cursive;font-size:2.6rem;color:var(--brownB);line-height:1.1}
-.note{background:#fdf8ef;border-left:5px solid var(--tan);border-radius:10px;padding:11px 13px;margin-top:12px;font-size:.95rem}
-.empty{text-align:center;padding:26px 10px;color:var(--soft)}
-.empty .e{font-size:2.6rem;display:block;margin-bottom:6px}
-pre.dump{white-space:pre-wrap;word-break:break-all;background:#f4ece0;border-radius:11px;
-         padding:10px;font-size:.76rem;margin-top:10px;display:none;max-height:260px;overflow:auto}
-</style>
+    /* ---------- เมนูบันทึก ---------- */
+    .note-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .note-item {
+      border-radius: 15px; padding: 0; aspect-ratio: 1 / 1;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15); cursor: pointer; transition: 0.1s; border: 2px solid rgba(255,255,255,0.3); box-sizing: border-box; overflow: hidden;
+    }
+    .note-item:active { transform: scale(0.95); filter: brightness(0.9); }
+    .note-icon { font-size: 55px; line-height: 1; margin-bottom: 2px; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); }
+    .note-label { font-size: 22px; font-weight: 800; line-height: 1.05; color: #FFF; text-align: center; text-shadow: 1px 1px 2px rgba(0,0,0,0.6); width: 100%; padding: 0 3px; word-break: break-word; }
+
+    .bg-sbgm { background: linear-gradient(135deg, #e94b3c, #b71c1c); } .bg-bp { background: linear-gradient(135deg, #2b3a67, #1a237e); } .bg-food { background: linear-gradient(135deg, #fe9554, #e65100); } .bg-weight { background: linear-gradient(135deg, #8bd365, #33691e); } .bg-ex { background: linear-gradient(135deg, #ab47bc, #4a148c); } .bg-adverse { background: linear-gradient(135deg, #ef5350, #b71c1c); }
+
+    /* ---------- 2 ปุ่มยาว : ของที่คลินิกส่งมา (สีต่างจากปุ่มบันทึก) ---------- */
+    .long-btn {
+        width: 100%; text-align: left; border: 3px solid #FFF; border-radius: 20px; padding: 14px 18px; margin-top: 12px;
+        background: linear-gradient(135deg, #FFF8E1 0%, #FFE0B2 100%); color: #5D4037; cursor: pointer;
+        box-shadow: 0 4px 12px rgba(93,64,55,0.22); transition: transform 0.1s; position: relative; display: block;
+    }
+    .long-btn:active { transform: scale(0.97); }
+    .long-btn b { display: block; font-size: 24px; font-weight: 800; color: #4E342E; }
+    .long-btn span.d { display: block; font-size: 16px; font-weight: 500; color: #795548; line-height: 1.3; margin-top: 2px; }
+    .long-btn .cv { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 30px; color: #A1887F; font-weight: 800; }
+
+    /* ---------- Modal ล่างจอ ---------- */
+    .modal-overlay { position: fixed; inset: 0; z-index: 2000; display: none; align-items: flex-end; justify-content: center; background: rgba(0,0,0,0.6); }
+    .modal-sheet { background: linear-gradient(180deg, var(--modal-bg-start), var(--modal-bg-end)); width: 100%; max-width: 600px; border-radius: 40px 40px 0 0; padding: 30px 20px 50px 20px; box-shadow: 0 -10px 40px rgba(0,0,0,0.3); animation: slideUp 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); max-height: 95vh; overflow-y: auto; color: #FFF; border-top: 4px solid #FFD600; position: relative; }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-main-title { font-size: 32px; font-weight: 800; color: #FFD600; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+    .modal-ai-ask { font-size: 26px; font-weight: 700; color: #FFF; text-align: center; margin-bottom: 20px; line-height: 1.4; }
+    .name-pink { color: #FF80AB; }
+    .form-label { display: block; font-size: 22px; font-weight: 700; margin-bottom: 10px; color: #FFE0B2; text-align: center; }
+
+    .chip-container { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; width: 100%; margin-bottom: 20px; }
+    .chip-btn { background: rgba(255,255,255,0.1); border: 2px solid #D7CCC8; border-radius: 50px; padding: 10px 18px; font-size: 20px; color: #FFF; font-weight: 700; cursor: pointer; transition: 0.2s; flex: 1 1 auto; min-width: 100px; text-align: center; }
+    .chip-btn.active { background: #FFD600; color: #3E2723; border-color: #FFD600; transform: scale(1.05); }
+
+    .for-box { background: rgba(255,255,255,0.12); border: 2px dashed #FFD600; border-radius: 15px; padding: 10px 14px; margin-bottom: 15px; font-size: 18px; color: #FFF8E1; text-align: center; }
+
+    /* ---------- กล่องเนื้อหาสีขาว (ลงทะเบียน/ประวัติ/แผน) ---------- */
+    .paper { background: #FFF; border-radius: 20px; padding: 18px; margin-bottom: 15px; border: 3px solid #FFE0B2; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .paper h1 { font-size: 28px; color: #3E2723; margin-bottom: 6px; }
+    .paper h2 { font-size: 22px; color: #5D4037; margin: 18px 0 10px; }
+    .lead { font-size: 18px; color: #5D4037; line-height: 1.4; font-weight: 500; }
+    .hn-chip { display: inline-block; background: #FFF9C4; color: #F57F17; border: 2px solid #FBC02D; border-radius: 20px; padding: 5px 18px; font-weight: 800; font-size: 20px; margin: 10px 0 4px; }
+    .uses { list-style: none; padding: 0; margin: 8px 0 0; }
+    .uses li { display: flex; gap: 10px; padding: 8px 0; border-bottom: 2px dashed #F0E2CD; font-size: 17px; color: #5D4037; font-weight: 500; line-height: 1.35; }
+    .uses li:last-child { border-bottom: 0; }
+    .uses .ic { flex: none; width: 34px; text-align: center; font-size: 24px; }
+    .fine { font-size: 16px; color: #6D4C41; line-height: 1.5; margin-top: 12px; background: #FFF8E1; border-radius: 15px; padding: 13px 15px; font-weight: 500; }
+    .agree { display: flex; gap: 12px; align-items: flex-start; margin-top: 18px; background: #FFF; border: 3px solid #FFE0B2; border-radius: 15px; padding: 15px; cursor: pointer; }
+    .agree span { font-size: 16px; color: #5D4037; line-height: 1.4; font-weight: 500; }
+    label.f { display: block; font-weight: 800; color: #5D4037; margin: 18px 0 6px; font-size: 19px; }
+
+    .role-card { background: #FFF; border: 3px solid #D7CCC8; border-radius: 20px; padding: 15px; margin-bottom: 12px; cursor: pointer; display: flex; align-items: center; gap: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.07); width: 100%; text-align: left; transition: 0.12s; }
+    .role-card:active { transform: scale(0.97); }
+    .role-card .e { font-size: 44px; flex: none; animation: pulse-jiggle 3s infinite; }
+    .role-card b { display: block; color: #3E2723; font-size: 22px; font-weight: 800; line-height: 1.2; }
+    .role-card span.s { display: block; font-size: 16px; color: #6D4C41; font-weight: 500; line-height: 1.3; }
+
+    /* ---------- ประวัติ ---------- */
+    .hist-card-flex { display: flex; background: #FFF; border-radius: 20px; padding: 15px; gap: 15px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); border: 2px solid #FFE0B2; position: relative; padding-top: 35px; }
+    .hist-card-flex.risk { background: #FFEBEE; border-color: #EF9A9A; }
+    .hist-date-badge { position: absolute; top: -12px; left: 15px; background: #5D4037; color: #FFF; padding: 4px 15px; border-radius: 20px; font-size: 14px; font-weight: 700; }
+    .hist-card-flex.risk .hist-date-badge { background: #C62828; }
+    .hist-right { flex: 1; display: flex; flex-direction: column; gap: 0; }
+    .hist-val-row { font-size: 16px; color: #5D4037; font-weight: 600; line-height: 1.2; margin-top: 5px; display: flex; align-items: center; justify-content: space-between; gap: 6px; flex-wrap: wrap; }
+    .hist-val-bold { font-size: 26px; font-weight: 800; color: #3E2723; }
+    .divider-dashed { border-bottom: 2px dashed #D7CCC8; margin: 8px 0; width: 100%; }
+    .alert-badge { padding: 4px 10px; border-radius: 20px; font-size: 14px; font-weight: 800; display: inline-block; line-height: 1; }
+    .alert-badge.high { background: #D32F2F; color: #FFF; border: 2px solid #B71C1C; }
+    .alert-badge.low { background: #E65100; color: #FFF; border: 2px solid #BF360C; }
+    .tag { display: inline-block; background: #E1F5FE; color: #0277BD; border-radius: 8px; padding: 1px 8px; font-size: 13px; font-weight: 700; }
+
+    /* ---------- ตารางอาหาร / สัดส่วน ---------- */
+    .metrics-container { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+    .metric-card { background: #FFF; border-left: 5px solid #FF9100; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); text-align: left; }
+    .metric-title { font-size: 18px; color: #795548; font-weight: 700; display: block; margin-bottom: 4px; }
+    .metric-value { font-size: 36px; color: #3E2723; font-weight: 800; line-height: 1; margin: 5px 0; }
+    .metric-value small { font-size: 18px; font-weight: 700; }
+    .metric-desc { font-size: 16px; color: #5D4037; line-height: 1.4; font-weight: 500; }
+    .big-kcal { font-size: 60px; font-weight: 800; color: #E65100; line-height: 1; text-align: center; }
+    .note-box { background: #FFF8E1; border-left: 5px solid #FF9100; border-radius: 12px; padding: 12px 15px; margin-top: 12px; font-size: 17px; color: #5D4037; font-weight: 500; line-height: 1.4; }
+    .empty { text-align: center; padding: 30px 12px; color: #8D6E63; font-size: 19px; font-weight: 600; line-height: 1.4; }
+    .empty .e { font-size: 60px; display: block; margin-bottom: 8px; animation: pulse-jiggle 2.5s infinite; }
+
+    /* ---------- โหลด ---------- */
+    .loader-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; }
+    .loader-logo-container { position: relative; width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
+    .loader-logo { width: 70px; height: 70px; border-radius: 50%; object-fit: contain; z-index: 2; position: relative; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    .swee-spinner-ring { position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 6px solid rgba(255,255,255,0.2); border-top: 6px solid #FF9100; border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
+
+    /* ---------- SweetAlert ---------- */
+    div:where(.swal2-container) { z-index: 3000 !important; }
+    div:where(button.swal2-confirm) { font-weight: 800 !important; border-radius: 50px !important; }
+    .swal-red-popup { background: linear-gradient(180deg, #e94b3c, #b71c1c) !important; color: #FFF !important; border: 3px solid #FFCDD2 !important; position: relative; overflow: hidden; }
+    .swal-red-popup .swal2-title, .swal-red-popup .swal2-html-container { color: #FFF !important; }
+    .nurse-bg-img { position: absolute; bottom: -20px; right: -20px; width: 150px; opacity: 0.3; z-index: 0; pointer-events: none; }
+    .swal-green-popup { background: linear-gradient(180deg, #bbe1c3, #66BB6A) !important; color: #1B5E20 !important; border: 3px solid #FFF !important; }
+    .swal-green-popup .swal2-title, .swal-green-popup .swal2-html-container { color: #1B5E20 !important; }
+    .swal-brown-popup { background: linear-gradient(180deg, #5D4037, #3E2723) !important; color: #FFF !important; border: 3px solid #FFD600 !important; }
+    .swal-brown-popup .swal2-title { color: #FFD600 !important; }
+    .swal-brown-popup .swal2-html-container { color: #FFF !important; }
+
+    /* ---------- ป๊อปอัปสำรอง : ใช้เมื่อโหลด SweetAlert ไม่ได้ (เน็ตช้า/ถูกบล็อก) ---------- */
+    .lite-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .lite-card { max-width: 520px; width: 100%; border-radius: 30px; padding: 24px; max-height: 88vh; overflow-y: auto; text-align: center; border: 3px solid #FFF; box-shadow: 0 10px 40px rgba(0,0,0,0.4); animation: slideUp 0.35s cubic-bezier(0.2,0.8,0.2,1); position: relative; }
+    .lite-title { font-size: 28px; font-weight: 800; margin-bottom: 10px; line-height: 1.2; }
+    .lite-html { font-size: 19px; line-height: 1.5; font-weight: 500; }
+    .lite-btns { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+    .lite-btns .btn-white-round { margin: 0 auto; }
+
+    pre.dump { white-space: pre-wrap; word-break: break-all; background: #EFEBE9; border-radius: 12px; padding: 12px; font-size: 13px; margin-top: 12px; display: none; max-height: 260px; overflow: auto; color: #4E342E; }
+    .credit { text-align: center; font-size: 12px; color: #5D4037; margin-top: 30px; margin-bottom: 20px; }
+  </style>
 </head>
 <body>
-<div class="wrap">
 
-  <!-- ===== กำลังตรวจสอบ / แจ้งปัญหา ===== -->
-  <section id="sLoad" class="screen on">
-    <div class="load" id="loadBox">
-      <div class="beans"><i></i><i></i><i></i></div>
-      <div class="t">กำลังตรวจสอบข้อมูลของคุณ…</div>
-    </div>
-    <div class="card" id="errBox" style="display:none">
-      <div style="font-size:2.3rem;text-align:center">😕</div>
-      <div id="errMain" style="font-weight:700;text-align:center;margin:6px 0 2px"></div>
-      <div id="errHint" class="muted" style="text-align:center"></div>
-      <button class="btn" id="errRetry">ลองอีกครั้ง</button>
-      <button class="btn ghost sm" id="errMore">ดูรายละเอียดทางเทคนิค</button>
-      <pre class="dump" id="errDump"></pre>
-    </div>
-  </section>
-
-  <!-- ===== เลือกบทบาท (ครั้งแรกที่สแกน) ===== -->
-  <section id="sRole" class="screen">
-    <div class="card brown">
-      <h1>สวีคุมหวาน</h1>
-      <div style="opacity:.9">คลินิกเบาหวานระยะสงบ โรงพยาบาลสวี</div>
-    </div>
-    <div class="card">
-      <div class="hn-chip" id="roleHn">HN —</div>
-      <div id="roleKnown" class="note" style="display:none"></div>
-      <h2 style="margin-top:14px">คุณกำลังบันทึกให้ใคร</h2>
-      <div class="roles">
-        <button class="role" id="roleSelf">
-          <span class="e">🙋</span>
-          <span><b>บันทึกให้ตัวเอง</b><span>ฉันคือเจ้าของ LINE นี้ และเป็นคนไข้เอง</span></span>
-        </button>
-        <button class="role" id="roleCare">
-          <span class="e">🤝</span>
-          <span><b>บันทึกให้คนที่ดูแลอยู่</b><span>ฉันเป็น อสม. / ญาติ ที่ช่วยคนไข้บันทึก</span></span>
-        </button>
+  <!-- ================= กำลังโหลด ================= -->
+  <div id="loading" class="loader-overlay" style="display:flex;">
+      <div class="loader-logo-container">
+          <img src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" class="loader-logo">
+          <div class="swee-spinner-ring"></div>
       </div>
-      <div class="fine">เลือกผิดไม่เป็นไร แจ้งเจ้าหน้าที่คลินิกให้แก้ให้ได้</div>
-    </div>
-  </section>
+      <div style="color:#FFF; font-weight:700; margin-top:15px; font-size:20px; letter-spacing:1px;">กำลังโหลด...</div>
+  </div>
 
-  <!-- ===== ยินยอม + ลงทะเบียน (เจ้าตัว) ===== -->
-  <section id="sReg" class="screen">
-    <button class="back" id="regBack">‹ กลับ</button>
-    <div class="card">
-      <h1>ยินดีต้อนรับเข้าโครงการ</h1>
-      <div class="muted">คลินิกเบาหวานระยะสงบ โรงพยาบาลสวี</div>
-      <div class="hn-chip" id="regHn">HN —</div>
+  <!-- ================= Navbar ================= -->
+  <nav class="navbar" id="main-navbar" style="display:none;">
+      <div class="nav-brand-container">
+          <img class="nav-icon" src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt="Logo">
+          <div class="nav-title-box"><div class="nav-title">สวีคุมหวาน</div></div>
+      </div>
+      <div style="display:flex; align-items:center;">
+          <button id="nav-btn" class="nav-hist-btn" style="display:none;">ดูประวัติ</button>
+      </div>
+  </nav>
 
-      <h2>เราจะดึงข้อมูลอะไรของคุณมาใช้บ้าง</h2>
-      <ul class="uses">
-        <li><span class="ic">🆔</span><span>ชื่อ–สกุล และเลข HN จากเวชระเบียนโรงพยาบาลสวี</span></li>
-        <li><span class="ic">🎂</span><span>วันเดือนปีเกิดและเพศ (ใช้คำนวณอายุและเกณฑ์แปลผล)</span></li>
-        <li><span class="ic">⚖️</span><span>น้ำหนัก ส่วนสูง รอบเอว และสัดส่วนร่างกายที่วัดในคลินิก</span></li>
-        <li><span class="ic">🩸</span><span>ผลน้ำตาลสะสม (HbA1c) และผลเลือดที่เกี่ยวกับเบาหวาน</span></li>
-        <li><span class="ic">💊</span><span>จำนวนรายการยาเบาหวานที่ได้รับล่าสุด</span></li>
-        <li><span class="ic">📅</span><span>วันที่มาตรวจล่าสุด และวันนัดครั้งถัดไป</span></li>
-      </ul>
+  <!-- ================= แจ้งปัญหาการเชื่อมต่อ ================= -->
+  <div id="v-error" class="container" style="display:none;">
+      <div class="paper" style="text-align:center;">
+          <div style="font-size:70px; animation: pulse-jiggle 2s infinite;">😕</div>
+          <h1 id="errMain" style="margin-top:6px;"></h1>
+          <div class="lead" id="errHint"></div>
+          <button class="btn" id="errRetry" style="margin-top:20px;">ลองอีกครั้ง</button>
+          <button class="btn-white-round" id="errMore" style="font-size:18px;">ดูรายละเอียดทางเทคนิค</button>
+          <pre class="dump" id="errDump"></pre>
+      </div>
+  </div>
 
-      <div class="fine">
-        <b>ใช้ทำอะไร</b> — ให้คุณเห็นค่าของตัวเองย้อนหลัง เตือนเมื่อค่าผิดปกติ
-        และให้ทีมคลินิกติดตามผลระหว่างนัด<br>
-        <b>ใครเห็นข้อมูล</b> — เฉพาะตัวคุณเองและทีมคลินิกเบาหวานระยะสงบ โรงพยาบาลสวี
-        ไม่เปิดเผยต่อบุคคลอื่น ไม่ใช้เพื่อการค้า<br>
-        <b>สิทธิของคุณ</b> — ขอดู ขอแก้ไข หรือถอนความยินยอมเมื่อใดก็ได้ โดยแจ้งเจ้าหน้าที่คลินิก
+  <!-- ================= เลือกบทบาท (ครั้งแรกที่สแกน) ================= -->
+  <div id="v-role" class="container" style="display:none;">
+      <div class="paper" style="text-align:center;">
+          <div style="font-size:60px; margin-bottom:6px; animation: pulse-jiggle 2s infinite;">👋</div>
+          <h1>ยินดีต้อนรับสู่ สวีคุมหวาน</h1>
+          <div class="lead">คลินิกเบาหวานระยะสงบ โรงพยาบาลสวี จ.ชุมพร</div>
+          <div class="hn-chip" id="roleHn">HN —</div>
+          <div class="note-box" id="roleKnown" style="display:none; text-align:left;"></div>
+      </div>
+      <div class="paper">
+          <h2 style="margin-top:0;">คุณกำลังบันทึกให้ใครคะ?</h2>
+          <button class="role-card" id="roleSelf">
+              <span class="e">🙋</span>
+              <span><b>บันทึกให้ตัวเอง</b><span class="s">ฉันคือเจ้าของไลน์นี้ และเป็นคนไข้เอง</span></span>
+          </button>
+          <button class="role-card" id="roleCare">
+              <span class="e">🤝</span>
+              <span><b>บันทึกให้คนที่ดูแลอยู่</b><span class="s">ฉันเป็น อสม. / ญาติ ที่ช่วยคนไข้บันทึก</span></span>
+          </button>
+          <div class="fine">เลือกผิดไม่เป็นไรค่ะ แจ้งเจ้าหน้าที่คลินิกให้แก้ให้ได้</div>
+      </div>
+      <div class="credit">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
+  </div>
+
+  <!-- ================= ยินยอม + ลงทะเบียน (เจ้าของไลน์) ================= -->
+  <div id="v-reg" class="container" style="display:none;">
+      <button class="btn-white-round" id="regBack" style="margin:0 0 12px; font-size:18px; padding:8px 20px;">‹ ย้อนกลับ</button>
+      <div class="paper">
+          <h1>📝 ลงทะเบียนสวีคุมหวาน</h1>
+          <div class="lead">เพื่อให้คุณดูค่าน้ำตาลย้อนหลังและให้คลินิกติดตามผลระหว่างนัดได้</div>
+          <div class="hn-chip" id="regHn">HN —</div>
+
+          <h2>เราจะดึงข้อมูลอะไรของคุณมาใช้บ้าง</h2>
+          <ul class="uses">
+              <li><span class="ic">🆔</span><span>ชื่อ–สกุล และเลข HN จากเวชระเบียนโรงพยาบาลสวี</span></li>
+              <li><span class="ic">🎂</span><span>วันเดือนปีเกิดและเพศ (ใช้คำนวณอายุและเกณฑ์แปลผล)</span></li>
+              <li><span class="ic">⚖️</span><span>น้ำหนัก ส่วนสูง รอบเอว และสัดส่วนร่างกายที่วัดในคลินิก</span></li>
+              <li><span class="ic">🩸</span><span>ผลน้ำตาลสะสม (HbA1c) และผลเลือดที่เกี่ยวกับเบาหวาน</span></li>
+              <li><span class="ic">💊</span><span>จำนวนรายการยาเบาหวานที่ได้รับล่าสุด</span></li>
+              <li><span class="ic">📅</span><span>วันที่มาตรวจล่าสุด และวันนัดครั้งถัดไป</span></li>
+          </ul>
+
+          <div class="fine">
+              <b>ใช้ทำอะไร</b> — ให้คุณเห็นค่าของตัวเองย้อนหลัง เตือนเมื่อค่าผิดปกติ และให้ทีมคลินิกติดตามผลระหว่างนัด<br>
+              <b>ใครเห็นข้อมูล</b> — เฉพาะตัวคุณเองและทีมคลินิกเบาหวานระยะสงบ รพ.สวี ไม่เปิดเผยต่อบุคคลอื่น ไม่ใช้เพื่อการค้า<br>
+              <b>สิทธิของคุณ</b> — ขอดู ขอแก้ไข หรือถอนความยินยอมเมื่อใดก็ได้ โดยแจ้งเจ้าหน้าที่คลินิก
+          </div>
+
+          <label class="f" for="regName">ชื่อที่อยากให้เราเรียก</label>
+          <input type="text" id="regName" maxlength="30" placeholder="เช่น ลุงแดง ป้าส้ม" autocomplete="off">
+
+          <label class="agree">
+              <input type="checkbox" id="regOk">
+              <span>ข้าพเจ้ายินยอมให้โรงพยาบาลสวีนำข้อมูลข้างต้นมาใช้ในการดูแลรักษาและติดตามผลผ่านไลน์นี้</span>
+          </label>
+          <button class="btn" id="regBtn" style="margin-top:20px;" disabled>เริ่มใช้งาน ✅</button>
+      </div>
+  </div>
+
+  <!-- ================= ยินยอม (ผู้ดูแล / อสม.) ================= -->
+  <div id="v-care" class="container" style="display:none;">
+      <button class="btn-white-round" id="careBack" style="margin:0 0 12px; font-size:18px; padding:8px 20px;">‹ ย้อนกลับ</button>
+      <div class="paper">
+          <h1>🤝 บันทึกให้คนที่ดูแลอยู่</h1>
+          <div class="hn-chip" id="careHn">HN —</div>
+          <div class="note-box" id="careKnown" style="display:none;"></div>
+
+          <div class="fine" style="margin-top:14px;">
+              <b>โหมดนี้ทำอะไรได้</b> — บันทึกค่าน้ำตาล ความดัน น้ำหนัก อาหาร การออกกำลังกาย และอาการผิดปกติ <b>ให้คนไข้</b> เท่านั้น<br>
+              <b>เห็นอะไร</b> — เห็นแค่ชื่อเรียกของคนไข้ <b>ไม่เห็น</b> ค่าย้อนหลัง ยา หรือวันนัด (ข้อมูลสุขภาพเป็นของคนไข้)<br>
+              <b>ค่าที่บันทึก</b> — ไปรวมกับข้อมูลของคนไข้ที่ HN เดียวกัน ทีมคลินิกเห็นเหมือนคนไข้บันทึกเอง<br>
+              <b>การแจ้งเตือน</b> — ถ้าน้ำตาลสูงหรือต่ำผิดปกติ ระบบจะแจ้งมาที่ไลน์ของคุณด้วย
+          </div>
+
+          <label class="f" for="careName">ชื่อเล่นของคนที่คุณดูแล</label>
+          <input type="text" id="careName" maxlength="30" placeholder="เช่น ยายมา ลุงชิต" autocomplete="off">
+
+          <label class="f" for="careRel">คุณเป็นอะไรกับคนไข้</label>
+          <select id="careRel">
+              <option value="อสม.">อสม.</option>
+              <option value="ลูก/หลาน">ลูก / หลาน</option>
+              <option value="คู่สมรส">คู่สมรส</option>
+              <option value="ผู้ดูแล">ผู้ดูแล / อื่น ๆ</option>
+          </select>
+
+          <label class="agree">
+              <input type="checkbox" id="careOk">
+              <span>ข้าพเจ้าได้รับอนุญาตจากคนไข้หรือญาติแล้ว ให้บันทึกข้อมูลสุขภาพแทนได้</span>
+          </label>
+          <button class="btn" id="careBtn" style="margin-top:20px;" disabled>เริ่มบันทึกให้ ✅</button>
+      </div>
+  </div>
+
+  <!-- ================= หน้าหลัก (เจ้าของไลน์) ================= -->
+  <div id="v-home" style="display:none;">
+      <div class="container" style="padding-bottom:0;">
+          <div class="compact-profile">
+              <div style="display:flex; gap:12px; width:100%; align-items:flex-start;">
+                  <div class="pic-wrapper">
+                      <img id="head-avatar" src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt="Avatar">
+                  </div>
+                  <div class="compact-info" style="width:100%;">
+                      <div class="compact-name" id="head-name">...</div>
+                      <div><span class="compact-badge" id="head-start">เริ่มต้นเมื่อ : ...</span></div>
+                      <div class="compact-target" id="head-target" style="display:none;"></div>
+                  </div>
+              </div>
+
+              <div class="more-box" id="head-more">
+                  <div class="profile-row-4" style="margin-bottom:8px;">
+                      <div class="stat-mini-badge">บันทึกแล้ว <span id="stat-total">0</span> ครั้ง</div>
+                      <div class="stat-mini-badge">เจาะน้ำตาล <span id="stat-sbgm">0</span> ครั้ง</div>
+                      <div class="stat-mini-badge" id="stat-last" style="display:none;"></div>
+                  </div>
+                  <div class="kv-row"><span>สถานะน้ำตาลล่าสุด</span><span id="head-status"></span></div>
+                  <div class="kv-row"><span>ยาเบาหวานที่ได้รับ</span><span class="v" id="head-med">—</span></div>
+                  <div class="kv-row"><span>นัดครั้งถัดไป</span><span class="v" id="head-next">—</span></div>
+                  <div class="med-badge-inline" id="head-goal" style="margin-top:8px;">—</div>
+              </div>
+
+              <button class="btn-brown" id="head-toggle" style="margin-top:2px;">ดูเพิ่มเติม ▾</button>
+          </div>
       </div>
 
-      <label class="f" for="regName">ชื่อที่อยากให้เราเรียก</label>
-      <input type="text" id="regName" maxlength="30" placeholder="เช่น ลุงสมชาย, ป้านิด" autocomplete="off">
+      <div class="container" style="padding-top:0; padding-bottom:60px;">
+          <div class="note-grid" id="main-grid"></div>
 
-      <label class="agree">
-        <input type="checkbox" id="regOk">
-        <span>ข้าพเจ้ายินยอมให้โรงพยาบาลสวีนำข้อมูลข้างต้นมาใช้ในการดูแลรักษาและติดตามผลผ่าน LINE นี้</span>
-      </label>
-      <button class="btn" id="regBtn" disabled>เริ่มใช้งาน</button>
-      <div class="msg err" id="regErr"></div>
-    </div>
-  </section>
+          <button class="long-btn" id="goPlan">
+              <span class="cv">›</span>
+              <b>รายการอาหารที่แนะนำ</b>
+              <span class="d">นักโภชนาการคำนวณให้เฉพาะคุณ ว่ากินได้วันละกี่ทัพพี กี่ช้อน</span>
+          </button>
+          <button class="long-btn" id="goBody">
+              <span class="cv">›</span>
+              <b>ดูสัดส่วนร่างกาย</b>
+              <span class="d">ผลชั่ง-วัดครั้งล่าสุดที่คลินิก พร้อมคำอธิบายว่าแต่ละค่าหมายถึงอะไร</span>
+          </button>
 
-  <!-- ===== ยินยอม (ผู้ดูแล / อสม.) ===== -->
-  <section id="sCare" class="screen">
-    <button class="back" id="careBack">‹ กลับ</button>
-    <div class="card">
-      <h1>บันทึกให้คนที่ดูแลอยู่</h1>
-      <div class="hn-chip" id="careHn">HN —</div>
-      <div id="careKnown" class="note" style="display:none"></div>
-
-      <div class="fine" style="margin-top:14px">
-        <b>โหมดนี้ทำอะไรได้</b> — บันทึกค่าน้ำตาล ความดัน น้ำหนัก อาหาร การออกกำลังกาย
-        และอาการผิดปกติ <b>ให้คนไข้</b> เท่านั้น<br>
-        <b>เห็นอะไร</b> — เห็นแค่ชื่อเรียกของคนไข้ <b>ไม่เห็น</b> ค่าย้อนหลัง ยา หรือวันนัด
-        (ข้อมูลสุขภาพเป็นของคนไข้)<br>
-        <b>ค่าที่บันทึก</b> — ไปรวมกับข้อมูลของคนไข้ที่ HN เดียวกัน ทีมคลินิกเห็นเหมือนคนไข้บันทึกเอง<br>
-        <b>การแจ้งเตือน</b> — ถ้าน้ำตาลสูงหรือต่ำผิดปกติ ระบบจะแจ้งมาที่ LINE ของคุณด้วย
+          <div class="credit">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
       </div>
+  </div>
 
-      <label class="f" for="careName">ชื่อเล่นของคนที่คุณดูแล</label>
-      <input type="text" id="careName" maxlength="30" placeholder="เช่น ยายมา, ลุงชิต" autocomplete="off">
-
-      <label class="f" for="careRel">คุณเป็นอะไรกับคนไข้</label>
-      <select id="careRel">
-        <option value="อสม.">อสม.</option>
-        <option value="ลูก/หลาน">ลูก / หลาน</option>
-        <option value="คู่สมรส">คู่สมรส</option>
-        <option value="ผู้ดูแล">ผู้ดูแล / อื่น ๆ</option>
-      </select>
-
-      <label class="agree">
-        <input type="checkbox" id="careOk">
-        <span>ข้าพเจ้าได้รับอนุญาตจากคนไข้หรือญาติแล้ว ให้บันทึกข้อมูลสุขภาพแทนได้</span>
-      </label>
-      <button class="btn" id="careBtn" disabled>เริ่มบันทึกให้</button>
-      <div class="msg err" id="careErr"></div>
-    </div>
-  </section>
-
-  <!-- ===== หน้าหลัก (เจ้าตัว) ===== -->
-  <section id="sHome" class="screen">
-    <div class="card brown">
-      <div class="who">
-        <img id="hPic" alt="" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='58' height='58'%3E%3C/svg%3E">
-        <div>
-          <div class="nm" id="hName">—</div>
-          <div class="sd" id="hStart">—</div>
-        </div>
+  <!-- ================= หน้าหลัก (ผู้ดูแล) ================= -->
+  <div id="v-carehome" style="display:none;">
+      <div class="container" style="padding-bottom:0;">
+          <div class="compact-profile">
+              <div style="display:flex; gap:12px; width:100%; align-items:center;">
+                  <div class="pic-wrapper"><img src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt=""></div>
+                  <div class="compact-info">
+                      <div style="font-size:16px; font-weight:700; color:#4E342E;">คุณกำลังบันทึกให้</div>
+                      <div class="compact-name" id="care-name">...</div>
+                      <div><span class="compact-badge" id="care-hn">HN —</span></div>
+                  </div>
+              </div>
+          </div>
+          <div class="note-box" style="margin-top:0;">
+              🤝 <b>โหมดผู้ดูแล</b> — บันทึกได้อย่างเดียว ไม่แสดงข้อมูลสุขภาพของคนไข้<br>
+              ถ้าน้ำตาลสูงหรือต่ำผิดปกติ ระบบจะแจ้งมาที่ไลน์นี้ด้วยค่ะ
+          </div>
       </div>
-      <button class="toggle" id="hToggle"><span id="hTogT">ดูเพิ่มเติม</span><span id="hCaret">▾</span></button>
-      <div class="more" id="hMore">
-        <div class="kv">
-          <span class="k">จำนวนครั้งที่บันทึก</span><span class="v" id="hCount">—</span>
-          <span class="k">สถานะปัจจุบัน</span><span class="v" id="hStatus">—</span>
-          <span class="k">จำนวนรายการยาเบาหวาน</span><span class="v" id="hMed">—</span>
-          <span class="k">เป้าหมาย</span><span class="v" id="hGoal">—</span>
-          <span class="k">นัดครั้งถัดไป</span><span class="v" id="hNext">—</span>
-        </div>
+      <div class="container" style="padding-top:12px; padding-bottom:60px;">
+          <div class="note-grid" id="care-grid"></div>
+          <div id="care-switch"></div>
+          <div class="credit">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
       </div>
+  </div>
+
+  <!-- ================= ประวัติ ================= -->
+  <div id="v-hist" class="container" style="display:none; padding-bottom:80px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h2 style="color:#5D4037; margin:0;">📋 ประวัติที่บันทึกไว้</h2>
+          <button class="btn-brown" id="histBack" style="width:auto; padding:8px 18px;">กลับ</button>
+      </div>
+      <div id="histBody"></div>
+  </div>
+
+  <!-- ================= รายการอาหารที่แนะนำ ================= -->
+  <div id="v-plan" class="container" style="display:none; padding-bottom:80px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h2 style="color:#5D4037; margin:0;">🍽️ รายการอาหารที่แนะนำ</h2>
+          <button class="btn-brown" id="planBack" style="width:auto; padding:8px 18px;">กลับ</button>
+      </div>
+      <div class="paper">
+          <div class="lead" id="planWhen" style="font-size:16px; color:#8D6E63;"></div>
+          <div id="planBody"></div>
+      </div>
+  </div>
+
+  <!-- ================= สัดส่วนร่างกาย ================= -->
+  <div id="v-body" class="container" style="display:none; padding-bottom:80px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <h2 style="color:#5D4037; margin:0;">📊 สัดส่วนร่างกาย</h2>
+          <button class="btn-brown" id="bodyBack" style="width:auto; padding:8px 18px;">กลับ</button>
+      </div>
+      <div class="paper">
+          <div class="lead" id="bodyWhen" style="font-size:16px; color:#8D6E63;"></div>
+          <div id="bodyBody"></div>
+      </div>
+  </div>
+
+  <!-- ================= Modal ฟอร์มบันทึก ================= -->
+  <div id="primary-modal" class="modal-overlay">
+    <div class="modal-sheet">
+      <div class="modal-header-row">
+        <div class="modal-main-title" id="pri-title">หัวข้อ</div>
+        <button class="btn-close" id="pri-close">ปิด</button>
+      </div>
+      <div class="for-box" id="pri-for" style="display:none;"></div>
+      <div class="modal-ai-ask" id="pri-ask"></div>
+      <div id="pri-body"></div>
+      <button class="btn" id="pri-save" style="margin-top:20px;">บันทึกข้อมูล ✅</button>
     </div>
+  </div>
 
-    <h2>บันทึกวันนี้</h2>
-    <div class="menu" id="menu"></div>
-
-    <h2>ข้อมูลจากคลินิก</h2>
-    <button class="long" id="goPlan">
-      <span class="cv">›</span>
-      <b>รายการอาหารที่แนะนำ</b>
-      <span class="d">นักโภชนาการคำนวณให้เฉพาะคุณ — กินได้วันละกี่ทัพพี กี่ช้อน</span>
-    </button>
-    <button class="long" id="goBody">
-      <span class="cv">›</span>
-      <b>ดูสัดส่วนร่างกาย</b>
-      <span class="d">ผลชั่ง-วัดครั้งล่าสุดที่คลินิก พร้อมคำอธิบายว่าแต่ละค่าหมายถึงอะไร</span>
-    </button>
-
-    <button class="btn ghost sm" id="goHist">📋 ดูประวัติที่บันทึกไว้</button>
-  </section>
-
-  <!-- ===== หน้าหลัก (ผู้ดูแล) — เห็นแค่ชื่อ ===== -->
-  <section id="sCareHome" class="screen">
-    <div class="card brown">
-      <div style="font-size:.9rem;opacity:.85">คุณกำลังบันทึกให้</div>
-      <div id="cName" style="font-family:'Itim',cursive;font-size:1.7rem">—</div>
-      <div class="sd" id="cHn">—</div>
-    </div>
-    <div class="for">
-      🤝 โหมดผู้ดูแล — บันทึกได้อย่างเดียว ไม่แสดงข้อมูลสุขภาพของคนไข้
-      <div style="margin-top:5px">ถ้าค่าผิดปกติ ระบบจะแจ้งมาที่ LINE นี้ด้วย</div>
-    </div>
-    <h2>บันทึกให้คนไข้</h2>
-    <div class="menu" id="cMenu"></div>
-    <div id="cSwitch"></div>
-  </section>
-
-  <!-- ===== ฟอร์มบันทึก ===== -->
-  <section id="sForm" class="screen">
-    <button class="back" id="fBack">‹ กลับ</button>
-    <div class="card">
-      <div class="for" id="fFor" style="display:none"></div>
-      <h1 id="fTitle">บันทึก</h1>
-      <div id="fBody"></div>
-      <button class="btn" id="fSave">บันทึก</button>
-      <div class="msg" id="fMsg"></div>
-    </div>
-  </section>
-
-  <!-- ===== ประวัติ ===== -->
-  <section id="sHist" class="screen">
-    <button class="back" id="hBack">‹ กลับ</button>
-    <div class="card">
-      <h1>ประวัติที่บันทึกไว้</h1>
-      <div id="histBody" class="muted">กำลังโหลด…</div>
-    </div>
-  </section>
-
-  <!-- ===== รายการอาหารที่แนะนำ ===== -->
-  <section id="sPlan" class="screen">
-    <button class="back" id="pBack">‹ กลับ</button>
-    <div class="card"><h1>🍽️ รายการอาหารที่แนะนำ</h1>
-      <div class="muted" id="pWhen">—</div>
-      <div id="pBody">กำลังโหลด…</div>
-    </div>
-  </section>
-
-  <!-- ===== สัดส่วนร่างกาย ===== -->
-  <section id="sBody" class="screen">
-    <button class="back" id="bBack">‹ กลับ</button>
-    <div class="card"><h1>📊 สัดส่วนร่างกาย</h1>
-      <div class="muted" id="bWhen">—</div>
-      <div id="bBody">กำลังโหลด…</div>
-    </div>
-  </section>
-</div>
 <script>
 /* ===================== ตั้งค่า ===================== */
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbzvLY5kLKw2sUaSelEZcxka2CsdiRoGdA9jmHMoKs3oB04ypte7yDwStWo6cFwb2-Y8Sw/exec';
 var LIFF_ID = '2007840605-zKl7p3Aa';
+var LOGO = 'https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H';
+
+/* ===================== Popup ชุดเดิม =====================
+   ถ้าโหลด SweetAlert จาก CDN ไม่ได้ (เน็ตช้า/ถูกบล็อก) จะใช้ป๊อปอัปสำรองที่เขียนไว้ในไฟล์นี้แทน
+   หน้าตาและปุ่มเหมือนกัน เพื่อไม่ให้หน้าค้างทั้งหน้าเพราะป๊อปอัปตัวเดียว */
+function liteFire(popupClass, o) {
+  return new Promise(function (resolve) {
+    var ov = document.createElement('div');
+    ov.className = 'lite-overlay';
+    var card = document.createElement('div');
+    card.className = 'lite-card swal2-popup ' + popupClass;
+    card.innerHTML = '<div class="lite-title swal2-title">' + esc(o.title || '') + '</div>'
+      + '<div class="lite-html swal2-html-container">' + (o.html || esc(o.text || '')) + '</div>'
+      + '<div class="lite-btns"></div>';
+    var btns = card.querySelector('.lite-btns');
+    var yes = document.createElement('button');
+    yes.className = 'btn swal2-confirm'; yes.textContent = o.confirmButtonText || 'ตกลง';
+    yes.onclick = function () { ov.remove(); resolve({ isConfirmed: true, isDismissed: false }); };
+    btns.appendChild(yes);
+    if (o.showCancelButton) {
+      var no = document.createElement('button');
+      no.className = 'btn-white-round swal2-cancel'; no.textContent = o.cancelButtonText || 'ยกเลิก';
+      no.onclick = function () { ov.remove(); resolve({ isConfirmed: false, isDismissed: true }); };
+      btns.appendChild(no);
+    }
+    ov.appendChild(card); document.body.appendChild(ov);
+  });
+}
+function mkSwal(popupClass, cancelClass, defConfirm, defCancel) {
+  if (window.Swal) {
+    return Swal.mixin({ customClass: { popup: popupClass, confirmButton: 'btn', cancelButton: cancelClass },
+                        buttonsStyling: false, confirmButtonText: defConfirm, cancelButtonText: defCancel });
+  }
+  return { fire: function (a, b, c) {
+    var o = (a && typeof a === 'object') ? a : { title: a, text: b, icon: c };
+    return liteFire(popupClass, { title: o.title, html: o.html, text: o.text,
+      showCancelButton: !!o.showCancelButton,
+      confirmButtonText: o.confirmButtonText || defConfirm,
+      cancelButtonText: o.cancelButtonText || defCancel });
+  } };
+}
+var swalAlert   = mkSwal('swal-red-popup',   'btn-white-round', 'รับทราบและปิดหน้าต่าง', 'ยกเลิก');
+var swalSuccess = mkSwal('swal-green-popup', 'btn-white-round', 'ปิดหน้าต่าง', 'ยกเลิก');
+var swalForm    = mkSwal('swal-brown-popup', 'btn-close',       'ปิดหน้าต่าง', 'ยกเลิก');
 
 /* ===================== ตัวช่วย ===================== */
 var $ = function (id) { return document.getElementById(id); };
 var S = { userId: '', displayName: '', pictureUrl: '', hn: '',
           profile: null, stats: null, mode: 'owner', careFor: null, boot: null };
-var SCREENS = ['sLoad','sRole','sReg','sCare','sHome','sCareHome','sForm','sHist','sPlan','sBody'];
+var VIEWS = ['v-error','v-role','v-reg','v-care','v-home','v-carehome','v-hist','v-plan','v-body'];
 var LOG = [];
 
 function note(t) { LOG.push(new Date().toLocaleTimeString('th-TH') + '  ' + t); }
-function show(id) { SCREENS.forEach(function (s) { $(s).classList.toggle('on', s === id); }); window.scrollTo(0, 0); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
   return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+function showLoading(on) { $('loading').style.display = on ? 'flex' : 'none'; }
+
+/** สลับหน้า + จัดการ navbar ให้เข้ากับหน้านั้น */
+function show(id) {
+  VIEWS.forEach(function (v) { $(v).style.display = (v === id) ? 'block' : 'none'; });
+  var nav = $('main-navbar'), btn = $('nav-btn');
+  nav.style.display = 'flex';
+  if (id === 'v-home') { btn.style.display = ''; btn.className = 'nav-hist-btn'; btn.textContent = 'ดูประวัติ'; }
+  else if (id === 'v-hist' || id === 'v-plan' || id === 'v-body') { btn.style.display = ''; btn.className = 'nav-return-btn'; btn.textContent = '📝 กลับหน้าบันทึก'; }
+  else { btn.style.display = 'none'; }
+  window.scrollTo(0, 0);
+}
+$('nav-btn').onclick = function () {
+  if ($('nav-btn').className === 'nav-hist-btn') openHistory(); else show('v-home');
+};
 
 function api(action, payload) {
   note('-> ' + action);
@@ -441,17 +590,14 @@ function hintForStatus(c) {
   return '';
 }
 function errWith(m, hint, dump) { var e = new Error(m); e.hint = hint || ''; e.dump = dump || ''; return e; }
-function say(el, text, kind) {
-  el.textContent = text; el.className = 'msg on ' + (kind || 'ok');
-  if (kind === 'ok') setTimeout(function () { el.className = 'msg'; }, 2800);
-}
+
 function thDate(s) {
   if (!s) return '—';
   var d = new Date(s); if (isNaN(d.getTime())) return String(s);
   var m = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
   return d.getDate() + ' ' + m[d.getMonth()] + ' ' + (d.getFullYear() + 543);
 }
-/** ?hn= จาก QR — เปิดในเบราว์เซอร์ LIFF จะส่งต่อมาใน liff.state */
+/** ?hn= จาก QR — ถ้าเปิดในเบราว์เซอร์ LIFF จะส่งต่อมาใน liff.state */
 function readHn() {
   var q = new URLSearchParams(location.search);
   var hn = q.get('hn');
@@ -466,13 +612,16 @@ function readHn() {
 function boot() {
   LOG = []; S.hn = readHn();
   note('เปิดหน้า ' + location.href); note('hn = ' + (S.hn || '(ไม่มี)'));
-  $('errBox').style.display = 'none'; $('loadBox').style.display = ''; show('sLoad');
+  VIEWS.forEach(function (v) { $(v).style.display = 'none'; });
+  $('main-navbar').style.display = 'none';
+  showLoading(true);
 
   if (!window.liff) return fail('โหลด LINE SDK ไม่สำเร็จ', 'เครื่องนี้ต้องต่ออินเทอร์เน็ตเพื่อใช้ LINE');
 
   liff.init({ liffId: LIFF_ID })
     .then(function () {
       note('liff.init ok · isInClient=' + liff.isInClient() + ' · isLoggedIn=' + liff.isLoggedIn());
+      // เปิดในเบราว์เซอร์ก็ล็อกอินได้ ไม่บังคับให้เปิดจากแอป LINE
       if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return null; }
       return liff.getProfile();
     })
@@ -481,7 +630,7 @@ function boot() {
       S.userId = p.userId; S.displayName = p.displayName; S.pictureUrl = p.pictureUrl;
       return api('bootstrap', { userId: S.userId, hn: S.hn, displayName: p.displayName, pictureUrl: p.pictureUrl });
     })
-    .then(function (r) { if (r) route(r); })
+    .then(function (r) { showLoading(false); if (r) route(r); })
     .catch(function (e) {
       var m = (e && e.message) ? e.message : String(e), hint = (e && e.hint) || '';
       if (/liffId|LIFF/i.test(m) && !hint) hint = 'ตรวจ LIFF ID ในไฟล์นี้ให้ตรงกับใน LINE Developers';
@@ -498,31 +647,31 @@ function route(r) {
   S.boot = r;
 
   // สแกน QR ของคนที่เราดูแลอยู่แล้ว -> เข้าโหมดผู้ดูแลเลย
-  if (r.careFor) { S.mode = 'care'; S.careFor = r.careFor; renderCareHome(); return show('sCareHome'); }
+  if (r.careFor) { S.mode = 'care'; S.careFor = r.careFor; renderCareHome(); return show('v-carehome'); }
 
   // เป็นคนไข้ที่ลงทะเบียนแล้ว
   if (r.registered) {
     S.mode = 'owner'; S.profile = r.profile; S.stats = r.stats;
     S.hn = r.profile.hn || S.hn;
-    renderHome(); return show('sHome');
+    renderHome(); return show('v-home');
   }
 
   // ไม่มี hn มา แต่เป็นผู้ดูแลของคนอื่นอยู่
   if (!S.hn && r.cares && r.cares.length) {
-    S.mode = 'care'; S.careFor = r.cares[0]; renderCareHome(); return show('sCareHome');
+    S.mode = 'care'; S.careFor = r.cares[0]; renderCareHome(); return show('v-carehome');
   }
 
-  renderRole(); show('sRole');
+  renderRole(); show('v-role');
 }
 
 function fail(msg, hint, dump) {
   note('x ' + msg + (hint ? ' | ' + hint : ''));
-  $('loadBox').style.display = 'none'; $('errBox').style.display = '';
+  showLoading(false);
   $('errMain').textContent = msg; $('errHint').textContent = hint || '';
   $('errDump').textContent = 'GAS_URL: ' + GAS_URL + '\nLIFF_ID: ' + LIFF_ID
     + '\nUA: ' + navigator.userAgent + '\n\n' + LOG.join('\n')
     + (dump ? '\n\n--- คำตอบจากเซิร์ฟเวอร์ ---\n' + String(dump).slice(0, 1500) : '');
-  show('sLoad');
+  show('v-error');
 }
 $('errRetry').onclick = function () { boot(); };
 $('errMore').onclick = function () {
@@ -536,46 +685,58 @@ function renderRole() {
   var k = $('roleKnown');
   if (known && known.nameUse) {
     k.style.display = '';
-    k.innerHTML = 'เลข HN นี้ลงทะเบียนไว้แล้วในชื่อ <b>"' + esc(known.nameUse) + '"</b><br>'
-                + '<span class="muted">ถ้าคุณคือเจ้าตัว เลือก "บันทึกให้ตัวเอง" · '
-                + 'ถ้าคุณช่วยเขาบันทึก เลือก "บันทึกให้คนที่ดูแลอยู่"</span>';
+    k.innerHTML = 'ไลน์นี้ / เลข HN นี้ ลงทะเบียนไว้แล้วในชื่อ <b>"' + esc(known.nameUse) + '"</b><br>'
+                + 'ถ้าคุณคือเจ้าตัว เลือก "บันทึกให้ตัวเอง" · ถ้าคุณช่วยเขาบันทึก เลือก "บันทึกให้คนที่ดูแลอยู่"';
   } else { k.style.display = 'none'; }
 }
 $('roleSelf').onclick = function () {
   if (S.boot && S.boot.hnTaken) {
-    if (!confirm('ยืนยันว่าเลข HN ' + S.hn + ' เป็นของคุณเอง?\nระบบจะย้ายทะเบียนมาที่ LINE นี้')) return;
-    return api('claimHn', { userId: S.userId, hn: S.hn, confirm: true,
-                            displayName: S.displayName, pictureUrl: S.pictureUrl })
-      .then(function (r) {
-        if (!r.ok) return alert(r.message || 'ย้ายไม่สำเร็จ');
-        return api('bootstrap', { userId: S.userId, hn: S.hn }).then(route);
-      });
+    return swalAlert.fire({
+      title: 'ยืนยันตัวตน',
+      html: 'เลข HN <b>' + esc(S.hn) + '</b> เคยลงทะเบียนไว้กับไลน์อื่น<br>ยืนยันว่าเป็นของคุณเองใช่ไหมคะ?<br>ระบบจะย้ายทะเบียนมาที่ไลน์นี้'
+          + '<img src="' + LOGO + '" class="nurse-bg-img">',
+      showCancelButton: true, confirmButtonText: 'ใช่ เป็นของฉันเอง', cancelButtonText: 'ยกเลิก'
+    }).then(function (cf) {
+      if (!cf.isConfirmed) return;
+      showLoading(true);
+      return api('claimHn', { userId: S.userId, hn: S.hn, confirm: true,
+                              displayName: S.displayName, pictureUrl: S.pictureUrl })
+        .then(function (r) {
+          if (!r.ok) { showLoading(false); return swalAlert.fire('ย้ายไม่สำเร็จ', r.message || '', 'error'); }
+          return api('bootstrap', { userId: S.userId, hn: S.hn }).then(function (b) { showLoading(false); route(b); });
+        })
+        .catch(function (e) { showLoading(false); swalAlert.fire('ข้อผิดพลาด', e.message, 'error'); });
+    });
   }
-  renderReg(); show('sReg');
+  renderReg(); show('v-reg');
 };
-$('roleCare').onclick = function () { renderCare(); show('sCare'); };
-$('regBack').onclick = function () { show('sRole'); };
-$('careBack').onclick = function () { show('sRole'); };
+$('roleCare').onclick = function () { renderCare(); show('v-care'); };
+$('regBack').onclick = function () { show('v-role'); };
+$('careBack').onclick = function () { show('v-role'); };
 
-/* ===================== ลงทะเบียน (เจ้าตัว) ===================== */
+/* ===================== ลงทะเบียน (เจ้าของไลน์) ===================== */
 function renderReg() {
   $('regHn').textContent = S.hn ? ('HN ' + S.hn) : 'ยังไม่ทราบเลข HN';
   $('regName').value = S.displayName || '';
   var ok = $('regOk'), btn = $('regBtn'), nm = $('regName');
   function check() { btn.disabled = !(ok.checked && nm.value.trim() && S.hn); }
   ok.onchange = check; nm.oninput = check; check();
-  if (!S.hn) say($('regErr'), 'ไม่พบเลข HN — สแกน QR จากใบของคลินิก หรือแจ้งเจ้าหน้าที่', 'err');
+  if (!S.hn) swalAlert.fire('ไม่พบเลข HN', 'กรุณาสแกน QR จากใบของคลินิก หรือแจ้งเจ้าหน้าที่ค่ะ', 'warning');
 
   btn.onclick = function () {
-    btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+    btn.disabled = true; showLoading(true);
     api('register', { userId: S.userId, hn: S.hn, nameUse: nm.value.trim(), consent: true,
                       displayName: S.displayName, pictureUrl: S.pictureUrl })
       .then(function (r) {
-        if (!r.ok) { say($('regErr'), r.message || 'ลงทะเบียนไม่สำเร็จ', 'err');
-                     btn.disabled = false; btn.textContent = 'เริ่มใช้งาน'; return; }
-        return api('bootstrap', { userId: S.userId, hn: S.hn }).then(route);
+        if (!r.ok) { showLoading(false); btn.disabled = false;
+                     return swalAlert.fire('ลงทะเบียนไม่สำเร็จ', r.message || '', 'error'); }
+        return api('bootstrap', { userId: S.userId, hn: S.hn }).then(function (b) {
+          showLoading(false);
+          swalSuccess.fire({ title: 'ลงทะเบียนเรียบร้อยแล้วค่ะ 🎉', text: 'เริ่มบันทึกค่าของคุณได้เลย' })
+            .then(function () { route(b); });
+        });
       })
-      .catch(function (e) { say($('regErr'), e.message, 'err'); btn.disabled = false; btn.textContent = 'เริ่มใช้งาน'; });
+      .catch(function (e) { showLoading(false); btn.disabled = false; swalAlert.fire('ข้อผิดพลาด', e.message, 'error'); });
   };
 }
 
@@ -586,7 +747,7 @@ function renderCare() {
   var k = $('careKnown');
   if (known) {
     k.style.display = '';
-    k.innerHTML = 'LINE นี้เป็นของ <b>"' + esc(known) + '"</b> — ถ้าไม่ใช่คนที่คุณดูแล ให้สแกน QR ใบอื่น';
+    k.innerHTML = 'ไลน์นี้เป็นของ <b>"' + esc(known) + '"</b> — ถ้าไม่ใช่คนที่คุณดูแล ให้สแกน QR ใบอื่นค่ะ';
     $('careName').value = known;
   } else { k.style.display = 'none'; }
 
@@ -595,172 +756,277 @@ function renderCare() {
   ok.onchange = check; nm.oninput = check; check();
 
   btn.onclick = function () {
-    btn.disabled = true; btn.textContent = 'กำลังบันทึก…';
+    btn.disabled = true; showLoading(true);
     api('registerCaregiver', { userId: S.userId, hn: S.hn, callName: nm.value.trim(),
                                relation: $('careRel').value, consent: true, displayName: S.displayName })
       .then(function (r) {
-        if (!r.ok) { say($('careErr'), r.message || 'ผูกไม่สำเร็จ', 'err');
-                     btn.disabled = false; btn.textContent = 'เริ่มบันทึกให้'; return; }
+        if (!r.ok) { showLoading(false); btn.disabled = false;
+                     return swalAlert.fire('ผูกไม่สำเร็จ', r.message || '', 'error'); }
         S.mode = 'care'; S.careFor = r.patient;
         return api('bootstrap', { userId: S.userId, hn: S.hn }).then(function (b) {
+          showLoading(false);
           if (b && b.ok) S.boot = b;
-          renderCareHome(); show('sCareHome');
+          swalSuccess.fire({ title: 'เริ่มบันทึกให้ได้เลยค่ะ 🤝' }).then(function () {
+            renderCareHome(); show('v-carehome');
+          });
         });
       })
-      .catch(function (e) { say($('careErr'), e.message, 'err'); btn.disabled = false; btn.textContent = 'เริ่มบันทึกให้'; });
+      .catch(function (e) { showLoading(false); btn.disabled = false; swalAlert.fire('ข้อผิดพลาด', e.message, 'error'); });
   };
 }
 
-/* ===================== เมนู ===================== */
+/* ===================== เมนูบันทึก 6 ปุ่ม ===================== */
 var MENU = [
-  { k: 'SBGM',     e: '🩸', t: 'น้ำตาล<br>ปลายนิ้ว' },
-  { k: 'BP',       e: '💓', t: 'ความดัน<br>โลหิต' },
-  { k: 'FOOD',     e: '🍲', t: 'บันทึก<br>อาหาร' },
-  { k: 'WEIGHT',   e: '⚖️', t: 'ชั่ง<br>น้ำหนัก' },
-  { k: 'EXERCISE', e: '🏃', t: 'ออก<br>กำลังกาย' },
-  { k: 'ADVERSE',  e: '⚠️', t: 'อาการ<br>ผิดปกติ' }
+  { k: 'SBGM',     bg: 'bg-sbgm',    e: '🩸', t: 'น้ำตาล<br>ปลายนิ้ว' },
+  { k: 'BP',       bg: 'bg-bp',      e: '💓', t: 'ความดัน<br>โลหิต' },
+  { k: 'FOOD',     bg: 'bg-food',    e: '🍲', t: 'บันทึก<br>อาหาร' },
+  { k: 'WEIGHT',   bg: 'bg-weight',  e: '⚖️', t: 'ชั่ง<br>น้ำหนัก' },
+  { k: 'EXERCISE', bg: 'bg-ex',      e: '🏃‍♀️', t: 'ออก<br>กำลังกาย' },
+  { k: 'ADVERSE',  bg: 'bg-adverse', e: '⚠️', t: 'อาการ<br>ผิดปกติ' }
 ];
 function paintMenu(boxId) {
   var box = $(boxId);
   box.innerHTML = MENU.map(function (m) {
-    return '<button class="mi" data-k="' + m.k + '"><span class="e">' + m.e + '</span>'
-         + '<span class="t">' + m.t + '</span></button>';
+    return '<div class="note-item ' + m.bg + '" data-k="' + m.k + '">'
+         + '<div class="note-icon">' + m.e + '</div><div class="note-label">' + m.t + '</div></div>';
   }).join('');
   Array.prototype.forEach.call(box.children, function (b) {
-    b.onclick = function () { openForm(b.getAttribute('data-k')); };
+    b.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';   // กระตุกไม่พร้อมกัน (ของเดิม)
+    b.onclick = function () { openNoteForm(b.getAttribute('data-k')); };
   });
 }
 
+/* ===================== หน้าหลัก ===================== */
 var STATUS_TH = {
-  'Stable': ['คุมได้ดี', 'ok'], 'Monitor': ['ต้องเฝ้าดู', 'warn'],
+  'Stable': ['คุมได้ดี 👍', 'ok'], 'Monitor': ['ต้องเฝ้าดู', 'warn'],
   'Hyperglycemia': ['น้ำตาลสูง', 'bad'], 'Hypoglycemia Alert': ['น้ำตาลต่ำ ระวัง', 'bad'],
   'Waiting': ['ยังไม่มีข้อมูล', 'warn']
 };
-
 function renderHome() {
   var p = S.profile || {}, st = S.stats || {};
-  if (p.picture) $('hPic').src = p.picture;
-  $('hName').textContent = 'สวัสดี คุณ' + (p.nameUse || '');
-  $('hStart').textContent = p.startDate ? ('มาตรวจล่าสุด ' + thDate(p.startDate)) : 'ยินดีต้อนรับเข้าโครงการ';
-  $('hCount').textContent = (st.total || 0) + ' ครั้ง';
+  if (p.picture) $('head-avatar').src = p.picture;
+  $('head-name').textContent = 'คุณ' + (p.nameUse || '');
+  $('head-start').textContent = p.startDate ? ('มาตรวจล่าสุด : ' + thDate(p.startDate)) : 'ยินดีต้อนรับเข้าโครงการ';
+
+  if (p.endDate) {
+    var end = new Date(p.endDate), today = new Date();
+    var days = Math.ceil((end - today) / 86400000);
+    var t = $('head-target'); t.style.display = 'block';
+    t.textContent = (days >= 0) ? ('อีก ' + days + ' วันถึงวันนัดครั้งถัดไป') : 'เลยวันนัดแล้ว กรุณาติดต่อคลินิก';
+  } else { $('head-target').style.display = 'none'; }
+
+  $('stat-total').textContent = st.total || 0;
+  $('stat-sbgm').textContent = st.sbgm || 0;
+  var lastSbgm = st.last && st.last.SBGM;
+  var lb = $('stat-last');
+  if (lastSbgm && lastSbgm.v1 !== '' && lastSbgm.v1 != null) {
+    lb.style.display = 'inline-block';
+    lb.textContent = 'ล่าสุด ' + lastSbgm.v1 + ' mg/dL';
+  } else { lb.style.display = 'none'; }
+
   var s = STATUS_TH[p.status] || [p.status || '—', 'warn'];
-  $('hStatus').innerHTML = '<span class="pill ' + s[1] + '">' + s[0] + '</span>';
-  $('hMed').textContent = (p.medicine === '' || p.medicine == null) ? '—' : (p.medicine + ' รายการ');
-  $('hGoal').textContent = p.remission ? 'รักษาระยะสงบให้ต่อเนื่อง' : 'น้ำตาลสะสม < 6.5% โดยไม่ใช้ยา';
-  $('hNext').textContent = thDate(p.endDate);
-  paintMenu('menu');
+  $('head-status').innerHTML = '<span class="status-pill ' + s[1] + '">' + s[0] + '</span>';
+  $('head-med').textContent = (p.medicine === '' || p.medicine == null) ? '—' : (p.medicine + ' รายการ');
+  $('head-next').textContent = thDate(p.endDate);
+  $('head-goal').textContent = p.remission ? '🎯 รักษาระยะสงบให้ต่อเนื่อง' : '🎯 น้ำตาลสะสม < 6.5% โดยไม่ใช้ยา';
+
+  paintMenu('main-grid');
 }
-$('hToggle').onclick = function () {
-  var on = $('hMore').classList.toggle('on');
-  $('hCaret').textContent = on ? '▴' : '▾';
-  $('hTogT').textContent = on ? 'ย่อกลับ' : 'ดูเพิ่มเติม';
+$('head-toggle').onclick = function () {
+  var on = $('head-more').classList.toggle('on');
+  $('head-toggle').textContent = on ? 'ย่อกลับ ▴' : 'ดูเพิ่มเติม ▾';
 };
 
 function renderCareHome() {
-  $('cName').textContent = 'คุณ' + ((S.careFor && S.careFor.name) || '');
-  $('cHn').textContent = 'HN ' + ((S.careFor && S.careFor.hn) || '—');
-  paintMenu('cMenu');
+  $('care-name').textContent = 'คุณ' + ((S.careFor && S.careFor.name) || '');
+  $('care-hn').textContent = 'HN ' + ((S.careFor && S.careFor.hn) || '—');
+  paintMenu('care-grid');
   var list = (S.boot && S.boot.cares) || [];
-  $('cSwitch').innerHTML = (list.length > 1)
-    ? '<h2>คนอื่นที่คุณดูแล</h2>' + list.map(function (c, i) {
-        return '<button class="btn ghost sm" data-i="' + i + '">' + esc(c.name) + ' (HN ' + esc(c.hn) + ')</button>';
-      }).join('')
+  $('care-switch').innerHTML = (list.length > 1)
+    ? '<h2 style="color:#5D4037; font-size:20px; margin-top:20px;">คนอื่นที่คุณดูแล</h2>'
+      + list.map(function (c, i) {
+          return '<button class="btn-brown" data-i="' + i + '" style="margin-bottom:8px;">'
+               + esc(c.name) + ' (HN ' + esc(c.hn) + ')</button>';
+        }).join('')
     : '';
-  Array.prototype.forEach.call($('cSwitch').querySelectorAll('button'), function (b) {
+  Array.prototype.forEach.call($('care-switch').querySelectorAll('button'), function (b) {
     b.onclick = function () { S.careFor = list[+b.getAttribute('data-i')]; renderCareHome(); };
   });
 }
 
-/* ===================== ฟอร์มบันทึก ===================== */
+/* ===================== ฟอร์มบันทึก (Modal ล่างจอ) ===================== */
+function chipsHTML(id, options, defaultVal) {
+  var html = '<div class="chip-container" id="' + id + '">';
+  options.forEach(function (o) {
+    html += '<button class="chip-btn' + (o === defaultVal ? ' active' : '') + '" data-v="' + o + '">' + o + '</button>';
+  });
+  return html + '</div>';
+}
+function chip(id) { var on = document.querySelector('#' + id + ' .chip-btn.active'); return on ? on.getAttribute('data-v') : ''; }
+
 var FORMS = {
-  SBGM: { title: '🩸 น้ำตาลปลายนิ้ว',
-    html: '<label class="f">ช่วงที่วัด</label><div class="chips" id="sub">'
-        + '<button class="chip on" data-v="ก่อนอาหาร">ก่อนอาหาร</button>'
-        + '<button class="chip" data-v="หลังอาหาร">หลังอาหาร</button>'
-        + '<button class="chip" data-v="ก่อนนอน">ก่อนนอน</button></div>'
-        + '<label class="f" for="v1">ค่าที่วัดได้ (mg/dL)</label>'
-        + '<input type="number" id="v1" inputmode="numeric" placeholder="เช่น 110">',
+  SBGM: {
+    title: 'ค่าน้ำตาลในเลือด',
+    ask: function (n) { return 'วันนี้คุณ <span class="name-pink">' + n + '</span> เจาะน้ำตาลปลายนิ้ว ได้ค่าเท่าไหร่คะ?'; },
+    html: function () {
+      return '<input type="tel" id="v1" class="main-input-anim" inputmode="numeric" placeholder="ระบุตัวเลข (mg/dL)">'
+           + '<div class="form-label">วัดตอนไหนคะ?</div>'
+           + chipsHTML('sub', ['ก่อนอาหาร','หลังอาหาร','ก่อนนอน'], 'ก่อนอาหาร');
+    },
     read: function () { return { subtype: chip('sub'), v1: $('v1').value }; },
-    valid: function (d) { return (d.v1 > 20 && d.v1 < 700) ? '' : 'กรุณาใส่ค่าน้ำตาลระหว่าง 20–700'; } },
-  BP: { title: '💓 ความดันโลหิต',
-    html: '<div class="two"><div><label class="f" for="v1">ตัวบน</label>'
-        + '<input type="number" id="v1" inputmode="numeric" placeholder="120"></div>'
-        + '<div><label class="f" for="v2">ตัวล่าง</label>'
-        + '<input type="number" id="v2" inputmode="numeric" placeholder="80"></div></div>',
+    valid: function (d) { return (d.v1 > 20 && d.v1 < 700) ? '' : 'ตัวเลขดูไม่น่าจะใช่ค่าน้ำตาลนะคะ (20–700)'; }
+  },
+  BP: {
+    title: 'ความดันโลหิต',
+    ask: function (n) { return 'วันนี้คุณ <span class="name-pink">' + n + '</span> วัดความดันได้เท่าไหร่คะ?'; },
+    html: function () {
+      return '<div style="display:flex; gap:10px;">'
+           + '<input type="tel" id="v1" class="main-input-anim" inputmode="numeric" placeholder="ตัวบน">'
+           + '<input type="tel" id="v2" inputmode="numeric" placeholder="ตัวล่าง"></div>';
+    },
     read: function () { return { v1: $('v1').value, v2: $('v2').value }; },
-    valid: function (d) { return (d.v1 > 50 && d.v1 < 300 && d.v2 > 30 && d.v2 < 200) ? '' : 'กรุณาใส่ความดันให้ถูกต้อง'; } },
-  FOOD: { title: '🍲 บันทึกอาหาร',
-    html: '<label class="f">มื้อ</label><div class="chips" id="sub">'
-        + '<button class="chip on" data-v="เช้า">เช้า</button>'
-        + '<button class="chip" data-v="กลางวัน">กลางวัน</button>'
-        + '<button class="chip" data-v="เย็น">เย็น</button>'
-        + '<button class="chip" data-v="ว่าง">ว่าง</button></div>'
-        + '<label class="f" for="vt">กินอะไรบ้าง</label>'
-        + '<textarea id="vt" rows="3" placeholder="เช่น ข้าวสวย 1 ทัพพี แกงจืด ไข่ต้ม"></textarea>',
+    valid: function (d) {
+      if (!(d.v1 > 50 && d.v1 < 300 && d.v2 > 30 && d.v2 < 200)) return 'กรุณาใส่ความดันให้ถูกต้องค่ะ';
+      if (parseFloat(d.v1) < parseFloat(d.v2)) return 'ความดันตัวบนต้องมากกว่าตัวล่างนะคะ';
+      return '';
+    }
+  },
+  FOOD: {
+    title: 'บันทึกอาหาร',
+    ask: function (n) { return 'คุณ <span class="name-pink">' + n + '</span> ทานอะไรไปบ้างคะ?'; },
+    html: function () {
+      var hr = new Date().getHours(), def = 'เช้า';
+      if (hr >= 11 && hr < 14) def = 'กลางวัน'; else if (hr >= 14 && hr < 20) def = 'เย็น'; else if (hr >= 20) def = 'ว่าง';
+      return '<div class="form-label">มื้อไหนคะ?</div>' + chipsHTML('sub', ['เช้า','กลางวัน','เย็น','ว่าง'], def)
+           + '<div class="form-label">ทานอะไรบ้าง</div>'
+           + '<textarea id="vt" rows="3" class="main-input-anim" placeholder="เช่น ข้าวสวย 1 ทัพพี แกงจืด ไข่ต้ม"></textarea>';
+    },
     read: function () { return { subtype: chip('sub'), vt: $('vt').value.trim() }; },
-    valid: function (d) { return d.vt ? '' : 'กรุณาพิมพ์รายการอาหาร'; } },
-  WEIGHT: { title: '⚖️ ชั่งน้ำหนัก',
-    html: '<label class="f" for="v1">น้ำหนัก (กก.)</label>'
-        + '<input type="number" id="v1" step="0.1" inputmode="decimal" placeholder="เช่น 62.5">'
-        + '<label class="f" for="v2">รอบเอว (ซม.) — ถ้าวัดด้วย</label>'
-        + '<input type="number" id="v2" step="0.5" inputmode="decimal" placeholder="ไม่ใส่ก็ได้">',
+    valid: function (d) { return d.vt ? '' : 'ช่วยพิมพ์รายการอาหารด้วยนะคะ'; }
+  },
+  WEIGHT: {
+    title: 'ชั่งน้ำหนัก',
+    ask: function (n) { return 'วันนี้คุณ <span class="name-pink">' + n + '</span> น้ำหนักเท่าไหร่คะ?'; },
+    html: function () {
+      return '<input type="tel" id="v1" class="main-input-anim" inputmode="decimal" placeholder="กี่กิโลกรัมคะ">'
+           + '<div class="form-label">วัดรอบเอวด้วยไหมคะ? (ไม่ใส่ก็ได้)</div>'
+           + '<input type="tel" id="v2" inputmode="decimal" placeholder="รอบเอว (ซม.)">';
+    },
     read: function () { return { v1: $('v1').value, v2: $('v2').value }; },
-    valid: function (d) { return (d.v1 > 20 && d.v1 < 300) ? '' : 'กรุณาใส่น้ำหนักระหว่าง 20–300 กก.'; } },
-  EXERCISE: { title: '🏃 ออกกำลังกาย',
-    html: '<label class="f">ทำอะไร</label><div class="chips" id="sub">'
-        + '<button class="chip on" data-v="เดิน">เดิน</button>'
-        + '<button class="chip" data-v="ปั่นจักรยาน">ปั่นจักรยาน</button>'
-        + '<button class="chip" data-v="ทำสวน/งานบ้าน">ทำสวน/งานบ้าน</button>'
-        + '<button class="chip" data-v="อื่น ๆ">อื่น ๆ</button></div>'
-        + '<label class="f" for="v1">นานกี่นาที</label>'
-        + '<input type="number" id="v1" inputmode="numeric" placeholder="เช่น 30">',
+    valid: function (d) { return (d.v1 > 20 && d.v1 < 300) ? '' : 'กรุณาใส่น้ำหนักระหว่าง 20–300 กก.'; }
+  },
+  EXERCISE: {
+    title: 'ออกกำลังกาย',
+    ask: function (n) { return 'วันนี้คุณ <span class="name-pink">' + n + '</span> ออกกำลังกายแบบไหนคะ?'; },
+    html: function () {
+      return chipsHTML('sub', ['เดิน','ปั่นจักรยาน','แกว่งแขน','ทำสวน/งานบ้าน','อื่น ๆ'], 'เดิน')
+           + '<div class="form-label">นานกี่นาทีคะ?</div>'
+           + '<input type="tel" id="v1" class="main-input-anim" inputmode="numeric" placeholder="เช่น 30">';
+    },
     read: function () { return { subtype: chip('sub'), v1: $('v1').value }; },
-    valid: function (d) { return (d.v1 > 0 && d.v1 <= 600) ? '' : 'กรุณาใส่จำนวนนาที'; } },
-  ADVERSE: { title: '⚠️ อาการผิดปกติ',
-    html: '<label class="f">อาการที่เป็น</label><div class="chips" id="sub">'
-        + '<button class="chip on" data-v="ใจสั่น เหงื่อแตก">ใจสั่น เหงื่อแตก</button>'
-        + '<button class="chip" data-v="หน้ามืด จะเป็นลม">หน้ามืด จะเป็นลม</button>'
-        + '<button class="chip" data-v="กระหายน้ำมาก ปัสสาวะบ่อย">กระหายน้ำ ปัสสาวะบ่อย</button>'
-        + '<button class="chip" data-v="แผลที่เท้าไม่หาย">แผลที่เท้าไม่หาย</button>'
-        + '<button class="chip" data-v="อื่น ๆ">อื่น ๆ</button></div>'
-        + '<label class="f" for="vt">เล่าเพิ่มเติม</label>'
-        + '<textarea id="vt" rows="2" placeholder="ไม่ใส่ก็ได้"></textarea>',
+    valid: function (d) { return (d.v1 > 0 && d.v1 <= 600) ? '' : 'ใส่จำนวนนาทีด้วยนะคะ'; }
+  },
+  ADVERSE: {
+    title: 'อาการผิดปกติ',
+    ask: function (n) { return 'คุณ <span class="name-pink">' + n + '</span> มีอาการอย่างไรบ้างคะ?'; },
+    html: function () {
+      return chipsHTML('sub', ['ใจสั่น เหงื่อแตก','หน้ามืด จะเป็นลม','กระหายน้ำ ปัสสาวะบ่อย','แผลที่เท้าไม่หาย','อื่น ๆ'], 'ใจสั่น เหงื่อแตก')
+           + '<div class="form-label">เล่าเพิ่มเติม (ไม่ใส่ก็ได้)</div>'
+           + '<textarea id="vt" rows="2" placeholder="พิมพ์อาการเพิ่มเติม..."></textarea>';
+    },
     read: function () { return { vt: chip('sub') + ($('vt').value.trim() ? ' — ' + $('vt').value.trim() : '') }; },
-    valid: function () { return ''; } }
+    valid: function () { return ''; }
+  }
 };
-function chip(id) { var on = document.querySelector('#' + id + ' .chip.on'); return on ? on.getAttribute('data-v') : ''; }
 
 var curType = null;
-function openForm(k) {
+function openNoteForm(k) {
   curType = k;
   var f = FORMS[k];
-  $('fTitle').textContent = f.title;
-  $('fBody').innerHTML = f.html;
-  $('fMsg').className = 'msg';
-  $('fSave').disabled = false; $('fSave').textContent = 'บันทึก';
+  var who = (S.mode === 'care' && S.careFor) ? (S.careFor.name || 'คนไข้')
+          : ((S.profile && S.profile.nameUse) || S.displayName || 'คุณ');
 
-  var forBox = $('fFor');
+  $('pri-title').textContent = f.title;
+  $('pri-ask').innerHTML = f.ask(esc(who));
+  $('pri-body').innerHTML = f.html();
+  $('pri-save').disabled = false; $('pri-save').textContent = 'บันทึกข้อมูล ✅';
+
+  var forBox = $('pri-for');
   if (S.mode === 'care' && S.careFor) {
     forBox.style.display = '';
     forBox.innerHTML = '🤝 กำลังบันทึกให้ <b>คุณ' + esc(S.careFor.name) + '</b> (HN ' + esc(S.careFor.hn) + ')';
   } else { forBox.style.display = 'none'; }
 
-  var box = $('fBody').querySelector('.chips');
+  var box = $('pri-body').querySelector('.chip-container');
   if (box) Array.prototype.forEach.call(box.children, function (c) {
     c.onclick = function () {
-      Array.prototype.forEach.call(box.children, function (x) { x.classList.remove('on'); });
-      c.classList.add('on');
+      Array.prototype.forEach.call(box.children, function (x) { x.classList.remove('active'); });
+      c.classList.add('active');
     };
   });
-  show('sForm');
+
+  $('primary-modal').style.display = 'flex';
 }
-$('fBack').onclick = function () { show(S.mode === 'care' ? 'sCareHome' : 'sHome'); };
+$('pri-close').onclick = function () { $('primary-modal').style.display = 'none'; };
 
-$('fSave').onclick = function () {
+$('pri-save').onclick = function () {
   var f = FORMS[curType], d = f.read(), bad = f.valid(d);
-  if (bad) return say($('fMsg'), bad, 'err');
-  $('fSave').disabled = true; $('fSave').textContent = 'กำลังบันทึก…';
+  if (bad) return swalAlert.fire('ตรวจสอบข้อมูล', bad, 'warning');
 
+  // ค่าน้ำตาลผิดปกติ — เตือนพร้อมวิธีปฏิบัติตัวแบบเดิม
+  if (curType === 'SBGM') {
+    var val = parseFloat(d.v1), lim = (d.subtype === 'หลังอาหาร') ? 140 : 110;
+    if (val < 70 || val > lim) return warnSbgm(val, d, lim);
+  }
+  if (curType === 'BP') {
+    var s = parseFloat(d.v1), dia = parseFloat(d.v2);
+    if (s > 140 || dia > 90 || s < 100 || dia < 60) return warnBp(s, dia, d);
+  }
+  doSave(d);
+};
+
+function warnSbgm(val, d, lim) {
+  var low = val < 70;
+  var html = low
+    ? '<div style="text-align:left; font-size:18px; position:relative; z-index:1;">'
+      + '<b>น้ำตาลต่ำกว่า 70 ให้ปฐมพยาบาลดังนี้ค่ะ</b><br>'
+      + '1. ให้คาร์โบไฮเดรตดูดซึมเร็ว 15 กรัมทันที เลือกอย่างใดอย่างหนึ่ง<br>'
+      + '&nbsp;&nbsp;◦ น้ำผึ้งหรือน้ำเชื่อมเข้มข้น 3 ช้อนชา<br>'
+      + '&nbsp;&nbsp;◦ ลูกอมแบบมีน้ำตาล 3–4 เม็ด<br>'
+      + '&nbsp;&nbsp;◦ น้ำส้มคั้นหรือน้ำอัดลมสูตรปกติ 180 ซีซี<br>'
+      + '&nbsp;&nbsp;◦ ขนมปัง 1 แผ่น หรือกล้วย 1 ลูก<br>'
+      + '<i style="color:#FFF59D; font-size:14px;">เลี่ยงช็อกโกแลตหรือนม เพราะไขมันทำให้ดูดซึมช้า</i><br>'
+      + '2. รอ 15 นาที แล้วเจาะน้ำตาลซ้ำ<br>'
+      + '3. ถ้ายังไม่เกิน 70 ให้ทานซ้ำอีก 1 รอบ<br><br>'
+      + '<b style="color:#FFCDD2;">🚨 ถ้าซึม ชัก หรือหมดสติ โทร 1669 ทันทีค่ะ</b>'
+      + '<img src="' + LOGO + '" class="nurse-bg-img"></div>'
+    : '<div style="text-align:left; font-size:20px; position:relative; z-index:1;">'
+      + '(เกณฑ์ปกติ ' + esc(d.subtype) + ' คือไม่เกิน ' + lim + ' มก./ดล.)<br><br>'
+      + '💡 <b>คำแนะนำ</b><br>คุมอาหารแป้งและน้ำตาล ดื่มน้ำเปล่าเยอะ ๆ นะคะ 💧'
+      + '<img src="' + LOGO + '" class="nurse-bg-img"></div>';
+
+  swalAlert.fire({
+    title: low ? '⚠️ น้ำตาลต่ำผิดปกติ' : '⚠️ น้ำตาลสูงเกินไป',
+    html: html, showCancelButton: true,
+    confirmButtonText: 'รับทราบและบันทึกค่านี้', cancelButtonText: 'แก้ไขตัวเลข'
+  }).then(function (cf) { if (cf.isConfirmed) doSave(d); else $('v1').value = ''; });
+}
+
+function warnBp(s, dia, d) {
+  var high = (s > 140 || dia > 90);
+  swalAlert.fire({
+    title: high ? '⚠️ ความดันโลหิตสูง' : '⚠️ ความดันโลหิตต่ำ',
+    html: 'กรุณานั่งพักแล้ววัดใหม่ ดื่มน้ำเยอะ ๆ<br>และเปิดประวัติให้แพทย์ดูเมื่อไปโรงพยาบาลนะคะ'
+        + '<img src="' + LOGO + '" class="nurse-bg-img">',
+    showCancelButton: true, confirmButtonText: 'รับทราบและบันทึกค่านี้', cancelButtonText: 'แก้ไขตัวเลข'
+  }).then(function (cf) { if (cf.isConfirmed) doSave(d); });
+}
+
+function doSave(d) {
+  $('pri-save').disabled = true; $('pri-save').textContent = 'กำลังบันทึก…';
+  showLoading(true);
+
+  // ปลายทางต้องถูกคน — โหมดผู้ดูแลส่ง forHn ของคนไข้ไปด้วยเสมอ
   var forHn = (S.mode === 'care' && S.careFor) ? S.careFor.hn : undefined;
   var extra = (curType === 'WEIGHT' && d.v2) ? { type: 'WAIST', v1: d.v2 } : null;
   if (extra) d.v2 = '';
@@ -774,46 +1040,76 @@ $('fSave').onclick = function () {
       return r;
     })
     .then(function (r) {
-      var tail = r.flag === 'HIGH' ? ' — ค่าสูงกว่าเกณฑ์ ทีมคลินิกจะเห็นข้อมูลนี้'
-               : r.flag === 'LOW'  ? ' — ค่าต่ำกว่าเกณฑ์ ถ้ามีอาการให้รีบแจ้งเจ้าหน้าที่' : '';
-      say($('fMsg'), 'บันทึกเรียบร้อย' + tail, r.flag === 'NORMAL' ? 'ok' : 'err');
-      $('fSave').disabled = false; $('fSave').textContent = 'บันทึก';
-      if (S.mode === 'owner') {
+      showLoading(false);
+      $('pri-save').disabled = false; $('pri-save').textContent = 'บันทึกข้อมูล ✅';
+      $('primary-modal').style.display = 'none';
+
+      var done = (r.flag === 'HIGH' || r.flag === 'LOW')
+        ? swalAlert.fire({ title: 'บันทึกแล้วค่ะ',
+            html: (r.flag === 'HIGH' ? 'ค่าสูงกว่าเกณฑ์ ทีมคลินิกจะเห็นข้อมูลนี้'
+                                     : 'ค่าต่ำกว่าเกณฑ์ ถ้ามีอาการให้รีบแจ้งเจ้าหน้าที่')
+                  + '<img src="' + LOGO + '" class="nurse-bg-img">' })
+        : swalSuccess.fire({ title: 'บันทึกเรียบร้อยแล้ว' });
+
+      return done.then(function () {
+        if (S.mode !== 'owner') return;
         return api('bootstrap', { userId: S.userId }).then(function (b) {
           if (b && b.ok && b.registered) { S.profile = b.profile; S.stats = b.stats; renderHome(); }
         });
-      }
+      });
     })
     .catch(function (e) {
-      say($('fMsg'), e.message || 'บันทึกไม่สำเร็จ', 'err');
-      $('fSave').disabled = false; $('fSave').textContent = 'บันทึก';
+      showLoading(false);
+      $('pri-save').disabled = false; $('pri-save').textContent = 'บันทึกข้อมูล ✅';
+      swalAlert.fire('บันทึกไม่สำเร็จ', e.message || '', 'error');
     });
-};
+}
 
 /* ===================== ประวัติ ===================== */
 var TYPE_TH = { SBGM: 'น้ำตาล', BP: 'ความดัน', WEIGHT: 'น้ำหนัก', WAIST: 'รอบเอว',
                 FOOD: 'อาหาร', EXERCISE: 'ออกกำลังกาย', ADVERSE: 'อาการ' };
-$('goHist').onclick = function () {
-  show('sHist'); $('histBody').textContent = 'กำลังโหลด…';
+function openHistory() {
+  show('v-hist'); $('histBody').innerHTML = '';
+  showLoading(true);
   api('history', { userId: S.userId, hn: S.hn, limit: 60 }).then(function (r) {
-    if (!r.ok || !r.events.length) {
-      $('histBody').innerHTML = '<div class="empty"><span class="e">📭</span>ยังไม่มีข้อมูลที่บันทึกไว้</div>'; return;
+    showLoading(false);
+    if (!r.ok || !r.events || !r.events.length) {
+      $('histBody').innerHTML = '<div class="paper"><div class="empty"><span class="e">📭</span>ยังไม่มีข้อมูลที่บันทึกไว้ค่ะ</div></div>';
+      return;
     }
-    $('histBody').innerHTML = r.events.map(function (e) {
-      var val = '';
-      if (e.v1 !== '' && e.v1 != null) val += e.v1;
-      if (e.v2 !== '' && e.v2 != null) val += '/' + e.v2;
-      if (e.vt) val += (val ? ' ' : '') + esc(e.vt);
-      var cls = e.flag === 'HIGH' ? 'flagh' : (e.flag === 'LOW' ? 'flagl' : '');
-      return '<div class="hrow"><div><div>' + (TYPE_TH[e.type] || esc(e.type))
-           + (e.subtype ? ' <small class="l">(' + esc(e.subtype) + ')</small>' : '')
-           + (e.by ? '<span class="tag">' + esc(e.by) + ' ลงให้</span>' : '') + '</div>'
-           + '<div class="l">' + esc(e.ts) + '</div></div>'
-           + '<div class="r ' + cls + '">' + val + ' <small>' + esc(e.unit || '') + '</small></div></div>';
+    // จัดกลุ่มตามวัน แบบการ์ดของเดิม
+    var groups = {}, order = [];
+    r.events.forEach(function (e) {
+      var d = new Date(e.ts);
+      var key = isNaN(d.getTime()) ? String(e.ts) : thDate(e.ts);
+      if (!groups[key]) { groups[key] = []; order.push(key); }
+      groups[key].push(e);
+    });
+    $('histBody').innerHTML = order.map(function (key) {
+      var list = groups[key];
+      var risk = list.some(function (e) { return e.flag === 'HIGH' || e.flag === 'LOW'; });
+      var rows = list.map(function (e) {
+        var val = '';
+        if (e.v1 !== '' && e.v1 != null) val += e.v1;
+        if (e.v2 !== '' && e.v2 != null) val += '/' + e.v2;
+        var alertTag = e.flag === 'HIGH' ? '<span class="alert-badge high">⚠️ สูงเกินไป</span>'
+                     : e.flag === 'LOW'  ? '<span class="alert-badge low">⚠️ ต่ำเกินไป</span>' : '';
+        var by = e.by ? '<span class="tag">' + esc(e.by) + ' ลงให้</span>' : '';
+        return '<div class="hist-val-row"><span>' + (TYPE_TH[e.type] || esc(e.type))
+             + (e.subtype ? ' <small>(' + esc(e.subtype) + ')</small>' : '') + ' ' + by + '</span>'
+             + '<span><span class="hist-val-bold">' + esc(val) + '</span> <small>' + esc(e.unit || '') + '</small> '
+             + (e.vt ? esc(e.vt) : '') + ' ' + alertTag + '</span></div>';
+      }).join('<div class="divider-dashed"></div>');
+      return '<div class="hist-card-flex ' + (risk ? 'risk' : '') + '">'
+           + '<div class="hist-date-badge">' + esc(key) + '</div>'
+           + '<div class="hist-right">' + rows + '</div></div>';
     }).join('');
-  }).catch(function (e) { $('histBody').textContent = e.message; });
-};
-$('hBack').onclick = function () { show('sHome'); };
+  }).catch(function (e) {
+    showLoading(false);
+    $('histBody').innerHTML = '<div class="paper"><div class="empty">' + esc(e.message) + '</div></div>';
+  });
+}
+$('histBack').onclick = function () { show('v-home'); };
 
 /* ===================== รายการอาหารที่แนะนำ ===================== */
 var PLAN_ROWS = [
@@ -826,73 +1122,81 @@ var PLAN_ROWS = [
   ['Sugar', '🍬 น้ำตาล', 'ช้อนชา', 'ยิ่งน้อยยิ่งดี — น้ำหวาน 1 แก้วมีเกือบ 10 ช้อนชา']
 ];
 $('goPlan').onclick = function () {
-  show('sPlan'); $('pBody').innerHTML = 'กำลังโหลด…'; $('pWhen').textContent = '';
+  show('v-plan'); $('planBody').innerHTML = ''; $('planWhen').textContent = '';
+  showLoading(true);
   api('getPlan', { hn: S.hn }).then(function (r) {
+    showLoading(false);
     var p = r && r.plan;
     if (!p) {
-      $('pBody').innerHTML = '<div class="empty"><span class="e">🍽️</span>'
-        + 'ยังไม่มีรายการอาหารสำหรับคุณ<br><span class="muted">'
-        + 'นักโภชนาการจะคำนวณให้ตอนมาพบที่คลินิก แล้วจะขึ้นที่นี่เอง</span></div>';
+      $('planBody').innerHTML = '<div class="empty"><span class="e">🍽️</span>ยังไม่มีรายการอาหารสำหรับคุณ<br>'
+        + '<span style="font-size:16px; font-weight:500;">นักโภชนาการจะคำนวณให้ตอนมาพบที่คลินิก แล้วจะขึ้นที่นี่เองค่ะ</span></div>';
       return;
     }
-    $('pWhen').textContent = 'คำนวณให้เมื่อ ' + thDate(p.PlanDate) + (p.By ? ' · โดย ' + p.By : '');
+    $('planWhen').textContent = 'คำนวณให้เมื่อ ' + thDate(p.PlanDate) + (p.By ? ' · โดย ' + p.By : '');
     var rows = PLAN_ROWS.filter(function (x) { return p[x[0]] !== '' && p[x[0]] != null; }).map(function (x) {
-      return '<div class="plan" style="margin:11px 0 0"><div><b>' + x[1] + '</b>'
-           + '<div class="muted" style="font-size:.86rem">' + x[3] + '</div></div>'
-           + '<div class="n">' + p[x[0]] + ' ' + x[2] + '<br>'
-           + '<span class="muted" style="font-weight:400;font-size:.8rem">ต่อวัน</span></div></div>';
+      return '<div class="metric-card"><div class="metric-title">' + x[1] + '</div>'
+           + '<div class="metric-value">' + esc(p[x[0]]) + ' <small>' + x[2] + ' / วัน</small></div>'
+           + '<div class="metric-desc">' + x[3] + '</div></div>';
     }).join('');
-    $('pBody').innerHTML =
-      (p.TargetKcal ? '<div style="text-align:center;margin:12px 0 4px">'
-        + '<div class="muted">พลังงานที่ควรได้ต่อวัน</div>'
-        + '<div class="big">' + p.TargetKcal + ' <span style="font-size:1.1rem">กิโลแคลอรี</span></div></div>' : '')
-      + (p.WeightTargetKg ? '<div class="note">🎯 น้ำหนักเป้าหมาย <b>' + p.WeightTargetKg + ' กก.</b>'
-        + (p.WeightKg ? ' (ตอนนี้ ' + p.WeightKg + ' กก.)' : '') + '</div>' : '')
-      + '<h2 style="font-size:1.15rem">กินได้วันละเท่าไร</h2>' + rows
-      + (p.Advice ? '<div class="note">💡 ' + esc(p.Advice) + '</div>' : '')
-      + (p.PlanNote ? '<div class="note">📝 ' + esc(p.PlanNote) + '</div>' : '')
-      + (p.NextFollowup ? '<div class="note">📅 นัดติดตามโภชนาการ ' + thDate(p.NextFollowup) + '</div>' : '')
+    $('planBody').innerHTML =
+      (p.TargetKcal ? '<div style="text-align:center; margin:14px 0 6px;">'
+        + '<div class="metric-title" style="text-align:center;">พลังงานที่ควรได้ต่อวัน</div>'
+        + '<div class="big-kcal">' + esc(p.TargetKcal) + '</div>'
+        + '<div class="metric-title" style="text-align:center;">กิโลแคลอรี</div></div>' : '')
+      + (p.WeightTargetKg ? '<div class="note-box">🎯 น้ำหนักเป้าหมาย <b>' + esc(p.WeightTargetKg) + ' กก.</b>'
+        + (p.WeightKg ? ' (ตอนนี้ ' + esc(p.WeightKg) + ' กก.)' : '') + '</div>' : '')
+      + '<h2 style="color:#5D4037; font-size:22px; margin-top:18px;">กินได้วันละเท่าไร</h2>'
+      + '<div class="metrics-container">' + rows + '</div>'
+      + (p.Advice ? '<div class="note-box">💡 ' + esc(p.Advice) + '</div>' : '')
+      + (p.PlanNote ? '<div class="note-box">📝 ' + esc(p.PlanNote) + '</div>' : '')
+      + (p.NextFollowup ? '<div class="note-box">📅 นัดติดตามโภชนาการ ' + thDate(p.NextFollowup) + '</div>' : '')
       + '<div class="fine">ตัวเลขนี้เป็นของคุณคนเดียว คำนวณจากน้ำหนัก ส่วนสูง และเป้าหมายของคุณ '
-      + 'ถ้ากินตามนี้ได้ น้ำตาลจะคุมง่ายขึ้นมาก</div>';
-  }).catch(function (e) { $('pBody').textContent = e.message; });
+      + 'ถ้ากินตามนี้ได้ น้ำตาลจะคุมง่ายขึ้นมากค่ะ</div>';
+  }).catch(function (e) {
+    showLoading(false);
+    $('planBody').innerHTML = '<div class="empty">' + esc(e.message) + '</div>';
+  });
 };
-$('pBack').onclick = function () { show('sHome'); };
+$('planBack').onclick = function () { show('v-home'); };
 
 /* ===================== สัดส่วนร่างกาย ===================== */
 var BODY_ROWS = [
-  ['Weight',        'น้ำหนัก', 'กก.', ''],
-  ['BMI',           'ดัชนีมวลกาย (BMI)', '', 'คนไทยควรอยู่ 18.5–22.9 · เกิน 25 ถือว่าอ้วน'],
-  ['Waist',         'รอบเอว', 'ซม.', 'ชายควรน้อยกว่า 90 · หญิงน้อยกว่า 80'],
-  ['BodyFatPct',    'ไขมันในร่างกาย', '%', 'ชายควรน้อยกว่า 20 · หญิงน้อยกว่า 28'],
-  ['VisceralFat',   'ไขมันช่องท้อง', 'ระดับ', 'ไขมันที่หุ้มอวัยวะในท้อง ควรไม่เกิน 9 (ยิ่งต่ำยิ่งดี)'],
-  ['MuscleMassPct', 'มวลกล้ามเนื้อ', '%', 'กล้ามเนื้อมากช่วยเผาผลาญน้ำตาลได้ดีขึ้น'],
-  ['BMR',           'อัตราเผาผลาญพื้นฐาน', 'กิโลแคลอรี/วัน', 'พลังงานที่ร่างกายใช้แม้ตอนนอนเฉย ๆ'],
-  ['BodyAge',       'อายุร่างกาย', 'ปี', 'ถ้าน้อยกว่าอายุจริง = ร่างกายแข็งแรงกว่าวัย']
+  ['Weight',        '⚖️ น้ำหนัก', 'กก.', ''],
+  ['BMI',           '📊 ดัชนีมวลกาย (BMI)', '', 'คนไทยควรอยู่ 18.5–22.9 · เกิน 25 ถือว่าอ้วน'],
+  ['Waist',         '📏 รอบเอว', 'ซม.', 'ชายควรน้อยกว่า 90 · หญิงน้อยกว่า 80'],
+  ['BodyFatPct',    '🥑 ไขมันในร่างกาย', '%', 'ชายควรน้อยกว่า 20 · หญิงน้อยกว่า 28'],
+  ['VisceralFat',   '🛡️ ไขมันช่องท้อง', 'ระดับ', 'ไขมันที่หุ้มอวัยวะในท้อง ควรไม่เกิน 9 (ยิ่งต่ำยิ่งดี)'],
+  ['MuscleMassPct', '💪 มวลกล้ามเนื้อ', '%', 'กล้ามเนื้อมากช่วยเผาผลาญน้ำตาลได้ดีขึ้น'],
+  ['BMR',           '🔥 อัตราเผาผลาญพื้นฐาน', 'กิโลแคลอรี/วัน', 'พลังงานที่ร่างกายใช้แม้ตอนนอนเฉย ๆ ห้ามกินน้อยกว่านี้'],
+  ['BodyAge',       '🧬 อายุร่างกาย', 'ปี', 'ถ้าน้อยกว่าอายุจริง แปลว่าร่างกายแข็งแรงกว่าวัย']
 ];
 $('goBody').onclick = function () {
-  show('sBody'); $('bBody').innerHTML = 'กำลังโหลด…'; $('bWhen').textContent = '';
+  show('v-body'); $('bodyBody').innerHTML = ''; $('bodyWhen').textContent = '';
+  showLoading(true);
   api('getBody', { hn: S.hn }).then(function (r) {
+    showLoading(false);
     var b = r && r.body;
     if (!b) {
-      $('bBody').innerHTML = '<div class="empty"><span class="e">📊</span>'
-        + 'ยังไม่มีผลวัดสัดส่วนร่างกาย<br><span class="muted">'
-        + 'วัดได้ที่คลินิกด้วยเครื่องชั่งวิเคราะห์ร่างกาย แล้วผลจะขึ้นที่นี่เอง</span></div>';
+      $('bodyBody').innerHTML = '<div class="empty"><span class="e">📊</span>ยังไม่มีผลวัดสัดส่วนร่างกาย<br>'
+        + '<span style="font-size:16px; font-weight:500;">วัดได้ที่คลินิกด้วยเครื่องชั่งวิเคราะห์ร่างกาย แล้วผลจะขึ้นที่นี่เองค่ะ</span></div>';
       return;
     }
-    $('bWhen').textContent = 'วัดเมื่อ ' + thDate(b.MeasureDate);
+    $('bodyWhen').textContent = 'วัดเมื่อ ' + thDate(b.MeasureDate);
     var rows = BODY_ROWS.filter(function (x) { return b[x[0]] !== '' && b[x[0]] != null; }).map(function (x) {
-      return '<div class="plan" style="margin:13px 0 0"><div><b>' + x[1] + '</b>'
-           + (x[3] ? '<div class="muted" style="font-size:.86rem">' + x[3] + '</div>' : '')
-           + '</div><div class="n" style="font-size:1.3rem">' + b[x[0]]
-           + ' <span style="font-size:.85rem;font-weight:400">' + x[2] + '</span></div></div>';
+      return '<div class="metric-card"><div class="metric-title">' + x[1] + '</div>'
+           + '<div class="metric-value">' + esc(b[x[0]]) + ' <small>' + x[2] + '</small></div>'
+           + (x[3] ? '<div class="metric-desc">' + x[3] + '</div>' : '') + '</div>';
     }).join('');
-    $('bBody').innerHTML = rows
+    $('bodyBody').innerHTML = '<div class="metrics-container">' + rows + '</div>'
+      + '<div class="note-box">🌟 คุณเปลี่ยนแปลงร่างกายให้ดีขึ้นได้ มาโรงพยาบาลครั้งหน้าต้องดีขึ้นแน่นอนค่ะ!</div>'
       + '<div class="fine">ค่าเหล่านี้วัดจากเครื่องที่คลินิก ไม่ใช่การวินิจฉัยโรค '
-      + 'ใช้ดูว่าร่างกายเปลี่ยนไปทางไหนเมื่อเทียบกับครั้งก่อน — '
-      + 'ลดไขมันและเพิ่มกล้ามเนื้อคือทิศทางที่ช่วยให้หยุดยาได้</div>';
-  }).catch(function (e) { $('bBody').textContent = e.message; });
+      + 'ใช้ดูว่าร่างกายเปลี่ยนไปทางไหนเมื่อเทียบกับครั้งก่อน — ลดไขมันและเพิ่มกล้ามเนื้อคือทิศทางที่ช่วยให้หยุดยาได้ค่ะ</div>';
+  }).catch(function (e) {
+    showLoading(false);
+    $('bodyBody').innerHTML = '<div class="empty">' + esc(e.message) + '</div>';
+  });
 };
-$('bBack').onclick = function () { show('sHome'); };
+$('bodyBack').onclick = function () { show('v-home'); };
 
 boot();
 </script>
