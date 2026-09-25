@@ -6,21 +6,25 @@
   <title>สวีคุมหวาน • บันทึกผล</title>
 
   <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H">
+  <!-- ต่อเน็ตล่วงหน้า: GAS ตอบผ่าน 2 โดเมนนี้ (ลดเวลารอต่อสาย) -->
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Mali:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <!-- SweetAlert ไม่บล็อกการแสดงผลหน้า (defer) — โค้ดด้านล่างเช็คตอนเรียกใช้จริง -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11" defer></script>
 
   <!--
-    ============ LIFF สวีคุมหวาน ============
-    ธีม/ฟอนต์/ความดุ๊กดิ๊ก = ของเดิมทั้งหมด
-    ที่เพิ่มจากของเดิม
-      · รับ ?hn= จาก QR ในใบสั่งอาหาร (เปิดในเบราว์เซอร์ก็ได้ ไม่บังคับเปิดใน LINE)
-      · เลือกบทบาทครั้งแรก : เจ้าของ LINE / อสม.-ญาติที่บันทึกให้
-      · โหมดผู้ดูแล เห็นแค่ชื่อคนไข้ บันทึกได้อย่างเดียว ค่าไปรวมที่ HN เดียวกัน
-      · 2 ปุ่มยาว = ของที่คลินิกส่งมาให้ (รายการอาหาร / สัดส่วนร่างกาย)
+    ============ LIFF สวีคุมหวาน (รอบ 20) ============
+    ความเร็ว : ยิง GAS ปลุกเครื่องทันทีที่เปิดหน้า · โหลดแบบ GET + ลองซ้ำอัตโนมัติ
+               แสดงหน้าหลักจากข้อมูลที่จำไว้ในเครื่องทันที แล้วค่อยอัปเดตจากชีต
+               สถิติ "บันทึกแล้ว x ครั้ง" โหลดแยกทีหลัง ไม่ให้หน้าแรกต้องรอ
+    โหมด     : ?mode=self  บันทึกให้ตัวเอง
+               ?mode=other บันทึกให้คนอื่น (อสม./ญาติ) → สแกน QR ที่มี HN
+               ไม่มี mode  → ถามเลือกเหมือนเดิม
   -->
 
   <style>
@@ -232,6 +236,82 @@
 
     pre.dump { white-space: pre-wrap; word-break: break-all; background: #EFEBE9; border-radius: 12px; padding: 12px; font-size: 13px; margin-top: 12px; display: none; max-height: 260px; overflow: auto; color: #4E342E; }
     .credit { text-align: center; font-size: 12px; color: #5D4037; margin-top: 30px; margin-bottom: 20px; }
+
+    /* =============== รอบ 20 : ส่วนที่เพิ่ม/แก้ (ทับของเดิมด้านบน) =============== */
+
+    /* avatar กลมสนิท — เดิมโดน flex บีบเป็นวงรี */
+    .pic-wrapper { flex: 0 0 70px; width: 70px; height: 70px; margin-top: 5px; }
+    .pic-wrapper img { width: 70px; height: 70px; min-width: 70px; min-height: 70px; aspect-ratio: 1 / 1; border-radius: 50%; object-fit: cover; display: block; }
+    .compact-info { min-width: 0; }
+
+    /* navbar : ปุ่มดูประวัติชิดชื่อ · ปุ่มปิดแดงอยู่ขวาสุด */
+    .navbar { gap: 8px; }
+    .nav-left { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .nav-title { font-size: 21px; white-space: nowrap; }
+    .nav-icon { width: 34px; height: 34px; flex: none; }
+    .nav-hist-btn, .nav-return-btn { margin: 0 !important; font-size: 13px; padding: 4px 10px; }
+    .nav-close { background: linear-gradient(135deg, #EF5350, #C62828); color: #FFF; border: 2px solid #FFCDD2; border-radius: 20px; padding: 4px 10px; font-size: 13px; font-weight: 800; box-shadow: 0 2px 5px rgba(0,0,0,0.25); cursor: pointer; white-space: nowrap; margin-left: auto; flex: none; }
+
+    /* หัวข้อ "วันนี้จะบันทึกอะไร?" ตัวกระตุกไล่ทีละตัว */
+    .ask-title { font-size: 34px; font-weight: 800; text-align: center; color: #4E342E; margin: 8px 0 14px; line-height: 1.3; }
+    .ask-title span { display: inline-block; animation: letterJump 2.6s infinite ease-in-out; will-change: transform; }
+    @keyframes letterJump {
+        0%, 55%, 100% { transform: translateY(0) rotate(0deg); }
+        8%  { transform: translateY(-10px) rotate(-7deg); }
+        16% { transform: translateY(3px) rotate(5deg); }
+        24% { transform: translateY(-5px) rotate(-3deg); }
+        32% { transform: translateY(0) rotate(0deg); }
+    }
+    @media (prefers-reduced-motion: reduce) { .ask-title span { animation: none; } }
+
+    /* ป้ายเป้าหมาย */
+    .goal-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .goal-row .lbl { font-size: 17px; font-weight: 800; color: #3E2723; }
+
+    /* ปุ่มยาวเพิ่ม */
+    .long-btn.warm { background: linear-gradient(135deg, #FFF3E0 0%, #FFCC80 100%); }
+    .long-btn.help { background: linear-gradient(135deg, #FFEBEE 0%, #FFCDD2 100%); }
+    .long-btn.help b { color: #B71C1C; }
+    .btn-green { border: 3px solid #FFF; outline: none; background: linear-gradient(135deg, #66BB6A 0%, #2E7D32 100%); color: #FFF; padding: 16px 20px; border-radius: 50px; font-size: 26px; font-weight: 800; width: 100%; cursor: pointer; box-shadow: 0 8px 20px rgba(46,125,50,0.4); margin-top: 18px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .btn-green:active { transform: scale(0.97); }
+
+    /* ตัวโหลด + ข้อความ */
+    #loading-msg { color: #FFF; font-weight: 700; margin-top: 15px; font-size: 20px; letter-spacing: 1px; text-align: center; padding: 0 20px; }
+    .mini-spin { display: inline-block; width: 22px; height: 22px; border: 4px solid rgba(93,64,55,0.2); border-top-color: #FF9100; border-radius: 50%; animation: spin 1s linear infinite; vertical-align: middle; margin-right: 8px; }
+    .lite-bar { position: absolute; left: 0; bottom: 0; height: 6px; background: rgba(255,255,255,0.7); width: 100%; animation: liteBar linear forwards; }
+    @keyframes liteBar { from { width: 100%; } to { width: 0; } }
+
+    /* หน้าให้ความรู้ */
+    .info-h { font-size: 22px; color: #5D4037; margin: 16px 0 8px; font-weight: 800; }
+    .info-list { margin: 0; padding-left: 22px; font-size: 18px; line-height: 1.5; color: #4E342E; font-weight: 500; }
+    .info-list li { margin-bottom: 6px; }
+    .doctor-box { background: #FFEBEE; border: 3px solid #EF9A9A; border-radius: 15px; padding: 13px 15px; font-size: 17px; line-height: 1.45; color: #B71C1C; font-weight: 700; margin: 12px 0; }
+    .step-card { display: flex; gap: 12px; align-items: flex-start; background: #FFF8E1; border-radius: 15px; padding: 12px 14px; margin-bottom: 8px; font-size: 18px; color: #4E342E; font-weight: 500; line-height: 1.4; }
+    .step-card .n { flex: none; width: 34px; height: 34px; border-radius: 50%; background: #FF9100; color: #FFF; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+
+    /* หน้าสรุปข้อมูล */
+    .sum-kv { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; border-bottom: 2px dashed #F0E2CD; font-size: 18px; color: #5D4037; font-weight: 600; }
+    .sum-kv:last-child { border-bottom: 0; }
+    .sum-kv b { color: #3E2723; font-weight: 800; text-align: right; }
+    .sum-tbl { width: 100%; border-collapse: collapse; font-size: 17px; margin-top: 4px; }
+    .sum-tbl th { background: #FFE0B2; color: #5D4037; padding: 6px 4px; font-weight: 800; }
+    .sum-tbl td { text-align: center; padding: 8px 4px; border-bottom: 2px dashed #F0E2CD; font-weight: 700; color: #3E2723; }
+    .sum-tbl td:first-child { text-align: left; color: #5D4037; }
+    .food-chip { display: inline-block; background: #FFF3E0; border: 2px solid #FFCC80; color: #E65100; border-radius: 20px; padding: 3px 12px; margin: 3px 3px 0 0; font-size: 16px; font-weight: 700; }
+    .ai-box { background: #F1F8E9; border: 3px solid #AED581; border-radius: 15px; padding: 13px 15px; margin-top: 12px; font-size: 17px; line-height: 1.55; color: #33691E; font-weight: 500; }
+    .ai-box .t { font-weight: 800; font-size: 18px; margin-bottom: 4px; display: block; }
+    .ds-head { background: linear-gradient(135deg, #5D4037, #3E2723); color: #FFD600; border-radius: 15px; padding: 12px 16px; margin: 6px 0 12px; font-size: 22px; font-weight: 800; text-align: center; }
+    .ds-box { background: #FFF; border: 3px solid #FFE0B2; border-left: 8px solid #FF9100; border-radius: 15px; padding: 12px 15px; margin-bottom: 12px; box-shadow: 0 3px 8px rgba(0,0,0,0.07); }
+    .ds-box h3 { font-size: 20px; color: #5D4037; margin: 0 0 6px; }
+    .trend-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 2px dashed #F0E2CD; font-size: 18px; font-weight: 600; color: #5D4037; flex-wrap: wrap; }
+    .trend-row:last-child { border-bottom: 0; }
+    .trend-row .v { font-weight: 800; color: #3E2723; }
+    .trend-row .good { color: #2E7D32; } .trend-row .bad { color: #E65100; }
+    .alert-red    { background: #FFEBEE; border-color: #EF9A9A; border-left-color: #D32F2F; }
+    .alert-yellow { background: #FFFDE7; border-color: #FFF59D; border-left-color: #F9A825; }
+    .alert-green  { background: #E8F5E9; border-color: #A5D6A7; border-left-color: #388E3C; }
+    .alert-lvl { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+    .btn-close, .btn-white-round, .btn-brown { font-family: var(--font-main) !important; }
   </style>
 </head>
 <body>
@@ -242,18 +322,17 @@
           <img src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" class="loader-logo">
           <div class="swee-spinner-ring"></div>
       </div>
-      <div style="color:#FFF; font-weight:700; margin-top:15px; font-size:20px; letter-spacing:1px;">กำลังโหลด...</div>
+      <div id="loading-msg">กำลังโหลด...</div>
   </div>
 
   <!-- ================= Navbar ================= -->
   <nav class="navbar" id="main-navbar" style="display:none;">
-      <div class="nav-brand-container">
+      <div class="nav-left">
           <img class="nav-icon" src="https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H" alt="Logo">
-          <div class="nav-title-box"><div class="nav-title">สวีคุมหวาน</div></div>
-      </div>
-      <div style="display:flex; align-items:center;">
+          <div class="nav-title">สวีคุมหวาน</div>
           <button id="nav-btn" class="nav-hist-btn" style="display:none;">ดูประวัติ</button>
       </div>
+      <button id="nav-close" class="nav-close">ปิดหน้านี้</button>
   </nav>
 
   <!-- ================= แจ้งปัญหาการเชื่อมต่อ ================= -->
@@ -268,7 +347,7 @@
       </div>
   </div>
 
-  <!-- ================= เลือกบทบาท (ครั้งแรกที่สแกน) ================= -->
+  <!-- ================= เลือกบทบาท (เปิดจาก QR ที่ไม่ระบุ mode) ================= -->
   <div id="v-role" class="container" style="display:none;">
       <div class="paper" style="text-align:center;">
           <div style="font-size:60px; margin-bottom:6px; animation: pulse-jiggle 2s infinite;">👋</div>
@@ -290,6 +369,24 @@
           <div class="fine">เลือกผิดไม่เป็นไรค่ะ แจ้งเจ้าหน้าที่คลินิกให้แก้ให้ได้</div>
       </div>
       <div class="credit">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
+  </div>
+
+  <!-- ================= ?mode=other : สแกน QR คนไข้ ================= -->
+  <div id="v-scan" class="container" style="display:none;">
+      <div class="paper" style="text-align:center;">
+          <div style="font-size:60px; margin-bottom:6px; animation: pulse-jiggle 2s infinite;">🤝</div>
+          <h1>บันทึกให้คนที่ดูแลอยู่</h1>
+          <div class="lead">สแกน QR code จากใบของคนไข้ (มีเลข HN ติดมา) เพื่อเลือกว่าจะบันทึกให้ใคร</div>
+          <button class="btn" id="scanBtn" style="margin-top:18px; font-size:24px;">📷 สแกน QR คนไข้</button>
+          <div class="fine" style="margin-top:16px;">ถ้าสแกนในหน้านี้ไม่ได้ ให้เปิดกล้องมือถือสแกน QR ที่ใบคนไข้ หรือพิมพ์เลข HN ด้านล่าง</div>
+          <label class="f" for="scanHn" style="text-align:left;">พิมพ์เลข HN</label>
+          <input type="tel" id="scanHn" inputmode="numeric" maxlength="12" placeholder="เช่น 123456" autocomplete="off">
+          <button class="btn-brown" id="scanGo" style="font-size:20px; padding:14px;">ตกลง</button>
+      </div>
+      <div class="paper" id="scanCaresBox" style="display:none;">
+          <h2 style="margin-top:0;">คนที่คุณดูแลอยู่</h2>
+          <div id="scanCares"></div>
+      </div>
   </div>
 
   <!-- ================= ยินยอม + ลงทะเบียน (เจ้าของไลน์) ================= -->
@@ -371,21 +468,19 @@
                   </div>
                   <div class="compact-info" style="width:100%;">
                       <div class="compact-name" id="head-name">...</div>
-                      <div><span class="compact-badge" id="head-start">เริ่มต้นเมื่อ : ...</span></div>
-                      <div class="compact-target" id="head-target" style="display:none;"></div>
+                      <div><span class="compact-badge" id="head-start">...</span></div>
                   </div>
               </div>
 
               <div class="more-box" id="head-more">
                   <div class="profile-row-4" style="margin-bottom:8px;">
-                      <div class="stat-mini-badge">บันทึกแล้ว <span id="stat-total">0</span> ครั้ง</div>
-                      <div class="stat-mini-badge">เจาะน้ำตาล <span id="stat-sbgm">0</span> ครั้ง</div>
-                      <div class="stat-mini-badge" id="stat-last" style="display:none;"></div>
+                      <div class="stat-mini-badge">บันทึกแล้ว <span id="stat-total">–</span> ครั้ง</div>
+                      <div class="stat-mini-badge">เจาะน้ำตาล <span id="stat-sbgm">–</span> ครั้ง</div>
                   </div>
                   <div class="kv-row"><span>สถานะน้ำตาลล่าสุด</span><span id="head-status"></span></div>
                   <div class="kv-row"><span>ยาเบาหวานที่ได้รับ</span><span class="v" id="head-med">—</span></div>
                   <div class="kv-row"><span>นัดครั้งถัดไป</span><span class="v" id="head-next">—</span></div>
-                  <div class="med-badge-inline" id="head-goal" style="margin-top:8px;">—</div>
+                  <div class="goal-row"><span class="lbl">เป้าหมาย</span><span class="med-badge-inline" id="head-goal">—</span></div>
               </div>
 
               <button class="btn-brown" id="head-toggle" style="margin-top:2px;">ดูเพิ่มเติม ▾</button>
@@ -393,6 +488,7 @@
       </div>
 
       <div class="container" style="padding-top:0; padding-bottom:60px;">
+          <div class="ask-title" id="ask-home" aria-label="วันนี้จะบันทึกอะไร?"></div>
           <div class="note-grid" id="main-grid"></div>
 
           <button class="long-btn" id="goPlan">
@@ -405,6 +501,18 @@
               <b>ดูสัดส่วนร่างกาย</b>
               <span class="d">ผลชั่ง-วัดครั้งล่าสุดที่คลินิก พร้อมคำอธิบายว่าแต่ละค่าหมายถึงอะไร</span>
           </button>
+          <button class="long-btn help" data-info="low">
+              <span class="cv">›</span>
+              <b>ถ้าน้ำตาลต่ำ ทำอย่างไร?</b>
+              <span class="d">วิธีปฐมพยาบาลเบื้องต้น และเมื่อไหร่ต้องรีบไปโรงพยาบาล</span>
+          </button>
+          <button class="long-btn warm" data-info="remit">
+              <span class="cv">›</span>
+              <b>วิธีควบคุมเบาหวานโดยไม่ต้องใช้ยา</b>
+              <span class="d">แนวทางดูแลตัวเองให้เบาหวานเข้าสู่ระยะสงบ ภายใต้การดูแลของแพทย์</span>
+          </button>
+
+          <button class="btn-green" id="goSum">📊 สรุปข้อมูลของคุณ</button>
 
           <div class="credit">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
       </div>
@@ -429,8 +537,15 @@
           </div>
       </div>
       <div class="container" style="padding-top:12px; padding-bottom:60px;">
+          <div class="ask-title" id="ask-care" aria-label="วันนี้จะบันทึกอะไร?"></div>
           <div class="note-grid" id="care-grid"></div>
+          <button class="long-btn help" data-info="low">
+              <span class="cv">›</span>
+              <b>ถ้าน้ำตาลต่ำ ทำอย่างไร?</b>
+              <span class="d">วิธีปฐมพยาบาลเบื้องต้น และเมื่อไหร่ต้องรีบไปโรงพยาบาล</span>
+          </button>
           <div id="care-switch"></div>
+          <button class="btn-brown" id="care-rescan" style="margin-top:14px; font-size:18px; padding:14px;">📷 สแกนคนไข้คนอื่น</button>
           <div class="credit">จัดทำโดย คลินิกเบาหวานระยะสงบ รพ.สวี จ.ชุมพร</div>
       </div>
   </div>
@@ -468,6 +583,24 @@
       </div>
   </div>
 
+  <!-- ================= หน้าให้ความรู้ (น้ำตาลต่ำ / ควบคุมโดยไม่ใช้ยา) ================= -->
+  <div id="v-info" class="container" style="display:none; padding-bottom:80px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:10px;">
+          <h2 style="color:#5D4037; margin:0; font-size:24px;" id="infoTitle"></h2>
+          <button class="btn-brown" id="infoBack" style="width:auto; padding:8px 18px;">กลับ</button>
+      </div>
+      <div class="paper" id="infoBody"></div>
+  </div>
+
+  <!-- ================= สรุปข้อมูลของคุณ ================= -->
+  <div id="v-sum" class="container" style="display:none; padding-bottom:80px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:10px;">
+          <h2 style="color:#5D4037; margin:0; font-size:24px;">📊 สรุปข้อมูลของคุณ</h2>
+          <button class="btn-brown" id="sumBack" style="width:auto; padding:8px 18px;">กลับ</button>
+      </div>
+      <div id="sumBody"></div>
+  </div>
+
   <!-- ================= Modal ฟอร์มบันทึก ================= -->
   <div id="primary-modal" class="modal-overlay">
     <div class="modal-sheet">
@@ -487,10 +620,77 @@
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbzvLY5kLKw2sUaSelEZcxka2CsdiRoGdA9jmHMoKs3oB04ypte7yDwStWo6cFwb2-Y8Sw/exec';
 var LIFF_ID = '2007840605-zKl7p3Aa';
 var LOGO = 'https://lh3.googleusercontent.com/d/1gJFmTXj6xpc_w8kfK-rL3HCqqgmnZp1H';
+var CACHE_KEY = 'swee_home_v2';
+
+/* ปลุก GAS ทันทีที่เปิดหน้า (ขนานไปกับการโหลด LINE SDK) — ตัดเวลา cold start ออกจากทางที่ผู้ใช้รอ */
+try { fetch(GAS_URL + '?action=ping', { redirect: 'follow' }).catch(function () {}); } catch (e) {}
+
+/*<pure>*/
+function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+  return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
+
+/** แยกตัวอักษรไทยแบบไม่ตัดสระ/วรรณยุกต์ออกจากพยัญชนะ (ไว้ทำแอนิเมชันไล่ทีละตัว) */
+function splitGraphemes(s) {
+  var out = [];
+  Array.from(String(s)).forEach(function (ch) {
+    if (/[ัิ-ฺ็-๎]/.test(ch) && out.length) out[out.length - 1] += ch;
+    else out.push(ch);
+  });
+  return out;
+}
+
+/** แยกรายการอาหาร "ชื่อ ตัวเลข หน่วย" → [{name, qty, unit, ok}] · ok=false คือไม่มีตัวเลข */
+function parseFood(text) {
+  var t = String(text || '').replace(/[​]/g, '').replace(/[๐-๙]/g, function (c) { return String(c.charCodeAt(0) - 0x0E50); });
+  var clean = function (s) {
+    return String(s).replace(/^[\s,;+\/\-–·•]+|[\s,;+\/\-–·•]+$/g, '').replace(/^(และ|กับ)\s*/, '').trim();
+  };
+  var re = /(\d+(?:[.,]\d+)?)\s*([A-Za-z฀-๿.]+)?/g;
+  var parts = [], pos = 0, m;
+  while ((m = re.exec(t)) !== null) {
+    var segs = t.slice(pos, m.index).split(/[,;\n+]+/).map(clean).filter(Boolean);
+    segs.slice(0, -1).forEach(function (n) { parts.push({ name: n, ok: false }); });
+    parts.push({ name: segs.length ? segs[segs.length - 1] : 'อาหาร', qty: m[1].replace(',', '.'), unit: m[2] || '', ok: true });
+    pos = re.lastIndex;
+  }
+  clean(t.slice(pos)).split(/[,;\n+]+|\s+/).map(clean).filter(Boolean)
+    .forEach(function (n) { parts.push({ name: n, ok: false }); });
+  return parts;
+}
+function fmtFoodItem(it, qty) { return it.name + ' ' + (qty != null ? qty : it.qty) + ' ' + (it.unit || 'หน่วย'); }
+
+var TH_M = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+function thDate(s) {
+  if (!s) return '—';
+  var d = new Date(s); if (isNaN(d.getTime())) return String(s);
+  return d.getDate() + ' ' + TH_M[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+}
+/** "1–30 ก.ย. 2569" */
+function thRange(from, to) {
+  var a = String(from).split('-'), b = String(to).split('-');
+  if (a.length < 3 || b.length < 3) return from + ' – ' + to;
+  var da = +a[2], db = +b[2], ma = +a[1] - 1, mb = +b[1] - 1, ya = +a[0] + 543, yb = +b[0] + 543;
+  if (ya === yb && ma === mb) return da + '–' + db + ' ' + TH_M[ma] + ' ' + ya;
+  if (ya === yb) return da + ' ' + TH_M[ma] + ' – ' + db + ' ' + TH_M[mb] + ' ' + ya;
+  return da + ' ' + TH_M[ma] + ' ' + ya + ' – ' + db + ' ' + TH_M[mb] + ' ' + yb;
+}
+function hnFromText(v) {
+  v = String(v || '');
+  try { v = decodeURIComponent(v); } catch (e) {}
+  var m = v.match(/[?&]hn=(\d+)/i) || v.match(/\bhn[=:]\s*(\d+)/i);
+  if (m) return m[1];
+  var d = v.replace(/\s/g, '');
+  return /^\d{4,12}$/.test(d) ? d : '';
+}
+function keyHn(v) { return String(v == null ? '' : v).replace(/\D/g, '').replace(/^0+/, ''); }
+function sbgmChoices(hour) {
+  return hour < 12 ? ['ก่อนอาหารเช้า', 'หลังอาหารเช้า'] : ['ก่อนอาหารเย็น', 'หลังอาหารเย็น'];
+}
+function isAfterMeal(sub) { return String(sub || '').indexOf('หลังอาหาร') >= 0; }
+/*</pure>*/
 
 /* ===================== Popup ชุดเดิม =====================
-   ถ้าโหลด SweetAlert จาก CDN ไม่ได้ (เน็ตช้า/ถูกบล็อก) จะใช้ป๊อปอัปสำรองที่เขียนไว้ในไฟล์นี้แทน
-   หน้าตาและปุ่มเหมือนกัน เพื่อไม่ให้หน้าค้างทั้งหน้าเพราะป๊อปอัปตัวเดียว */
+   ถ้าโหลด SweetAlert ไม่ได้ (เน็ตช้า/ถูกบล็อก) ใช้ป๊อปอัปสำรองแทน — เช็คตอนเรียกใช้ ไม่ใช่ตอนโหลดหน้า */
 function liteFire(popupClass, o) {
   return new Promise(function (resolve) {
     var ov = document.createElement('div');
@@ -499,32 +699,34 @@ function liteFire(popupClass, o) {
     card.className = 'lite-card swal2-popup ' + popupClass;
     card.innerHTML = '<div class="lite-title swal2-title">' + esc(o.title || '') + '</div>'
       + '<div class="lite-html swal2-html-container">' + (o.html || esc(o.text || '')) + '</div>'
-      + '<div class="lite-btns"></div>';
+      + '<div class="lite-btns"></div>' + (o.timer ? '<div class="lite-bar" style="animation-duration:' + o.timer + 'ms"></div>' : '');
     var btns = card.querySelector('.lite-btns');
+    var done = false;
+    function end(res) { if (done) return; done = true; ov.remove(); resolve(res); }
     var yes = document.createElement('button');
     yes.className = 'btn swal2-confirm'; yes.textContent = o.confirmButtonText || 'ตกลง';
-    yes.onclick = function () { ov.remove(); resolve({ isConfirmed: true, isDismissed: false }); };
+    yes.onclick = function () { end({ isConfirmed: true, isDismissed: false }); };
     btns.appendChild(yes);
     if (o.showCancelButton) {
       var no = document.createElement('button');
       no.className = 'btn-white-round swal2-cancel'; no.textContent = o.cancelButtonText || 'ยกเลิก';
-      no.onclick = function () { ov.remove(); resolve({ isConfirmed: false, isDismissed: true }); };
+      no.onclick = function () { end({ isConfirmed: false, isDismissed: true, dismiss: 'cancel' }); };
       btns.appendChild(no);
     }
+    if (o.timer) setTimeout(function () { end({ isConfirmed: false, isDismissed: true, dismiss: 'timer' }); }, o.timer);
     ov.appendChild(card); document.body.appendChild(ov);
   });
 }
 function mkSwal(popupClass, cancelClass, defConfirm, defCancel) {
-  if (window.Swal) {
-    return Swal.mixin({ customClass: { popup: popupClass, confirmButton: 'btn', cancelButton: cancelClass },
-                        buttonsStyling: false, confirmButtonText: defConfirm, cancelButtonText: defCancel });
-  }
   return { fire: function (a, b, c) {
     var o = (a && typeof a === 'object') ? a : { title: a, text: b, icon: c };
-    return liteFire(popupClass, { title: o.title, html: o.html, text: o.text,
+    if (window.Swal) {
+      return Swal.fire(Object.assign({ customClass: { popup: popupClass, confirmButton: 'btn', cancelButton: cancelClass },
+        buttonsStyling: false, confirmButtonText: defConfirm, cancelButtonText: defCancel }, o));
+    }
+    return liteFire(popupClass, { title: o.title, html: o.html, text: o.text, timer: o.timer,
       showCancelButton: !!o.showCancelButton,
-      confirmButtonText: o.confirmButtonText || defConfirm,
-      cancelButtonText: o.cancelButtonText || defCancel });
+      confirmButtonText: o.confirmButtonText || defConfirm, cancelButtonText: o.cancelButtonText || defCancel });
   } };
 }
 var swalAlert   = mkSwal('swal-red-popup',   'btn-white-round', 'รับทราบและปิดหน้าต่าง', 'ยกเลิก');
@@ -533,134 +735,190 @@ var swalForm    = mkSwal('swal-brown-popup', 'btn-close',       'ปิดหน
 
 /* ===================== ตัวช่วย ===================== */
 var $ = function (id) { return document.getElementById(id); };
-var S = { userId: '', displayName: '', pictureUrl: '', hn: '',
+var S = { userId: '', displayName: '', pictureUrl: '', hn: '', modeParam: '', action: '',
           profile: null, stats: null, mode: 'owner', careFor: null, boot: null };
-var VIEWS = ['v-error','v-role','v-reg','v-care','v-home','v-carehome','v-hist','v-plan','v-body'];
+var VIEWS = ['v-error','v-role','v-scan','v-reg','v-care','v-home','v-carehome','v-hist','v-plan','v-body','v-info','v-sum'];
+var BACK_VIEWS = ['v-hist','v-plan','v-body','v-info','v-sum'];
 var LOG = [];
 
-function note(t) { LOG.push(new Date().toLocaleTimeString('th-TH') + '  ' + t); }
-function esc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
-  return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
-function showLoading(on) { $('loading').style.display = on ? 'flex' : 'none'; }
+function note(t) { LOG.push(new Date().toLocaleTimeString('th-TH') + '  ' + t); if (LOG.length > 80) LOG.shift(); }
+function showLoading(on, msg) {
+  $('loading').style.display = on ? 'flex' : 'none';
+  if (on) $('loading-msg').textContent = msg || 'กำลังโหลด...';
+}
+function goHome() { if (S.mode === 'care') show('v-carehome'); else show('v-home'); }
 
-/** สลับหน้า + จัดการ navbar ให้เข้ากับหน้านั้น */
+/** สลับหน้า + จัดการ navbar */
 function show(id) {
   VIEWS.forEach(function (v) { $(v).style.display = (v === id) ? 'block' : 'none'; });
-  var nav = $('main-navbar'), btn = $('nav-btn');
-  nav.style.display = 'flex';
+  var btn = $('nav-btn');
+  $('main-navbar').style.display = 'flex';
   if (id === 'v-home') { btn.style.display = ''; btn.className = 'nav-hist-btn'; btn.textContent = 'ดูประวัติ'; }
-  else if (id === 'v-hist' || id === 'v-plan' || id === 'v-body') { btn.style.display = ''; btn.className = 'nav-return-btn'; btn.textContent = '📝 กลับหน้าบันทึก'; }
+  else if (BACK_VIEWS.indexOf(id) >= 0) { btn.style.display = ''; btn.className = 'nav-return-btn'; btn.textContent = '‹ กลับ'; }
   else { btn.style.display = 'none'; }
   window.scrollTo(0, 0);
 }
 $('nav-btn').onclick = function () {
-  if ($('nav-btn').className === 'nav-hist-btn') openHistory(); else show('v-home');
+  if ($('nav-btn').className === 'nav-hist-btn') openHistory(); else goHome();
+};
+$('nav-close').onclick = function () {
+  try { if (window.liff && liff.isInClient && liff.isInClient()) { liff.closeWindow(); return; } } catch (e) {}
+  window.close();
+  setTimeout(function () { swalSuccess.fire({ title: 'ปิดหน้านี้ได้เลยค่ะ', text: 'กดปุ่มปิดหรือย้อนกลับของเบราว์เซอร์' }); }, 350);
 };
 
-function api(action, payload) {
-  note('-> ' + action);
-  return fetch(GAS_URL, {
-    method: 'POST', redirect: 'follow',
-    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-    body: JSON.stringify({ action: action, payload: payload || {} })
-  }).then(function (r) {
-    return r.text().then(function (txt) {
-      note('<- ' + r.status + ' ' + txt.slice(0, 200));
-      if (!r.ok) throw errWith('GAS ตอบกลับรหัส ' + r.status, hintForStatus(r.status), txt);
-      var j;
-      try { j = JSON.parse(txt); }
-      catch (e) {
-        var needLogin = /accounts\.google|sign ?in|ServiceLogin/i.test(txt);
-        throw errWith('GAS ไม่ได้ตอบเป็น JSON',
-          needLogin ? 'ตอนนี้สิทธิ์เป็น "เฉพาะผู้ที่ล็อกอิน" — ต้องตั้ง Deploy → Who has access = Anyone'
-                    : 'มักเกิดจากยังไม่ Deploy เวอร์ชันใหม่ หรือสคริปต์มี error ตอนเริ่มทำงาน', txt);
-      }
-      var stale = j && (/^unknown[ _]action$/i.test(String(j.error || ''))
-                     || String(j.status || '') === 'unknown_request');
-      if (stale) throw errWith('GAS ที่ deploy อยู่ยังไม่รู้จักคำสั่งของหน้านี้',
-        'วาง App.gs · ลบ Main.gs · แล้ว Deploy → Manage deployments → New version', txt);
-      return j;
-    });
-  });
+/** แอนิเมชันตัวอักษรกระตุกไล่ทีละตัว */
+function jitterText(el, text) {
+  el.innerHTML = splitGraphemes(text).map(function (g, i) {
+    return '<span style="animation-delay:' + (i * 0.09).toFixed(2) + 's">' + (g === ' ' ? '&nbsp;' : esc(g)) + '</span>';
+  }).join('');
 }
+
+/* ---------- เรียก GAS ----------
+   ใช้ GET (ไม่ต้องตาม redirect ของ POST ซึ่งเป็นต้นเหตุ "GAS ตอบรหัส 404" ทั้งที่ข้อมูลเข้าชีตแล้ว)
+   ล้มเหลวชั่วคราว (404/5xx/หลุด/ไม่ใช่ JSON) → ลองซ้ำ · งานเขียนแนบ rid ให้ฝั่งเซิร์ฟเวอร์กันบันทึกซ้ำ */
+function rid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+function errWith(m, hint, dump) { var e = new Error(m); e.hint = hint || ''; e.dump = dump || ''; return e; }
 function hintForStatus(c) {
   if (c === 401 || c === 403) return 'ตั้ง Deploy → Who has access = Anyone';
-  if (c === 404) return 'URL /exec ไม่ถูกต้อง หรือ deployment ถูกลบไปแล้ว';
+  if (c === 404) return 'ถ้าเป็นบางครั้ง ให้ลองอีกรอบ · ถ้าเป็นตลอด URL /exec ไม่ถูกต้อง หรือ deployment ถูกลบ';
   if (c >= 500) return 'สคริปต์มี error — ดู Executions ใน Apps Script';
   return '';
 }
-function errWith(m, hint, dump) { var e = new Error(m); e.hint = hint || ''; e.dump = dump || ''; return e; }
-
-function thDate(s) {
-  if (!s) return '—';
-  var d = new Date(s); if (isNaN(d.getTime())) return String(s);
-  var m = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  return d.getDate() + ' ' + m[d.getMonth()] + ' ' + (d.getFullYear() + 543);
+function api(action, payload, opt) {
+  opt = opt || {}; payload = payload || {};
+  var tries = opt.tries || 3, timeout = opt.timeout || 25000;
+  var url = GAS_URL + '?action=' + encodeURIComponent(action) + '&p=' + encodeURIComponent(JSON.stringify(payload));
+  return new Promise(function (resolve, reject) {
+    (function attempt(n) {
+      note('-> ' + action + (n > 1 ? ' (ครั้งที่ ' + n + ')' : ''));
+      var ctl = window.AbortController ? new AbortController() : null;
+      var timer = ctl ? setTimeout(function () { ctl.abort(); }, timeout) : null;
+      function retryOrFail(err, transient) {
+        if (timer) clearTimeout(timer);
+        if (transient && n < tries) return setTimeout(function () { attempt(n + 1); }, 500 * n);
+        err.maybeSaved = !!opt.write && transient;
+        reject(err);
+      }
+      fetch(url, { redirect: 'follow', signal: ctl ? ctl.signal : undefined }).then(function (r) {
+        return r.text().then(function (txt) {
+          if (timer) clearTimeout(timer);
+          note('<- ' + r.status + ' ' + txt.slice(0, 160));
+          if (!r.ok) return retryOrFail(errWith('GAS ตอบกลับรหัส ' + r.status, hintForStatus(r.status), txt), r.status === 404 || r.status >= 500 || r.status === 429);
+          var j;
+          try { j = JSON.parse(txt); }
+          catch (e) {
+            var needLogin = /accounts\.google|sign ?in|ServiceLogin/i.test(txt);
+            return retryOrFail(errWith('GAS ไม่ได้ตอบเป็น JSON',
+              needLogin ? 'ตอนนี้สิทธิ์เป็น "เฉพาะผู้ที่ล็อกอิน" — ต้องตั้ง Deploy → Who has access = Anyone'
+                        : 'มักเกิดจากยังไม่ Deploy เวอร์ชันใหม่ หรือสคริปต์มี error ตอนเริ่มทำงาน', txt), !needLogin);
+          }
+          if (j && (/^unknown[ _]action$/i.test(String(j.error || '')) || String(j.status || '') === 'unknown_request')) {
+            return reject(errWith('GAS ที่ deploy อยู่ยังไม่รู้จักคำสั่งของหน้านี้',
+              'วาง App.gs · ลบ Main.gs · แล้ว Deploy → Manage deployments → New version', txt));
+          }
+          resolve(j);
+        });
+      }).catch(function (e) {
+        if (timer) clearTimeout(timer);
+        var m = (e && e.name === 'AbortError') ? 'รอนานเกินไป' : (e && e.message) || String(e);
+        retryOrFail(errWith(m, 'เรียก GAS ไม่ถึง — ตรวจว่าเครื่องต่อเน็ตอยู่ และ Deploy เป็น Web app · Who has access = Anyone'), true);
+      });
+    })(1);
+  });
 }
-/** ?hn= จาก QR — ถ้าเปิดในเบราว์เซอร์ LIFF จะส่งต่อมาใน liff.state */
-function readHn() {
-  var q = new URLSearchParams(location.search);
-  var hn = q.get('hn');
-  if (!hn) {
-    var st = q.get('liff.state');
-    if (st) { try { hn = new URLSearchParams(st.replace(/^\?/, '')).get('hn'); } catch (e) {} }
+
+/** ?hn= / ?mode= / ?action= — ถ้าเปิดผ่าน LIFF จะถูกส่งต่อมาใน liff.state */
+var Q = new URLSearchParams(location.search);
+function param(k) {
+  var v = Q.get(k);
+  if (!v) {
+    var st = Q.get('liff.state');
+    if (st) { try { var i = st.indexOf('?'); v = new URLSearchParams(i >= 0 ? st.slice(i + 1) : st).get(k); } catch (e) {} }
   }
-  return (hn || '').replace(/\D/g, '');
+  return v || '';
+}
+function readHn() { return param('hn').replace(/\D/g, ''); }
+
+/* ---------- จำข้อมูลหน้าหลักไว้ในเครื่อง (แสดงทันที แล้วค่อยอัปเดตจากชีต) ---------- */
+function readCache() { try { return JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch (e) { return null; } }
+function writeCache() {
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ userId: S.userId, profile: S.profile, stats: S.stats })); } catch (e) {}
 }
 
 /* ===================== เริ่มทำงาน ===================== */
 function boot() {
-  LOG = []; S.hn = readHn();
-  note('เปิดหน้า ' + location.href); note('hn = ' + (S.hn || '(ไม่มี)'));
+  LOG = []; S.hn = readHn(); S.modeParam = param('mode'); S.action = param('action');
+  note('เปิดหน้า ' + location.href); note('hn = ' + (S.hn || '(ไม่มี)') + ' · mode = ' + (S.modeParam || '(ไม่มี)'));
   VIEWS.forEach(function (v) { $(v).style.display = 'none'; });
   $('main-navbar').style.display = 'none';
   showLoading(true);
 
   if (!window.liff) return fail('โหลด LINE SDK ไม่สำเร็จ', 'เครื่องนี้ต้องต่ออินเทอร์เน็ตเพื่อใช้ LINE');
 
+  var fast = false;
   liff.init({ liffId: LIFF_ID })
     .then(function () {
       note('liff.init ok · isInClient=' + liff.isInClient() + ' · isLoggedIn=' + liff.isLoggedIn());
-      // เปิดในเบราว์เซอร์ก็ล็อกอินได้ ไม่บังคับให้เปิดจากแอป LINE
       if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return null; }
       return liff.getProfile();
     })
     .then(function (p) {
       if (!p) return null;
       S.userId = p.userId; S.displayName = p.displayName; S.pictureUrl = p.pictureUrl;
-      return api('bootstrap', { userId: S.userId, hn: S.hn, displayName: p.displayName, pictureUrl: p.pictureUrl });
+
+      // ★ มีข้อมูลที่จำไว้ของบัญชีนี้ → โชว์หน้าหลักเลย ไม่ต้องรอชีต
+      var c = readCache();
+      fast = !!(c && c.userId === S.userId && c.profile && S.modeParam !== 'other'
+                && !(S.hn && c.profile.hn && keyHn(S.hn) !== keyHn(c.profile.hn)));
+      if (fast) {
+        S.mode = 'owner'; S.profile = c.profile; S.stats = c.stats || null;
+        S.hn = c.profile.hn || S.hn;
+        renderHome(); showLoading(false); show('v-home');
+        note('แสดงหน้าหลักจากข้อมูลที่จำไว้');
+      }
+      return api('bootstrap', { userId: S.userId, hn: S.hn });
     })
-    .then(function (r) { showLoading(false); if (r) route(r); })
+    .then(function (r) { showLoading(false); if (r) route(r, fast); })
     .catch(function (e) {
+      if (fast) { note('อัปเดตจากชีตไม่สำเร็จ: ' + (e && e.message)); return; }   // มีหน้าให้ดูอยู่แล้ว ไม่ต้องขึ้นจอ error
       var m = (e && e.message) ? e.message : String(e), hint = (e && e.hint) || '';
       if (/liffId|LIFF/i.test(m) && !hint) hint = 'ตรวจ LIFF ID ในไฟล์นี้ให้ตรงกับใน LINE Developers';
-      if (/Failed to fetch|NetworkError|Load failed/i.test(m)) {
-        hint = 'เรียก GAS ไม่ถึง — ตรวจว่า Deploy เป็น Web app · Who has access = Anyone และเครื่องต่อเน็ตอยู่';
-      }
       fail(m, hint, (e && e.dump) || '');
     });
 }
 
+function enterOwner(r, fast) {
+  S.mode = 'owner'; S.profile = r.profile; S.hn = r.profile.hn || S.hn;
+  if (r.stats) S.stats = r.stats;
+  writeCache(); renderHome();
+  if (!fast) show('v-home');
+  if (!r.stats) loadStats();
+  if (S.action === 'history' && !S._histOpened) { S._histOpened = true; openHistory(); }
+}
+function enterCare(who) { S.mode = 'care'; S.careFor = who; S.hn = who.hn || S.hn; renderCareHome(); show('v-carehome'); }
+
 /** ตัดสินว่าจะพาไปหน้าไหน */
-function route(r) {
+function route(r, fast) {
   if (!r.ok) return fail('ระบบตอบกลับว่าไม่สำเร็จ', r.message || ('รหัส: ' + (r.error || 'ไม่ทราบ')), JSON.stringify(r));
   S.boot = r;
 
-  // สแกน QR ของคนที่เราดูแลอยู่แล้ว -> เข้าโหมดผู้ดูแลเลย
-  if (r.careFor) { S.mode = 'care'; S.careFor = r.careFor; renderCareHome(); return show('v-carehome'); }
-
-  // เป็นคนไข้ที่ลงทะเบียนแล้ว
-  if (r.registered) {
-    S.mode = 'owner'; S.profile = r.profile; S.stats = r.stats;
-    S.hn = r.profile.hn || S.hn;
-    renderHome(); return show('v-home');
+  // ?mode=other → บันทึกให้คนอื่น : ต้องรู้ HN ก่อน (สแกน QR)
+  if (S.modeParam === 'other') {
+    if (S.hn) { if (r.careFor) return enterCare(r.careFor); renderCare(); return show('v-care'); }
+    renderScan(); return show('v-scan');
   }
 
-  // ไม่มี hn มา แต่เป็นผู้ดูแลของคนอื่นอยู่
-  if (!S.hn && r.cares && r.cares.length) {
-    S.mode = 'care'; S.careFor = r.cares[0]; renderCareHome(); return show('v-carehome');
+  // ?mode=self → บันทึกให้ตัวเอง
+  if (S.modeParam === 'self') {
+    if (r.registered) return enterOwner(r, fast);
+    return chooseSelf();
   }
 
+  // ไม่มี mode → พฤติกรรมเดิม
+  if (r.careFor) return enterCare(r.careFor);
+  if (r.registered) return enterOwner(r, fast);
+  if (!S.hn && r.cares && r.cares.length) return enterCare(r.cares[0]);
   renderRole(); show('v-role');
 }
 
@@ -678,7 +936,7 @@ $('errMore').onclick = function () {
   var d = $('errDump'); d.style.display = (d.style.display === 'block') ? 'none' : 'block';
 };
 
-/* ===================== เลือกบทบาท ===================== */
+/* ===================== เลือกบทบาท / ลงทะเบียนตัวเอง ===================== */
 function renderRole() {
   $('roleHn').textContent = S.hn ? ('HN ' + S.hn) : 'ยังไม่ทราบเลข HN';
   var known = S.boot && S.boot.hnTaken;
@@ -689,7 +947,8 @@ function renderRole() {
                 + 'ถ้าคุณคือเจ้าตัว เลือก "บันทึกให้ตัวเอง" · ถ้าคุณช่วยเขาบันทึก เลือก "บันทึกให้คนที่ดูแลอยู่"';
   } else { k.style.display = 'none'; }
 }
-$('roleSelf').onclick = function () {
+/** เลือก "ตัวเอง": ถ้า HN ถูกบัญชีอื่นครองอยู่ ต้องกดยืนยันก่อนย้ายทะเบียน */
+function chooseSelf() {
   if (S.boot && S.boot.hnTaken) {
     return swalAlert.fire({
       title: 'ยืนยันตัวตน',
@@ -699,8 +958,8 @@ $('roleSelf').onclick = function () {
     }).then(function (cf) {
       if (!cf.isConfirmed) return;
       showLoading(true);
-      return api('claimHn', { userId: S.userId, hn: S.hn, confirm: true,
-                              displayName: S.displayName, pictureUrl: S.pictureUrl })
+      return api('claimHn', { userId: S.userId, hn: S.hn, confirm: true, displayName: S.displayName, pictureUrl: S.pictureUrl,
+                              rid: rid() }, { write: true })
         .then(function (r) {
           if (!r.ok) { showLoading(false); return swalAlert.fire('ย้ายไม่สำเร็จ', r.message || '', 'error'); }
           return api('bootstrap', { userId: S.userId, hn: S.hn }).then(function (b) { showLoading(false); route(b); });
@@ -709,24 +968,27 @@ $('roleSelf').onclick = function () {
     });
   }
   renderReg(); show('v-reg');
-};
+}
+$('roleSelf').onclick = chooseSelf;
 $('roleCare').onclick = function () { renderCare(); show('v-care'); };
 $('regBack').onclick = function () { show('v-role'); };
-$('careBack').onclick = function () { show('v-role'); };
+$('careBack').onclick = function () {
+  if (S.modeParam === 'other') { renderScan(); show('v-scan'); } else show('v-role');
+};
 
-/* ===================== ลงทะเบียน (เจ้าของไลน์) ===================== */
 function renderReg() {
+  $('regBack').style.display = (S.modeParam === 'self') ? 'none' : '';
   $('regHn').textContent = S.hn ? ('HN ' + S.hn) : 'ยังไม่ทราบเลข HN';
-  $('regName').value = S.displayName || '';
+  $('regName').value = (S.boot && S.boot.pending && S.boot.pending.nameUse) || S.displayName || '';
   var ok = $('regOk'), btn = $('regBtn'), nm = $('regName');
   function check() { btn.disabled = !(ok.checked && nm.value.trim() && S.hn); }
   ok.onchange = check; nm.oninput = check; check();
   if (!S.hn) swalAlert.fire('ไม่พบเลข HN', 'กรุณาสแกน QR จากใบของคลินิก หรือแจ้งเจ้าหน้าที่ค่ะ', 'warning');
 
   btn.onclick = function () {
-    btn.disabled = true; showLoading(true);
+    btn.disabled = true; showLoading(true, 'กำลังลงทะเบียน...');
     api('register', { userId: S.userId, hn: S.hn, nameUse: nm.value.trim(), consent: true,
-                      displayName: S.displayName, pictureUrl: S.pictureUrl })
+                      displayName: S.displayName, pictureUrl: S.pictureUrl, rid: rid() }, { write: true })
       .then(function (r) {
         if (!r.ok) { showLoading(false); btn.disabled = false;
                      return swalAlert.fire('ลงทะเบียนไม่สำเร็จ', r.message || '', 'error'); }
@@ -739,6 +1001,53 @@ function renderReg() {
       .catch(function (e) { showLoading(false); btn.disabled = false; swalAlert.fire('ข้อผิดพลาด', e.message, 'error'); });
   };
 }
+
+/* ===================== โหมดบันทึกให้คนอื่น : สแกน QR ===================== */
+function renderScan() {
+  var list = (S.boot && S.boot.cares) || [];
+  $('scanCaresBox').style.display = list.length ? '' : 'none';
+  $('scanCares').innerHTML = list.map(function (c, i) {
+    return '<button class="btn-brown" data-i="' + i + '" style="margin-bottom:8px; font-size:18px;">'
+         + esc(c.name || 'คนไข้') + ' (HN ' + esc(c.hn) + ')</button>';
+  }).join('');
+  Array.prototype.forEach.call($('scanCares').querySelectorAll('button'), function (b) {
+    b.onclick = function () { enterCare(list[+b.getAttribute('data-i')]); };
+  });
+}
+function gotoPatient(hn) {
+  S.hn = hn; showLoading(true);
+  api('bootstrap', { userId: S.userId, hn: hn }).then(function (r) {
+    showLoading(false);
+    if (!r.ok) return fail('ระบบตอบกลับว่าไม่สำเร็จ', r.message || '', JSON.stringify(r));
+    S.boot = r;
+    if (r.careFor) return enterCare(r.careFor);
+    renderCare(); show('v-care');
+  }).catch(function (e) { showLoading(false); swalAlert.fire('ข้อผิดพลาด', e.message, 'error'); });
+}
+function handleScanned(v) {
+  var hn = hnFromText(v);
+  if (!hn) return swalAlert.fire('QR นี้ไม่มีเลข HN', 'กรุณาสแกน QR จากใบของคนไข้ หรือพิมพ์เลข HN แทนค่ะ', 'warning');
+  gotoPatient(hn);
+}
+$('scanBtn').onclick = function () {
+  var inClient = false;
+  try { inClient = !!(window.liff && liff.isInClient && liff.isInClient()); } catch (e) {}
+  var scan = inClient && (liff.scanCodeV2 || liff.scanCode);
+  if (!scan) {
+    return swalAlert.fire('สแกนในหน้านี้ไม่ได้', 'ให้เปิดกล้องมือถือสแกน QR ที่ใบของคนไข้ หรือพิมพ์เลข HN ในช่องด้านล่างค่ะ', 'info');
+  }
+  scan.call(liff).then(function (r) { handleScanned(r && r.value); })
+    .catch(function (e) {
+      note('scan error ' + (e && e.message));
+      swalAlert.fire('สแกนไม่สำเร็จ', 'ลองใหม่อีกครั้ง หรือพิมพ์เลข HN ในช่องด้านล่างแทนค่ะ', 'warning');
+    });
+};
+$('scanGo').onclick = function () {
+  var hn = $('scanHn').value.replace(/\D/g, '');
+  if (hn.length < 3) return swalAlert.fire('เลข HN ไม่ถูกต้อง', 'กรุณาพิมพ์เลข HN ให้ครบค่ะ', 'warning');
+  gotoPatient(hn);
+};
+$('care-rescan').onclick = function () { renderScan(); show('v-scan'); };
 
 /* ===================== ยินยอม (ผู้ดูแล) ===================== */
 function renderCare() {
@@ -756,19 +1065,18 @@ function renderCare() {
   ok.onchange = check; nm.oninput = check; check();
 
   btn.onclick = function () {
-    btn.disabled = true; showLoading(true);
+    btn.disabled = true; showLoading(true, 'กำลังบันทึก...');
     api('registerCaregiver', { userId: S.userId, hn: S.hn, callName: nm.value.trim(),
-                               relation: $('careRel').value, consent: true, displayName: S.displayName })
+                               relation: $('careRel').value, consent: true, displayName: S.displayName, rid: rid() }, { write: true })
       .then(function (r) {
         if (!r.ok) { showLoading(false); btn.disabled = false;
                      return swalAlert.fire('ผูกไม่สำเร็จ', r.message || '', 'error'); }
-        S.mode = 'care'; S.careFor = r.patient;
+        var who = { hn: (r.patient && r.patient.hn) || S.hn, name: (r.patient && r.patient.name) || nm.value.trim() };
         return api('bootstrap', { userId: S.userId, hn: S.hn }).then(function (b) {
           showLoading(false);
           if (b && b.ok) S.boot = b;
-          swalSuccess.fire({ title: 'เริ่มบันทึกให้ได้เลยค่ะ 🤝' }).then(function () {
-            renderCareHome(); show('v-carehome');
-          });
+          swalSuccess.fire({ title: 'เริ่มบันทึกให้ได้เลยค่ะ 🤝', timer: 1800, timerProgressBar: true })
+            .then(function () { enterCare(who); });
         });
       })
       .catch(function (e) { showLoading(false); btn.disabled = false; swalAlert.fire('ข้อผิดพลาด', e.message, 'error'); });
@@ -791,10 +1099,11 @@ function paintMenu(boxId) {
          + '<div class="note-icon">' + m.e + '</div><div class="note-label">' + m.t + '</div></div>';
   }).join('');
   Array.prototype.forEach.call(box.children, function (b) {
-    b.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';   // กระตุกไม่พร้อมกัน (ของเดิม)
+    b.style.animationDelay = (Math.random() * 4).toFixed(2) + 's';
     b.onclick = function () { openNoteForm(b.getAttribute('data-k')); };
   });
 }
+var ASK = 'วันนี้จะบันทึกอะไร?';
 
 /* ===================== หน้าหลัก ===================== */
 var STATUS_TH = {
@@ -802,35 +1111,39 @@ var STATUS_TH = {
   'Hyperglycemia': ['น้ำตาลสูง', 'bad'], 'Hypoglycemia Alert': ['น้ำตาลต่ำ ระวัง', 'bad'],
   'Waiting': ['ยังไม่มีข้อมูล', 'warn']
 };
+function renderStats() {
+  var st = S.stats;
+  $('stat-total').textContent = st ? (st.total || 0) : '–';
+  $('stat-sbgm').textContent = st ? (st.sbgm || 0) : '–';
+}
 function renderHome() {
-  var p = S.profile || {}, st = S.stats || {};
-  if (p.picture) $('head-avatar').src = p.picture;
+  var p = S.profile || {};
+  $('head-avatar').src = S.pictureUrl || p.picture || LOGO;
   $('head-name').textContent = 'คุณ' + (p.nameUse || '');
   $('head-start').textContent = p.startDate ? ('มาตรวจล่าสุด : ' + thDate(p.startDate)) : 'ยินดีต้อนรับเข้าโครงการ';
 
+  // นัดครั้งถัดไป : วันที่ + จำนวนวันที่เหลือ (เลยนัดแล้วแสดงวันที่เฉย ๆ)
+  var nx = '—';
   if (p.endDate) {
-    var end = new Date(p.endDate), today = new Date();
-    var days = Math.ceil((end - today) / 86400000);
-    var t = $('head-target'); t.style.display = 'block';
-    t.textContent = (days >= 0) ? ('อีก ' + days + ' วันถึงวันนัดครั้งถัดไป') : 'เลยวันนัดแล้ว กรุณาติดต่อคลินิก';
-  } else { $('head-target').style.display = 'none'; }
+    var end = new Date(p.endDate + 'T00:00:00'), today = new Date(); today.setHours(0, 0, 0, 0);
+    var days = Math.round((end - today) / 86400000);
+    nx = thDate(p.endDate) + (days > 0 ? ' (อีก ' + days + ' วัน)' : (days === 0 ? ' (วันนี้)' : ''));
+  }
+  $('head-next').textContent = nx;
 
-  $('stat-total').textContent = st.total || 0;
-  $('stat-sbgm').textContent = st.sbgm || 0;
-  var lastSbgm = st.last && st.last.SBGM;
-  var lb = $('stat-last');
-  if (lastSbgm && lastSbgm.v1 !== '' && lastSbgm.v1 != null) {
-    lb.style.display = 'inline-block';
-    lb.textContent = 'ล่าสุด ' + lastSbgm.v1 + ' mg/dL';
-  } else { lb.style.display = 'none'; }
-
+  renderStats();
   var s = STATUS_TH[p.status] || [p.status || '—', 'warn'];
   $('head-status').innerHTML = '<span class="status-pill ' + s[1] + '">' + s[0] + '</span>';
   $('head-med').textContent = (p.medicine === '' || p.medicine == null) ? '—' : (p.medicine + ' รายการ');
-  $('head-next').textContent = thDate(p.endDate);
   $('head-goal').textContent = p.remission ? '🎯 รักษาระยะสงบให้ต่อเนื่อง' : '🎯 น้ำตาลสะสม < 6.5% โดยไม่ใช้ยา';
 
+  jitterText($('ask-home'), ASK);
   paintMenu('main-grid');
+}
+function loadStats() {
+  api('stats', { userId: S.userId, hn: S.hn }).then(function (r) {
+    if (r && r.ok && r.stats) { S.stats = r.stats; renderStats(); writeCache(); }
+  }).catch(function () {});
 }
 $('head-toggle').onclick = function () {
   var on = $('head-more').classList.toggle('on');
@@ -840,6 +1153,7 @@ $('head-toggle').onclick = function () {
 function renderCareHome() {
   $('care-name').textContent = 'คุณ' + ((S.careFor && S.careFor.name) || '');
   $('care-hn').textContent = 'HN ' + ((S.careFor && S.careFor.hn) || '—');
+  jitterText($('ask-care'), ASK);
   paintMenu('care-grid');
   var list = (S.boot && S.boot.cares) || [];
   $('care-switch').innerHTML = (list.length > 1)
@@ -850,7 +1164,7 @@ function renderCareHome() {
         }).join('')
     : '';
   Array.prototype.forEach.call($('care-switch').querySelectorAll('button'), function (b) {
-    b.onclick = function () { S.careFor = list[+b.getAttribute('data-i')]; renderCareHome(); };
+    b.onclick = function () { S.careFor = list[+b.getAttribute('data-i')]; renderCareHome(); window.scrollTo(0, 0); };
   });
 }
 
@@ -869,9 +1183,10 @@ var FORMS = {
     title: 'ค่าน้ำตาลในเลือด',
     ask: function (n) { return 'วันนี้คุณ <span class="name-pink">' + n + '</span> เจาะน้ำตาลปลายนิ้ว ได้ค่าเท่าไหร่คะ?'; },
     html: function () {
+      var ch = sbgmChoices(new Date().getHours());       // ก่อนเที่ยง = เช้า · หลังเที่ยง = เย็น
       return '<input type="tel" id="v1" class="main-input-anim" inputmode="numeric" placeholder="ระบุตัวเลข (mg/dL)">'
            + '<div class="form-label">วัดตอนไหนคะ?</div>'
-           + chipsHTML('sub', ['ก่อนอาหาร','หลังอาหาร','ก่อนนอน'], 'ก่อนอาหาร');
+           + chipsHTML('sub', ch, ch[0]);
     },
     read: function () { return { subtype: chip('sub'), v1: $('v1').value }; },
     valid: function (d) { return (d.v1 > 20 && d.v1 < 700) ? '' : 'ตัวเลขดูไม่น่าจะใช่ค่าน้ำตาลนะคะ (20–700)'; }
@@ -899,7 +1214,8 @@ var FORMS = {
       if (hr >= 11 && hr < 14) def = 'กลางวัน'; else if (hr >= 14 && hr < 20) def = 'เย็น'; else if (hr >= 20) def = 'ว่าง';
       return '<div class="form-label">มื้อไหนคะ?</div>' + chipsHTML('sub', ['เช้า','กลางวัน','เย็น','ว่าง'], def)
            + '<div class="form-label">ทานอะไรบ้าง</div>'
-           + '<textarea id="vt" rows="3" class="main-input-anim" placeholder="เช่น ข้าวสวย 1 ทัพพี แกงจืด ไข่ต้ม"></textarea>';
+           + '<textarea id="vt" rows="3" maxlength="250" class="main-input-anim" placeholder="เช่น ข้าวสวย 1 ทัพพี, แกงจืด 1 ถ้วย, ไข่ต้ม 2 ฟอง"></textarea>'
+           + '<div style="font-size:16px; color:#FFE0B2; text-align:center; margin-top:-8px;">พิมพ์ &quot;ชื่ออาหาร ตัวเลข หน่วย&quot; เช่น ข้าวสวย 1 ทัพพี</div>';
     },
     read: function () { return { subtype: chip('sub'), vt: $('vt').value.trim() }; },
     valid: function (d) { return d.vt ? '' : 'ช่วยพิมพ์รายการอาหารด้วยนะคะ'; }
@@ -932,16 +1248,16 @@ var FORMS = {
     html: function () {
       return chipsHTML('sub', ['ใจสั่น เหงื่อแตก','หน้ามืด จะเป็นลม','กระหายน้ำ ปัสสาวะบ่อย','แผลที่เท้าไม่หาย','อื่น ๆ'], 'ใจสั่น เหงื่อแตก')
            + '<div class="form-label">เล่าเพิ่มเติม (ไม่ใส่ก็ได้)</div>'
-           + '<textarea id="vt" rows="2" placeholder="พิมพ์อาการเพิ่มเติม..."></textarea>';
+           + '<textarea id="vt" rows="2" maxlength="200" placeholder="พิมพ์อาการเพิ่มเติม..."></textarea>';
     },
     read: function () { return { vt: chip('sub') + ($('vt').value.trim() ? ' — ' + $('vt').value.trim() : '') }; },
     valid: function () { return ''; }
   }
 };
 
-var curType = null;
+var curType = null, saving = false, formRid = '';
 function openNoteForm(k) {
-  curType = k;
+  curType = k; formRid = rid(); saving = false;
   var f = FORMS[k];
   var who = (S.mode === 'care' && S.careFor) ? (S.careFor.name || 'คนไข้')
           : ((S.profile && S.profile.nameUse) || S.displayName || 'คุณ');
@@ -964,23 +1280,37 @@ function openNoteForm(k) {
       c.classList.add('active');
     };
   });
-
   $('primary-modal').style.display = 'flex';
 }
 $('pri-close').onclick = function () { $('primary-modal').style.display = 'none'; };
 
+/** เตือน + นับถอยหลัง 5 วินาที — ไม่กดอะไร = ถือว่ายืนยันและบันทึก · กด "แก้ไขตัวเลข" = ยกเลิก */
+function confirmAuto(o) {
+  o.html += '<div style="margin-top:14px; font-size:15px; opacity:.9; position:relative; z-index:1;">⏱ ถ้าไม่กดภายใน 5 วินาที ระบบจะบันทึกค่านี้ให้เอง</div>';
+  return swalAlert.fire(Object.assign({
+    showCancelButton: true, confirmButtonText: 'รับทราบและบันทึกค่านี้', cancelButtonText: 'แก้ไขตัวเลข',
+    timer: 5000, timerProgressBar: true, allowOutsideClick: false
+  }, o)).then(function (cf) { return !!(cf.isConfirmed || cf.dismiss === 'timer'); });
+}
+
 $('pri-save').onclick = function () {
+  if (saving) return;
   var f = FORMS[curType], d = f.read(), bad = f.valid(d);
   if (bad) return swalAlert.fire('ตรวจสอบข้อมูล', bad, 'warning');
 
-  // ค่าน้ำตาลผิดปกติ — เตือนพร้อมวิธีปฏิบัติตัวแบบเดิม
   if (curType === 'SBGM') {
-    var val = parseFloat(d.v1), lim = (d.subtype === 'หลังอาหาร') ? 140 : 110;
+    var val = parseFloat(d.v1), lim = isAfterMeal(d.subtype) ? 140 : 110;
     if (val < 70 || val > lim) return warnSbgm(val, d, lim);
   }
   if (curType === 'BP') {
     var s = parseFloat(d.v1), dia = parseFloat(d.v2);
     if (s > 140 || dia > 90 || s < 100 || dia < 60) return warnBp(s, dia, d);
+  }
+  if (curType === 'FOOD') {
+    return normalizeFood(d.vt).then(function (t) {
+      if (t === null) return;
+      $('vt').value = t; d.vt = t; doSave(d);
+    });
   }
   doSave(d);
 };
@@ -1005,63 +1335,95 @@ function warnSbgm(val, d, lim) {
       + '💡 <b>คำแนะนำ</b><br>คุมอาหารแป้งและน้ำตาล ดื่มน้ำเปล่าเยอะ ๆ นะคะ 💧'
       + '<img src="' + LOGO + '" class="nurse-bg-img"></div>';
 
-  swalAlert.fire({
-    title: low ? '⚠️ น้ำตาลต่ำผิดปกติ' : '⚠️ น้ำตาลสูงเกินไป',
-    html: html, showCancelButton: true,
-    confirmButtonText: 'รับทราบและบันทึกค่านี้', cancelButtonText: 'แก้ไขตัวเลข'
-  }).then(function (cf) { if (cf.isConfirmed) doSave(d); else $('v1').value = ''; });
+  confirmAuto({ title: low ? '⚠️ น้ำตาลต่ำผิดปกติ' : '⚠️ น้ำตาลสูงเกินไป', html: html })
+    .then(function (go) { if (go) doSave(d); else $('v1').value = ''; });
 }
 
 function warnBp(s, dia, d) {
   var high = (s > 140 || dia > 90);
-  swalAlert.fire({
+  confirmAuto({
     title: high ? '⚠️ ความดันโลหิตสูง' : '⚠️ ความดันโลหิตต่ำ',
-    html: 'กรุณานั่งพักแล้ววัดใหม่ ดื่มน้ำเยอะ ๆ<br>และเปิดประวัติให้แพทย์ดูเมื่อไปโรงพยาบาลนะคะ'
-        + '<img src="' + LOGO + '" class="nurse-bg-img">',
-    showCancelButton: true, confirmButtonText: 'รับทราบและบันทึกค่านี้', cancelButtonText: 'แก้ไขตัวเลข'
-  }).then(function (cf) { if (cf.isConfirmed) doSave(d); });
+    html: '<div style="position:relative; z-index:1;">กรุณานั่งพักแล้ววัดใหม่ ดื่มน้ำเยอะ ๆ<br>และเปิดประวัติให้แพทย์ดูเมื่อไปโรงพยาบาลนะคะ</div>'
+        + '<img src="' + LOGO + '" class="nurse-bg-img">'
+  }).then(function (go) { if (go) doSave(d); });
 }
 
+/* ---------- ตรวจข้อความอาหาร : "ชื่ออาหาร ตัวเลข หน่วย" ---------- */
+var CANCEL = { cancel: true };
+function askQty(name) {
+  if (window.Swal) {
+    return Swal.fire({
+      title: 'บอกหน่อยได้ไหมคะ',
+      html: 'กิน <b>' + esc(name) + '</b> ไปเท่าไหร่คะ?<br><small>ใส่เป็นตัวเลข ระบบจะใส่คำว่า &quot;หน่วย&quot; ให้เอง</small>',
+      input: 'number', inputAttributes: { min: 0, step: 'any', inputmode: 'decimal' }, inputPlaceholder: 'เช่น 1 หรือ 2',
+      showCancelButton: true, confirmButtonText: 'ตกลง', cancelButtonText: 'ยกเลิก', allowOutsideClick: false,
+      customClass: { popup: 'swal-brown-popup', confirmButton: 'btn', cancelButton: 'btn-close' }, buttonsStyling: false,
+      inputValidator: function (v) { return (!v || !(parseFloat(v) > 0)) ? 'ใส่ตัวเลขมากกว่า 0 ด้วยนะคะ' : undefined; }
+    }).then(function (r) { return r.isConfirmed ? String(parseFloat(r.value)) : null; });
+  }
+  var v = window.prompt('กิน ' + name + ' ไปเท่าไหร่คะ (ใส่ตัวเลข)');
+  return Promise.resolve(v && parseFloat(v) > 0 ? String(parseFloat(v)) : null);
+}
+/** คืนข้อความที่จัดรูปแล้ว · null = ผู้ใช้ยกเลิก */
+function normalizeFood(text) {
+  var items = parseFood(text), out = [];
+  return items.reduce(function (p, it) {
+    return p.then(function () {
+      if (it.ok) { out.push(fmtFoodItem(it)); return; }
+      return askQty(it.name).then(function (q) {
+        if (q === null) throw CANCEL;
+        out.push(fmtFoodItem({ name: it.name, unit: '' }, q));
+      });
+    });
+  }, Promise.resolve()).then(function () { return out.join(', '); })
+    .catch(function (e) { if (e === CANCEL) return null; throw e; });
+}
+
+/* ---------- บันทึก ---------- */
+function hashStr(s) { var h = 5381; for (var i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0; return (h >>> 0).toString(36); }
 function doSave(d) {
+  if (saving) return;
+  saving = true;
   $('pri-save').disabled = true; $('pri-save').textContent = 'กำลังบันทึก…';
-  showLoading(true);
+  showLoading(true, 'กำลังบันทึก...');
 
-  // ปลายทางต้องถูกคน — โหมดผู้ดูแลส่ง forHn ของคนไข้ไปด้วยเสมอ
   var forHn = (S.mode === 'care' && S.careFor) ? S.careFor.hn : undefined;
-  var extra = (curType === 'WEIGHT' && d.v2) ? { type: 'WAIST', v1: d.v2 } : null;
-  if (extra) d.v2 = '';
+  var payload = { userId: S.userId, forHn: forHn, type: curType, subtype: d.subtype, v1: d.v1,
+                  v2: (curType === 'WEIGHT') ? '' : d.v2, vt: d.vt,
+                  waist: (curType === 'WEIGHT' && d.v2) ? d.v2 : undefined };
+  // rid = รหัสฟอร์ม + แฮชของค่า → กดซ้ำ/ส่งซ้ำด้วยค่าเดิมจะไม่ถูกบันทึกซ้ำ แต่แก้ค่าแล้วส่งใหม่จะบันทึกใหม่
+  payload.rid = formRid + hashStr(JSON.stringify(payload));
 
-  api('log', { userId: S.userId, forHn: forHn, type: curType,
-               subtype: d.subtype, v1: d.v1, v2: d.v2, vt: d.vt })
+  api('log', payload, { write: true, tries: 4 })
     .then(function (r) {
       if (!r.ok) throw new Error(r.message || 'บันทึกไม่สำเร็จ');
-      if (extra) return api('log', { userId: S.userId, forHn: forHn, type: extra.type, v1: extra.v1 })
-                        .then(function () { return r; });
-      return r;
-    })
-    .then(function (r) {
+      saving = false; formRid = rid();
       showLoading(false);
       $('pri-save').disabled = false; $('pri-save').textContent = 'บันทึกข้อมูล ✅';
       $('primary-modal').style.display = 'none';
 
-      var done = (r.flag === 'HIGH' || r.flag === 'LOW')
-        ? swalAlert.fire({ title: 'บันทึกแล้วค่ะ',
-            html: (r.flag === 'HIGH' ? 'ค่าสูงกว่าเกณฑ์ ทีมคลินิกจะเห็นข้อมูลนี้'
-                                     : 'ค่าต่ำกว่าเกณฑ์ ถ้ามีอาการให้รีบแจ้งเจ้าหน้าที่')
-                  + '<img src="' + LOGO + '" class="nurse-bg-img">' })
-        : swalSuccess.fire({ title: 'บันทึกเรียบร้อยแล้ว' });
-
-      return done.then(function () {
-        if (S.mode !== 'owner') return;
-        return api('bootstrap', { userId: S.userId }).then(function (b) {
-          if (b && b.ok && b.registered) { S.profile = b.profile; S.stats = b.stats; renderHome(); }
-        });
-      });
+      if (S.mode === 'owner' && S.stats) {                 // อัปเดตตัวเลขในการ์ดทันที ไม่ต้องรอโหลดใหม่
+        S.stats.total = (S.stats.total || 0) + (payload.waist ? 2 : 1);
+        if (curType === 'SBGM') S.stats.sbgm = (S.stats.sbgm || 0) + 1;
+        renderStats(); writeCache();
+      }
+      if (r.flag === 'HIGH' || r.flag === 'LOW') {
+        return swalAlert.fire({ title: 'บันทึกแล้วค่ะ',
+          html: (r.flag === 'HIGH' ? 'ค่าสูงกว่าเกณฑ์ ทีมคลินิกจะเห็นข้อมูลนี้'
+                                   : 'ค่าต่ำกว่าเกณฑ์ ถ้ามีอาการให้รีบแจ้งเจ้าหน้าที่')
+                + '<img src="' + LOGO + '" class="nurse-bg-img">' });
+      }
+      return swalSuccess.fire({ title: 'บันทึกเรียบร้อยแล้ว', timer: 2200, timerProgressBar: true });
     })
     .catch(function (e) {
+      saving = false;
       showLoading(false);
       $('pri-save').disabled = false; $('pri-save').textContent = 'บันทึกข้อมูล ✅';
-      swalAlert.fire('บันทึกไม่สำเร็จ', e.message || '', 'error');
+      if (e && e.maybeSaved) {
+        return swalAlert.fire({ title: 'สัญญาณไม่เสถียร',
+          html: 'ระบบส่งซ้ำหลายรอบแล้วแต่ยังไม่ได้รับคำตอบ<br><b>ค่าอาจเข้าระบบแล้ว</b> กรุณาเช็คที่ "ดูประวัติ" ก่อน<br>ถ้ายังไม่มี ค่อยกดบันทึกอีกครั้ง (ระบบจะไม่บันทึกซ้ำให้)' });
+      }
+      swalAlert.fire('บันทึกไม่สำเร็จ', (e && e.message) || '', 'error');
     });
 }
 
@@ -1077,7 +1439,6 @@ function openHistory() {
       $('histBody').innerHTML = '<div class="paper"><div class="empty"><span class="e">📭</span>ยังไม่มีข้อมูลที่บันทึกไว้ค่ะ</div></div>';
       return;
     }
-    // จัดกลุ่มตามวัน แบบการ์ดของเดิม
     var groups = {}, order = [];
     r.events.forEach(function (e) {
       var d = new Date(e.ts);
@@ -1197,6 +1558,183 @@ $('goBody').onclick = function () {
   });
 };
 $('bodyBack').onclick = function () { show('v-home'); };
+
+/* ===================== หน้าให้ความรู้ ===================== */
+var INFO = {
+  low: {
+    title: '🍬 ถ้าน้ำตาลต่ำ ทำอย่างไร?',
+    html: function () {
+      return '<div class="doctor-box">👨‍⚕️ ข้อมูลนี้เป็นแนวทางปฐมพยาบาลเบื้องต้นเท่านั้น '
+        + 'การปรับยาและการรักษาต้องอยู่ในการดูแลของแพทย์ทุกครั้ง อย่าปรับหรือหยุดยาเอง</div>'
+        + '<div class="info-h">น้ำตาลต่ำคือเท่าไหร่ และรู้ได้อย่างไร</div>'
+        + '<ul class="info-list"><li>น้ำตาลในเลือด <b>ต่ำกว่า 70 mg/dL</b></li>'
+        + '<li>อาการ: ใจสั่น เหงื่อแตก มือสั่น หิวมาก หน้ามืด มึนงง ปวดหัว</li>'
+        + '<li>ถ้ามีอาการแต่ไม่มีเครื่องเจาะ ให้ปฏิบัติเหมือนน้ำตาลต่ำไว้ก่อน</li></ul>'
+        + '<div class="info-h">ทำตามนี้ทันที (กฎ 15)</div>'
+        + '<div class="step-card"><span class="n">1</span><span>กินหรือดื่มของหวาน <b>ที่ดูดซึมเร็ว 15 กรัม</b> อย่างใดอย่างหนึ่ง: น้ำผึ้ง 3 ช้อนชา · ลูกอม 3–4 เม็ด · น้ำส้ม/น้ำอัดลมสูตรปกติ 180 ซีซี · กล้วย 1 ลูก</span></div>'
+        + '<div class="step-card"><span class="n">2</span><span>นั่งพัก <b>รอ 15 นาที</b> แล้วเจาะน้ำตาลซ้ำ</span></div>'
+        + '<div class="step-card"><span class="n">3</span><span>ถ้ายังต่ำกว่า 70 ให้กินซ้ำอีก 1 รอบ แล้วรอ 15 นาที เจาะซ้ำ</span></div>'
+        + '<div class="step-card"><span class="n">4</span><span>เมื่อน้ำตาลกลับมาปกติ ให้กินอาหารมื้อถัดไปหรือของว่างที่มีแป้ง เพื่อไม่ให้ตกซ้ำ</span></div>'
+        + '<div class="doctor-box">🚨 ถ้าซึม กลืนไม่ได้ ชัก หรือหมดสติ <b>อย่าป้อนอาหาร/น้ำ</b> โทร <b>1669</b> ทันที<br>'
+        + 'ถ้าน้ำตาลต่ำซ้ำหลายครั้ง หรือต่ำโดยไม่ทราบสาเหตุ ให้แจ้งคลินิกหรือมาพบแพทย์ เพื่อให้แพทย์ประเมินและปรับยา</div>'
+        + '<div class="info-h">ป้องกันน้ำตาลต่ำ</div>'
+        + '<ul class="info-list"><li>ไม่กินอาหารข้ามมื้อ โดยเฉพาะเมื่อใช้ยาลดน้ำตาล</li>'
+        + '<li>พกลูกอมหรือของหวานติดตัวเสมอ</li>'
+        + '<li>ออกกำลังกายหนักหรือนาน ควรมีของว่างเตรียมไว้</li>'
+        + '<li>หลีกเลี่ยงการขับรถขณะน้ำตาลต่ำ</li>'
+        + '<li>บันทึกค่าน้ำตาลในแอปนี้ทุกครั้ง ทีมคลินิกจะเห็นและช่วยดูแล</li></ul>';
+    }
+  },
+  remit: {
+    title: '🌱 ควบคุมเบาหวานโดยไม่ต้องใช้ยา',
+    html: function () {
+      return '<div class="doctor-box">👨‍⚕️ <b>ต้องดูแลโดยแพทย์เสมอ</b> — ห้ามหยุดหรือลดยาเอง แม้น้ำตาลจะดีขึ้นแล้ว '
+        + 'การลดหรือหยุดยาต้องให้แพทย์ประเมินจากผลตรวจ เพราะอาจทำให้น้ำตาลสูงหรือต่ำผิดปกติได้</div>'
+        + '<div class="info-h">"ระยะสงบ" คืออะไร</div>'
+        + '<div class="lead">คือภาวะที่น้ำตาลสะสม (HbA1c) ต่ำกว่า 6.5% ต่อเนื่อง โดยไม่ต้องใช้ยาลดน้ำตาล อย่างน้อย 3 เดือน '
+        + 'เกิดได้ในผู้ป่วยบางราย โดยเฉพาะผู้ที่เป็นเบาหวานมาไม่นานและลดน้ำหนักได้ ไม่ได้แปลว่าหายขาด จึงต้องดูแลตัวเองต่อเนื่องและมาตรวจตามนัด</div>'
+        + '<div class="info-h">5 สิ่งที่ช่วยได้</div>'
+        + '<div class="step-card"><span class="n">1</span><span><b>ลดน้ำหนักอย่างค่อยเป็นค่อยไป</b> การลดน้ำหนักและลดไขมันช่องท้องคือหัวใจสำคัญ ตั้งเป้าตามที่นักโภชนาการและแพทย์แนะนำ</span></div>'
+        + '<div class="step-card"><span class="n">2</span><span><b>กินตามรายการอาหารของคุณ</b> ลดข้าว-แป้ง น้ำตาล น้ำหวาน ขนมหวาน เพิ่มผักและโปรตีนไม่ติดมัน (ดูที่ปุ่ม "รายการอาหารที่แนะนำ")</span></div>'
+        + '<div class="step-card"><span class="n">3</span><span><b>ขยับร่างกาย</b> อย่างน้อยสัปดาห์ละ 150 นาที เช่น เดินเร็ว ปั่นจักรยาน และเสริมกล้ามเนื้อสัปดาห์ละ 2 ครั้ง</span></div>'
+        + '<div class="step-card"><span class="n">4</span><span><b>นอนให้พอ ลดเครียด</b> นอน 7–8 ชั่วโมง งดบุหรี่และเหล้า เพราะทำให้น้ำตาลคุมยาก</span></div>'
+        + '<div class="step-card"><span class="n">5</span><span><b>เจาะน้ำตาล บันทึกค่า และมาตามนัด</b> ยิ่งบันทึกครบ แพทย์ยิ่งตัดสินใจลดยาได้ปลอดภัย</span></div>'
+        + '<div class="note-box">💬 ถ้าน้ำตาลต่ำ หน้ามืด ใจสั่นขณะที่ลดน้ำหนักหรือคุมอาหาร ให้แจ้งคลินิกทันที อาจต้องให้แพทย์ปรับยา</div>'
+        + '<div class="fine">ข้อมูลนี้เป็นความรู้ทั่วไป ไม่ใช่คำแนะนำเฉพาะราย และไม่ทดแทนการตรวจรักษาของแพทย์</div>';
+    }
+  }
+};
+function openInfo(k) {
+  var f = INFO[k]; if (!f) return;
+  $('infoTitle').textContent = f.title; $('infoBody').innerHTML = f.html();
+  show('v-info');
+}
+Array.prototype.forEach.call(document.querySelectorAll('[data-info]'), function (b) {
+  b.onclick = function () { openInfo(b.getAttribute('data-info')); };
+});
+$('infoBack').onclick = goHome;
+
+/* ===================== สรุปข้อมูลของคุณ + Doctor Summary ===================== */
+function nv(v, unit) { return (v === null || v === undefined || v === '') ? '—' : (v + (unit ? ' ' + unit : '')); }
+function statText(o) { return (o && o.n) ? ('สูงสุด ' + o.max + ' · ต่ำสุด ' + o.min + ' · เฉลี่ย ' + o.avg) : 'ไม่มีข้อมูล'; }
+function trendRow(label, t, unit, lowerBetter, sub) {
+  var a = t && t.prev, b = t && t.cur, cls = '', arrow = '';
+  if (a != null && b != null && a !== '' && b !== '') {
+    var diff = +b - +a;
+    if (Math.abs(diff) > 0.0001) {
+      arrow = diff < 0 ? ' ↓' : ' ↑';
+      cls = ((diff < 0) === lowerBetter) ? 'good' : 'bad';
+    }
+  }
+  return '<div class="trend-row"><span>' + label + (sub ? '<br><small style="font-weight:500;">' + sub + '</small>' : '') + '</span>'
+       + '<span class="v ' + cls + '">' + nv(a) + ' → ' + nv(b) + (unit ? ' ' + unit : '') + arrow + '</span></div>';
+}
+function renderSummary(s) {
+  var g = s.glucose, b = s.bp, c = s.counts, cv = s.cover, tr = s.trend, al = s.alert;
+  var kv = function (k, v) { return '<div class="sum-kv"><span>' + k + '</span><b>' + v + '</b></div>'; };
+
+  var h = '<div class="paper"><h1 style="font-size:24px;">1. สรุปช่วงเวลาที่บันทึก</h1>'
+    + '<div class="lead" style="font-size:15px; color:#8D6E63;">นับจากวันที่ข้อมูลจากโรงพยาบาลอัปเดตล่าสุด'
+    + (s.period.capped ? ' (แสดงย้อนหลังสูงสุด 120 วัน)' : '') + '</div>'
+    + kv('ช่วงวันที่', esc(thRange(s.period.from, s.period.to)))
+    + kv('จำนวนวันที่บันทึก', cv.recordedDays + '/' + cv.totalDays + ' วัน')
+    + kv('SBGM (เจาะน้ำตาล)', c.sbgm + ' ครั้ง')
+    + kv('BP (ความดัน)', c.bp + ' ครั้ง')
+    + kv('Food log', c.foodDays + ' วัน')
+    + kv('ความครบถ้วนของข้อมูล', cv.pct + '%')
+    + '</div>';
+
+  h += '<div class="paper"><h1 style="font-size:24px;">🩸 น้ำตาลปลายนิ้ว</h1>'
+    + '<table class="sum-tbl"><tr><th></th><th>ก่อนอาหาร</th><th>หลังอาหาร</th></tr>'
+    + '<tr><td>สูงสุด</td><td>' + nv(g.pre.max) + '</td><td>' + nv(g.post.max) + '</td></tr>'
+    + '<tr><td>ต่ำสุด</td><td>' + nv(g.pre.min) + '</td><td>' + nv(g.post.min) + '</td></tr>'
+    + '<tr><td>เฉลี่ย</td><td>' + nv(g.pre.avg) + '</td><td>' + nv(g.post.avg) + '</td></tr>'
+    + '<tr><td>จำนวนครั้ง</td><td>' + g.pre.n + '</td><td>' + g.post.n + '</td></tr></table>'
+    + '<div class="fine" style="margin-top:8px;">หน่วย mg/dL · เป้าก่อนอาหาร 80–130 · หลังอาหาร &lt; 180</div></div>';
+
+  h += '<div class="paper"><h1 style="font-size:24px;">💓 ความดันโลหิต</h1>'
+    + (b.n ? kv('เฉลี่ย', b.avgS + '/' + b.avgD + ' mmHg') + kv('สูงสุด', b.maxS + '/' + b.maxD) + kv('ต่ำสุด', b.minS + '/' + b.minD)
+           : '<div class="empty" style="padding:10px;">ยังไม่มีบันทึกความดันในช่วงนี้</div>')
+    + '</div>';
+
+  h += '<div class="paper"><h1 style="font-size:24px;">🍲 อาหารที่กินบ่อย</h1>';
+  if (s.food.top && s.food.top.length) {
+    h += s.food.top.map(function (f) { return '<span class="food-chip">' + esc(f.name) + ' × ' + f.count + '</span>'; }).join('');
+    h += '<div class="ai-box" id="aiBox"><span class="t">🤖 วิเคราะห์โดย AI</span><span class="mini-spin"></span>กำลังประมวลผล กรุณารอสักครู่</div>';
+  } else {
+    h += '<div class="empty" style="padding:10px;">ยังไม่มีบันทึกอาหารในช่วงนี้<br><span style="font-size:15px;">ลองกดปุ่ม "บันทึกอาหาร" ดูนะคะ</span></div>';
+  }
+  h += '</div>';
+
+  // ---- Doctor Summary 5 ช่อง ----
+  h += '<div class="ds-head">🩺 Doctor Summary (สำหรับพบแพทย์)</div>';
+  h += '<div class="ds-box"><h3>① Glycemic</h3>'
+    + kv('FBS (ก่อนอาหารเช้า/ก่อนอาหาร)', nv(g.fbs.n ? g.fbs.avg : null, 'mg/dL'))
+    + kv('PPG (หลังอาหาร)', nv(g.post.n ? g.post.avg : null, 'mg/dL'))
+    + kv('SD', nv(g.sd)) + kv('% in target', g.inTargetPct == null ? '—' : g.inTargetPct + '%')
+    + kv('Hypo (&lt; 70)', g.hypo + ' ครั้ง' + (g.severe ? ' (&lt; 54: ' + g.severe + ')' : ''))
+    + kv('High (เกินเป้า)', g.high + ' ครั้ง') + '</div>';
+  h += '<div class="ds-box"><h3>② BP</h3>'
+    + kv('Average', b.n ? b.avgS + '/' + b.avgD + ' mmHg' : '—')
+    + kv('% controlled (&lt;140/90)', b.controlledPct == null ? '—' : b.controlledPct + '%')
+    + kv('Highest', b.n ? b.maxS + '/' + b.maxD + ' mmHg' : '—') + '</div>';
+  h += '<div class="ds-box"><h3>③ Behavior</h3>'
+    + kv('Food', c.foodDays + ' วัน (' + c.foodLogs + ' รายการ)')
+    + kv('Exercise', c.exerciseDays + ' วัน · รวม ' + c.exerciseMin + ' นาที')
+    + kv('Weight', s.weight.n ? (s.weight.first + ' → ' + s.weight.last + ' กก.') : '—')
+    + (s.sleep ? kv('Sleep', 'เฉลี่ย ' + s.sleep.avg) : '') + '</div>';
+  h += '<div class="ds-box"><h3>④ Trend <small style="font-weight:500;">(เทียบกับครั้งก่อน)</small></h3>'
+    + trendRow('HbA1c', tr.hba1c, '%', true, tr.hba1c.prevDate ? esc(thDate(tr.hba1c.prevDate)) + ' → ' + esc(thDate(tr.hba1c.curDate)) : '')
+    + trendRow('น้ำหนัก', tr.weight, 'กก.', true)
+    + trendRow('FBS เฉลี่ย', tr.fbs, 'mg/dL', true)
+    + trendRow('ความดันตัวบนเฉลี่ย', tr.sbp, 'mmHg', true)
+    + trendRow('รอบเอว', tr.waist, 'ซม.', true) + '</div>';
+
+  var lvl = { red: ['🔴 ต้องพิจารณา', 'alert-red'], yellow: ['🟡 เฝ้าระวัง', 'alert-yellow'], green: ['🟢 ทำต่อได้', 'alert-green'] }[al.level];
+  h += '<div class="ds-box ' + lvl[1] + '"><h3>⑤ Clinical Alert</h3><div class="alert-lvl">' + lvl[0] + '</div>'
+    + (al.reasons.length ? '<ul class="info-list">' + al.reasons.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>'
+                         : '<div class="lead">ไม่พบสัญญาณผิดปกติจากข้อมูลที่บันทึกในช่วงนี้</div>')
+    + '</div>';
+  h += '<div class="fine">สรุปนี้คิดจากตัวเลขที่บันทึกในแอปเท่านั้น ใช้เป็นข้อมูลประกอบการพบแพทย์ ไม่ใช่การวินิจฉัย การปรับยาและการรักษาเป็นดุลยพินิจของแพทย์</div>';
+  return h;
+}
+function loadAI(s) {
+  var box = $('aiBox'); if (!box) return;
+  var foods = s.food.top.slice(0, 10).map(function (f) { return { name: String(f.name).slice(0, 24), count: f.count }; });
+  api('summaryAI', {
+    userId: S.userId, period: thRange(s.period.from, s.period.to), foods: foods, meals: s.food.meals || {},
+    fbsAvg: s.glucose.fbs.n ? s.glucose.fbs.avg : null, ppgAvg: s.glucose.post.n ? s.glucose.post.avg : null,
+    bpAvg: s.bp.n ? (s.bp.avgS + '/' + s.bp.avgD) : '', sbgmN: s.counts.sbgm
+  }, { timeout: 60000, tries: 2 }).then(function (r) {
+    var b2 = $('aiBox'); if (!b2) return;
+    if (r && r.ok && r.text) {
+      b2.innerHTML = '<span class="t">🤖 วิเคราะห์โดย AI</span>' + esc(r.text).replace(/\n/g, '<br>')
+        + '<div style="font-size:13px; opacity:.8; margin-top:8px;">สร้างโดย AI เพื่อเป็นแนวทางเบื้องต้น ไม่ใช่คำแนะนำทางการแพทย์</div>';
+    } else {
+      b2.innerHTML = '<span class="t">🤖 วิเคราะห์โดย AI</span>ตอนนี้ยังวิเคราะห์ไม่ได้ค่ะ'
+        + ((r && r.error === 'quota') ? ' (' + esc(r.message) + ')' : ' ลองเปิดหน้านี้ใหม่อีกครั้ง');
+      note('AI: ' + JSON.stringify(r).slice(0, 300));
+    }
+  }).catch(function (e) {
+    var b2 = $('aiBox'); if (!b2) return;
+    b2.innerHTML = '<span class="t">🤖 วิเคราะห์โดย AI</span>ตอนนี้ยังวิเคราะห์ไม่ได้ค่ะ ลองเปิดหน้านี้ใหม่อีกครั้ง';
+    note('AI error: ' + (e && e.message));
+  });
+}
+$('goSum').onclick = function () {
+  show('v-sum'); $('sumBody').innerHTML = '';
+  showLoading(true, 'กำลังประมวลผล กรุณารอสักครู่');
+  api('summary', { userId: S.userId }, { timeout: 40000 }).then(function (r) {
+    showLoading(false);
+    if (!r || !r.ok) { $('sumBody').innerHTML = '<div class="paper"><div class="empty">' + esc((r && r.message) || 'สรุปข้อมูลไม่สำเร็จ') + '</div></div>'; return; }
+    $('sumBody').innerHTML = renderSummary(r);
+    if (r.food.top && r.food.top.length) loadAI(r);
+  }).catch(function (e) {
+    showLoading(false);
+    $('sumBody').innerHTML = '<div class="paper"><div class="empty">' + esc(e.message) + '<br><small>' + esc(e.hint || '') + '</small></div></div>';
+  });
+};
+$('sumBack').onclick = goHome;
 
 boot();
 </script>
